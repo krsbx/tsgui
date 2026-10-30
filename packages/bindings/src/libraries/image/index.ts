@@ -1,13 +1,17 @@
 /** SDL3_image bindings. Pointer values are opaque and backend-specific. */
 import { runtime } from "../../runtime.ts";
-import type { image as imageBunType } from "./bun.ts";
 
 export * from "./generated/constants.ts";
-
-export type Uimage = typeof imageBunType;
+export type { ImageSymbols } from "./generated/types.ts";
+export type { ImageFunctions } from "./generated/functions.ts";
+import type { ImageSymbols, ImageFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")
   : import("./node.ts"));
 
-export const image: Uimage = backend.image as unknown as Uimage;
+/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
+export const imageRaw: ImageSymbols = backend.imageRaw;
+
+/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
+export const image: ImageFunctions = backend.image;

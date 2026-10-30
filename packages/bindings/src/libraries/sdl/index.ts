@@ -1,19 +1,17 @@
-/**
- * SDL3 — the `sdl` hardcore tier.
- *
- * Pointer values are backend-specific but opaque: code written against
- * `sdl` is backend-agnostic as long as handles only flow through FFI
- * calls. ArrayBuffers/TypedArrays are borrowed for the duration of a call.
- */
+/** SDL3 bindings. Pointer values are opaque and backend-specific. */
 import { runtime } from "../../runtime.ts";
-import type { sdl as sdlBunType } from "./bun.ts";
 
 export * from "./generated/constants.ts";
-
-export type Sdl = typeof sdlBunType;
+export type { SdlSymbols } from "./generated/types.ts";
+export type { SdlFunctions } from "./generated/functions.ts";
+import type { SdlSymbols, SdlFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")
   : import("./node.ts"));
 
-export const sdl: Sdl = backend.sdl as unknown as Sdl;
+/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
+export const sdlRaw: SdlSymbols = backend.sdlRaw;
+
+/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
+export const sdl: SdlFunctions = backend.sdl;

@@ -7,6 +7,6 @@ const CANDIDATES: Record<string, string[]> = {
   win32: ["SDL3.dll"],
 };
 
-export function resolveSdlLibrary(): string {
+export function resolveLibrary(): string {
   return resolveDylib("SDL3", "TSGUI_SDL3_PATH", CANDIDATES[process.platform] ?? []);
 }
