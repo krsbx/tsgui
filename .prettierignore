@@ -1,0 +1,12 @@
+node_modules/
+
+package.json
+package-lock.json
+.eslintrc
+.prettierrc
+tsconfig.json
+
+routeTree.gen.ts
+
+# drizzle-kit owns these (snapshot.json / migration.sql); keep its formatting
+packages/core/src/db/migrations/
