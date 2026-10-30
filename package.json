@@ -36,7 +36,11 @@
     ]
   },
   "scripts": {
+    "codegen:all": "bun run tools/codegen/src/index.ts all",
+    "codegen:image": "bun run tools/codegen/src/index.ts image",
+    "codegen:mixer": "bun run tools/codegen/src/index.ts mixer",
     "codegen:sdl": "bun run tools/codegen/src/index.ts sdl",
+    "codegen:ttf": "bun run tools/codegen/src/index.ts ttf",
     "smoke": "bun run scripts/smoke.ts",
     "smoke:node": "node scripts/smoke.ts",
     "hello": "bun run examples/hello.ts",

@@ -3,14 +3,15 @@
  * generates FFI backend tables for @tsgui/bindings.
  *
  * Usage:
- *   bun run tools/codegen/src/index.ts sdl          # regenerate SDL3 tables
- *   bun run tools/codegen/src/index.ts sdl --check  # CI: fail if stale
+ *   bun run tools/codegen/src/index.ts <target>|all [--check]
+ *
+ * Targets are declared in TARGETS below; the pipeline itself is generic.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { ClangNodeParser } from './clang/parser';
-import { buildFfiTables, type FfiFilterOptions } from './model';
+import { buildFfiTables } from './model';
 import { scanNumericDefines } from './defines';
 import {
   generateBunDefs,
@@ -18,19 +19,17 @@ import {
   generateNodeDefs,
   summarizeUnsafe,
 } from './gen/ffi';
+import { pascalCase } from './model';
 
 const repoRoot = join(import.meta.dir, '../../..');
-const generatedDir = join(repoRoot, 'packages/bindings/src/generated');
+const bindingsSrcDir = join(repoRoot, 'packages/bindings/src');
 
-/** Where SDL3 headers live, by platform convention. */
-function sdl3IncludeDir(): string {
+/** Base include dir that exposes SDL3*/ function includeDir(): string {
   if (process.env.TSGUI_SDL3_INCLUDE) return process.env.TSGUI_SDL3_INCLUDE;
-  if (process.platform === 'darwin') {
-    return '/opt/homebrew/include';
-  }
+  if (process.platform === 'darwin') return '/opt/homebrew/include';
   if (process.platform === 'linux') return '/usr/include';
   throw new Error(
-    'codegen: set TSGUI_SDL3_INCLUDE to the directory containing SDL3/'
+    'codegen: set TSGUI_SDL3_INCLUDE to the base include directory (contains SDL3/, SDL3_image/, …)'
   );
 }
 
@@ -68,68 +67,77 @@ function dumpAst(headerPath: string, includeDir?: string): unknown {
   throw new Error('clang produced no JSON AST dump on stdout or stderr');
 }
 
-/**
- * A Target = one native library bound through FFI. Adding a library means
- * adding one Target factory + one `case` below (and a loader in
- * @tsgui/bindings) — everything under clang/, model, and gen is
- * library-agnostic.
- */
-interface Target {
+interface TargetSpec {
+  /** Library short name: file prefix, output folder, defs export name. */
+  name: string;
   origin: string;
-  headerPath: string;
-  includeDir?: string;
-  filter: FfiFilterOptions;
-  /** Export name of the defs table in the generated files. */
-  defsExportName: string;
-  /** Output file names, relative to packages/bindings/src/generated. */
-  outputs: { constants: string; bunDefs: string; nodeDefs: string };
-  /** #define constants live in this subdirectory of includeDir. */
+  /** Header path relative to the base include dir. */
+  headerRel: string;
+  prefix: string;
+  /** Subdirectory of the include dir to scan for numeric #defines. */
   definesSubdir?: string;
 }
 
-function sdlTarget(): Target {
-  const includeDir = sdl3IncludeDir();
-  return {
+const TARGETS: Record<string, TargetSpec> = {
+  sdl: {
+    name: 'sdl',
     origin: 'SDL3 headers',
-    headerPath: join(includeDir, 'SDL3/SDL.h'),
-    includeDir,
-    filter: { namePrefix: 'SDL_' },
-    defsExportName: 'sdlDefs',
-    outputs: {
-      constants: 'sdl-constants.ts',
-      bunDefs: 'sdl-defs-bun.ts',
-      nodeDefs: 'sdl-defs-node.ts',
-    },
+    headerRel: 'SDL3/SDL.h',
+    prefix: 'SDL_',
     definesSubdir: 'SDL3',
-  };
-}
+  },
+  image: {
+    name: 'image',
+    origin: 'SDL3_image headers',
+    headerRel: 'SDL3_image/SDL_image.h',
+    prefix: 'IMG_',
+    definesSubdir: 'SDL3_image',
+  },
+  ttf: {
+    name: 'ttf',
+    origin: 'SDL3_ttf headers',
+    headerRel: 'SDL3_ttf/SDL_ttf.h',
+    prefix: 'TTF_',
+    definesSubdir: 'SDL3_ttf',
+  },
+  mixer: {
+    name: 'mixer',
+    origin: 'SDL3_mixer headers',
+    headerRel: 'SDL3_mixer/SDL_mixer.h',
+    prefix: 'MIX_',
+    definesSubdir: 'SDL3_mixer',
+  },
+};
 
-async function generateSdl(check: boolean): Promise<void> {
-  const target = sdlTarget();
-  console.log(`codegen: dumping ${target.headerPath} …`);
+async function generateTarget(spec: TargetSpec, check: boolean): Promise<void> {
+  const base = includeDir();
+  const headerPath = join(base, spec.headerRel);
+  console.log(`codegen[${spec.name}]: dumping ${headerPath} …`);
 
-  const ast = dumpAst(target.headerPath, target.includeDir);
+  const ast = dumpAst(headerPath, base);
   // No parser-level name filter: non-prefixed typedefs (Sint32, Uint16, …)
   // must reach the alias resolver; the model filters by prefix instead.
   const header = await new ClangNodeParser(ast).parse();
-  const tables = buildFfiTables(header, target.filter);
+  const tables = buildFfiTables(header, { namePrefix: spec.prefix });
 
-  const { defines, skipped } = target.definesSubdir
-    ? scanNumericDefines(target.includeDir!, target.definesSubdir, 'SDL_')
+  const { defines, skipped } = spec.definesSubdir
+    ? scanNumericDefines(base, spec.definesSubdir, spec.prefix)
     : { defines: [], skipped: 0 };
 
-  const constants = generateFfiConstants(tables, target.origin, defines);
-  const bunDefs = generateBunDefs(tables, target.origin, target.defsExportName);
-  const nodeDefs = generateNodeDefs(
+  const outDir = join(bindingsSrcDir, 'libraries', spec.name, 'generated');
+  const constants = generateFfiConstants(
     tables,
-    target.origin,
-    target.defsExportName
+    spec.origin,
+    defines,
+    `${pascalCase(spec.name)}Defines`
   );
+  const bunDefs = generateBunDefs(tables, spec.origin, `${spec.name}Defs`);
+  const nodeDefs = generateNodeDefs(tables, spec.origin, `${spec.name}Defs`);
 
   const outputs: [string, string][] = [
-    [join(generatedDir, target.outputs.constants), constants],
-    [join(generatedDir, target.outputs.bunDefs), bunDefs],
-    [join(generatedDir, target.outputs.nodeDefs), nodeDefs],
+    [join(outDir, 'constants.ts'), constants],
+    [join(outDir, 'defs-bun.ts'), bunDefs],
+    [join(outDir, 'defs-node.ts'), nodeDefs],
   ];
 
   if (check) {
@@ -137,26 +145,25 @@ async function generateSdl(check: boolean): Promise<void> {
       const current = await Bun.file(path).text();
       if (current !== content) {
         console.error(
-          `codegen: ${path} is out of date — run \`bun run codegen sdl\``
+          `codegen[${spec.name}]: ${path} is out of date — run \`bun run codegen:all\``
         );
         process.exit(1);
       }
     }
-    console.log('codegen: generated files are up to date');
+    console.log(`codegen[${spec.name}]: up to date`);
     return;
   }
 
-  mkdirSync(generatedDir, { recursive: true });
+  mkdirSync(outDir, { recursive: true });
   for (const [path, content] of outputs) {
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content);
   }
 
   console.log(
-    `codegen: ${tables.functions.length} functions, ${tables.enums.length} enums, ${defines.length} defines` +
+    `codegen[${spec.name}]: ${tables.functions.length} functions, ${tables.enums.length} enums, ${defines.length} defines` +
       (skipped > 0 ? ` (${skipped} non-numeric defines skipped)` : '') +
-      summarizeUnsafe(tables) +
-      `\n→ ${generatedDir}`
+      summarizeUnsafe(tables)
   );
 }
 
@@ -164,14 +171,19 @@ async function main() {
   const check = process.argv.includes('--check');
   const targetName = process.argv[2];
 
-  switch (targetName) {
-    case 'sdl':
-      await generateSdl(check);
-      break;
-    default:
-      console.error('usage: codegen <sdl> [--check]');
-      process.exit(1);
+  if (targetName === 'all') {
+    for (const spec of Object.values(TARGETS)) {
+      await generateTarget(spec, check);
+    }
+    return;
   }
+
+  const spec = targetName ? TARGETS[targetName] : undefined;
+  if (!spec) {
+    console.error(`usage: codegen <${Object.keys(TARGETS).join('|')}|all> [--check]`);
+    process.exit(1);
+  }
+  await generateTarget(spec, check);
 }
 
 main().catch((err) => {

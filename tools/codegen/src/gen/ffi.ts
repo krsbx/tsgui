@@ -57,7 +57,8 @@ function banner(origin: string): string[] {
 export function generateFfiConstants(
   tables: FfiTables,
   origin: string,
-  defines: { name: string; value: number }[] = []
+  defines: { name: string; value: number }[] = [],
+  definesExportName = 'Defines'
 ): string {
   const L = banner(origin);
   L.push(`/** Enum constants from ${origin}. */`);
@@ -72,7 +73,7 @@ export function generateFfiConstants(
 
   if (defines.length > 0) {
     L.push(`/** Numeric #define constants (invisible to the AST). */`);
-    L.push(`export const Define = {`);
+    L.push(`export const ${definesExportName} = {`);
     for (const d of defines) {
       L.push(`  ${d.name}: ${d.value},`);
     }
