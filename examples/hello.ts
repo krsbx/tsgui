@@ -9,22 +9,22 @@ import { EventType, SdlDefines, Scancode, sdl } from "@tsgui/bindings";
 
 const selftest = process.argv.includes("--selftest");
 
-if (!sdl.SDL_Init(SdlDefines.SDL_INIT_VIDEO)) {
+if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
   throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
 }
 
-const window = sdl.SDL_CreateWindow(
-  "tsgui — phase 0",
-  1280,
-  800,
-  SdlDefines.SDL_WINDOW_RESIZABLE
-);
+const window = sdl.SDL_CreateWindow({
+  title: "tsgui — phase 0",
+  w: 1280,
+  h: 800,
+  flags: SdlDefines.SDL_WINDOW_RESIZABLE,
+});
 if (!window) {
   sdl.SDL_Quit();
   throw new Error(`SDL_CreateWindow failed: ${sdl.SDL_GetError()}`);
 }
 
-const renderer = sdl.SDL_CreateRenderer(window, null);
+const renderer = sdl.SDL_CreateRenderer({ window, name: null });
 if (!renderer) {
   throw new Error(`SDL_CreateRenderer failed: ${sdl.SDL_GetError()}`);
 }
@@ -38,7 +38,7 @@ let running = true;
 let frames = 0;
 
 while (running) {
-  while (sdl.SDL_PollEvent(eventData)) {
+  while (sdl.SDL_PollEvent({ event: eventData })) {
     const type = eventView.getUint32(0, true);
     if (type === EventType.SDL_EVENT_QUIT) running = false;
     if (type === EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
@@ -48,18 +48,18 @@ while (running) {
     }
   }
 
-  sdl.SDL_SetRenderDrawColor(renderer, 32, 36, 48, 255);
-  sdl.SDL_RenderClear(renderer);
-  sdl.SDL_RenderPresent(renderer);
+  sdl.SDL_SetRenderDrawColor({ renderer, r: 32, g: 36, b: 48, a: 255 });
+  sdl.SDL_RenderClear({ renderer });
+  sdl.SDL_RenderPresent({ renderer });
 
   frames++;
   if (selftest && frames >= 120) running = false;
 
-  sdl.SDL_Delay(16); // ~60fps without busy-spinning
+  sdl.SDL_Delay({ ms: 16 }); // ~60fps without busy-spinning
 }
 
-sdl.SDL_DestroyRenderer(renderer);
-sdl.SDL_DestroyWindow(window);
+sdl.SDL_DestroyRenderer({ renderer });
+sdl.SDL_DestroyWindow({ window });
 sdl.SDL_Quit();
 
 console.log(`hello: ${frames} frames, ok`);

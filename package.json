@@ -5,6 +5,7 @@
   "private": true,
   "packageManager": "bun@1.4.4",
   "devDependencies": {
+    "@tsgui/gpu": "workspace:*",
     "@tsgui/bindings": "workspace:*",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
@@ -45,6 +46,7 @@
     "smoke:node": "node scripts/smoke.ts",
     "hello": "bun run examples/hello.ts",
     "typecheck": "bun check",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "benchmark": "bun run examples/benchmark.ts"
   }
 }

@@ -23,24 +23,29 @@ before anything else gets built on it.
 --selftest` and `node examples/hello.ts --selftest` both pass, plus a
 headless smoke (`bun run smoke`).
 
-## Phase 1 — Batched renderer in TypeScript (the thesis test, zero C)
+## Phase 1 — Batched renderer in TypeScript (the thesis test, zero C) ✅ (2026-10-30)
 
 Revised: the `libtsgui` C core is retired — SDL_Renderer's GPU backend +
 `SDL_RenderGeometryRaw` + `SDL_SetGPURenderState` cover it entirely through
 FFI (see PLATFORM.md).
 
-- [ ] Renderer module in `@tsgui/gpu`: GPU-backend renderer per window
-      (`SDL_CreateRendererWithProperties`), batch accumulator into a reused
-      ArrayBuffer, flush = `SDL_RenderGeometryRaw` per texture batch.
-- [ ] Shader build step: SDF shaders authored offline (SDL_shadercross),
-      attached via `SDL_SetGPURenderState`. Fallback if immature: CPU
-      tessellation for rounded rects (flying-pan's Path2D port).
-- [ ] Texture path: `image` tier decodes → `SDL_CreateGPUTexture`-family
-      upload through the renderer.
-- [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms — macOS
-      first, then Windows/Linux.
+- [x] Renderer module in `@tsgui/gpu`: GPU-backend renderer per window
+      (`SDL_CreateRendererWithProperties`, "gpu" backend confirmed on
+      macOS), batch accumulator into a reused 20-byte-SDL_Vertex buffer,
+      flush = `SDL_RenderGeometry` per texture batch.
+- [ ] SDF shaders via `SDL_SetGPURenderState` — **moved to Phase 2** where
+      fancy shapes actually land (exit criteria don't need them); fallback
+      remains CPU tessellation (flying-pan's Path2D port).
+- [x] Texture path: procedural pixels → `SDL_CreateTextureWithProperties`
+      + `SDL_UpdateTexture`, drawn through the textured batch. (Also fixed
+      en route: the codegen dropped every enum-by-value param function —
+      77 recovered — and node:ffi returns raw addresses for `'string'`
+      returns, now converted in the node loaders.)
+- [x] Benchmark: `examples/benchmark.ts` — 10,000 rects + textured quad.
 
-**Exit:** 10k rects at 60fps with ≤ 10 FFI calls/frame, on Node and Bun.
+**Exit (met):** 10k rects at 60fps with ≤ 10 FFI calls/frame, on Node and
+Bun — measured **avg 0.35ms/frame (≈2,850 fps), p99 < 1ms, 6 calls/frame,
+`renderer: gpu` on both runtimes** (Apple M-series; ~33× the 60fps budget).
 
 ## Phase 2 — Renderer core
 

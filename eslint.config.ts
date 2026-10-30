@@ -5,13 +5,14 @@ import tseslint from "typescript-eslint";
 /**
  * Layering rules from docs/ARCHITECTURE.md, mechanically enforced:
  *
- *   layout | gpu | widgets | devtools  → never import bindings/platform
+ *   layout | widgets | devtools        → pure TS, never import bindings/platform
+ *   gpu                                → bindings only (renderer over SDL)
  *   platform                           → bindings only
  *   bindings                           → nothing from this repo
  *
  * Pure layers stay testable with no window, no GPU, no native code.
  */
-const PURE_LAYERS = ["packages/layout", "packages/gpu", "packages/widgets", "packages/devtools"];
+const PURE_LAYERS = ["packages/layout", "packages/widgets", "packages/devtools"];
 
 export default [
   {

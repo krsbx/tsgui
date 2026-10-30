@@ -11,6 +11,7 @@
         "@eslint/js": "^10.0.1",
         "@trivago/prettier-plugin-sort-imports": "^6.0.2",
         "@tsgui/bindings": "workspace:*",
+        "@tsgui/gpu": "workspace:*",
         "@types/bun": "latest",
         "@types/node": "^26.6.6",
         "@typescript/native": "npm:typescript@^7.0.2",
@@ -29,6 +30,15 @@
     "packages/bindings": {
       "name": "@tsgui/bindings",
       "version": "0.0.1",
+    },
+    "packages/gpu": {
+      "name": "@tsgui/gpu",
+      "version": "0.0.1",
+      "dependencies": {
+        "@tsgui/bindings": "workspace:*",
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
     },
     "tools/codegen": {
       "name": "@tsgui/codegen",
@@ -168,6 +178,8 @@
     "@tsgui/bindings": ["@tsgui/bindings@workspace:packages/bindings"],
 
     "@tsgui/codegen": ["@tsgui/codegen@workspace:tools/codegen"],
+
+    "@tsgui/gpu": ["@tsgui/gpu@workspace:packages/gpu"],
 
     "@types/bun": ["@types/bun@1.4.4", "", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 
