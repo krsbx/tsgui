@@ -10,7 +10,6 @@
  * hand-written parts of @tsgui/bindings.
  */
 import type { FfiTables } from '../model';
-import type { FfiType } from '../model';
 
 /** C kind → bun:ffi FFIType member. */
 const BUN_TYPE: Record<string, string> = {
@@ -99,9 +98,12 @@ export function generateBunDefs(
       fn.args.length === 0
         ? `[]`
         : `[${fn.args.map((a) => `FFIType.${BUN_TYPE[a.kind]}`).join(', ')}]`;
-    L.push(
-      `  ${fn.name}: { args: ${args}, returns: FFIType.${BUN_TYPE[fn.returns]} },`
-    );
+    // bun:ffi has no FFIType.void — omitting `returns` is the void form.
+    const ret =
+      fn.returns.kind === 'void'
+        ? ''
+        : `, returns: FFIType.${BUN_TYPE[fn.returns.kind]}`;
+    L.push(`  ${fn.name}: { args: ${args}${ret} },`);
   }
   L.push(`} as const;`);
   L.push(``);
@@ -121,7 +123,7 @@ export function generateNodeDefs(
       fn.args.length === 0
         ? `[]`
         : `[${fn.args.map((a) => JSON.stringify(NODE_TYPE[a.kind])).join(', ')}]`;
-    L.push(`  ${fn.name}: { arguments: ${args}, return: ${JSON.stringify(NODE_TYPE[fn.returns])} },`);
+    L.push(`  ${fn.name}: { arguments: ${args}, return: ${JSON.stringify(NODE_TYPE[fn.returns.kind])} },`);
   }
   L.push(`} as const;`);
   L.push(``);
@@ -131,47 +133,52 @@ export function generateNodeDefs(
 /* ------------------------------------------------------------------ */
 /* Typed symbol surface + single-object-param wrappers                 */
 /* ------------------------------------------------------------------ */
+/* Typed symbol surface + single-object-param wrappers                 */
+/* ------------------------------------------------------------------ */
 
-/** TS type for one FfiType — shared by the symbols and functions surfaces. */
-function tsType(kind: FfiType, position: 'param' | 'return'): string {
-  switch (kind) {
-    case 'void':
-      return position === 'return' ? 'void' : 'never';
-    case 'bool':
-      return 'boolean';
-    case 'i64':
-    case 'u64':
-      // 64-bit ints cross FFI as bigint.
-      return position === 'param' ? 'number | bigint' : 'bigint';
-    case 'i8':
-    case 'u8':
-    case 'i16':
-    case 'u16':
-    case 'i32':
-    case 'u32':
-    case 'f32':
-    case 'f64':
-      return 'number';
-    case 'string':
-      // C char* is nullable unless documented otherwise — SDL's
-      // SDL_CreateRenderer(w, null)-style default-arg patterns rely on it.
-      return position === 'param' ? 'string | null' : 'string';
-    case 'pointer':
-      // Opaque handles and borrowed buffers; backend-shaped values flow
-      // function → function without inspection.
-      return 'unknown';
+function generateTypes(
+  tables: FfiTables,
+  pascalName: string,
+  namePrefix: string
+): string {
+  const L = banner(`pointer brands + symbols type for ${pascalName}`);
+
+  // Satellite libraries reference core handles (SDL_Window, …): import
+  // them from the sdl target's types instead of re-declaring.
+  const imported = tables.handleTypes.filter(
+    (h) => h.startsWith('SDL_') && namePrefix !== 'SDL_'
+  );
+  L.push(`/**`);
+  L.push(` * Opaque native pointer. Backend-shaped at runtime (bun:ffi Pointer /`);
+  L.push(` * node:ffi bigint) — branded here so handles are compile-checked.`);
+  L.push(` */`);
+  L.push(`export type Pointer = { readonly pointer: true };`);
+  L.push(``);
+  if (imported.length > 0) {
+    L.push(`// Core handles from the sdl target.`);
+    L.push(
+      `import type { ${imported.join(', ')} } from "../../sdl/generated/types.ts";`
+    );
+    L.push(
+      `export type { ${imported.join(', ')} } from "../../sdl/generated/types.ts";`
+    );
+    L.push(``);
   }
-}
+  const local = tables.handleTypes.filter((h) => !imported.includes(h));
+  for (const h of local) {
+    L.push(`export type ${h} = Pointer & { readonly handle: ${JSON.stringify(h)} };`);
+  }
+  if (local.length > 0) L.push(``);
+  L.push(
+    `export type AnyPointer = Pointer | ArrayBufferView | ArrayBuffer;`
+  );
+  L.push(``);
 
-function generateSymbolsType(tables: FfiTables, pascalName: string): string {
-  const L = banner(`symbols type for ${pascalName}`);
   L.push(`/** Raw positional surface of the loaded ${pascalName} library. */`);
   L.push(`export interface ${pascalName}Symbols {`);
   for (const fn of tables.functions) {
-    const args = fn.args
-      .map((a) => `${a.name}: ${tsType(a.kind, 'param')}`)
-      .join(', ');
-    L.push(`  ${fn.name}(${args}): ${tsType(fn.returns, 'return')};`);
+    const args = fn.args.map((a) => `${a.name}: ${a.ts}`).join(', ');
+    L.push(`  ${fn.name}(${args}): ${fn.returns.ts};`);
   }
   L.push(`}`);
   L.push(``);
@@ -180,8 +187,18 @@ function generateSymbolsType(tables: FfiTables, pascalName: string): string {
 
 function generateFunctions(tables: FfiTables, pascalName: string): string {
   const L = banner(`single-object-param wrappers for ${pascalName}`);
-  L.push(`import type { ${pascalName}Symbols } from "./types.ts";`);
-  L.push(`export type { ${pascalName}Symbols } from "./types.ts";`);
+  // types.ts re-exports core brands for satellite libraries, so a single
+  // local import covers Symbols, brands, and buffer types.
+  const blob = tables.functions
+    .map((f) => [f.returns.ts, ...f.args.map((a) => a.ts)].join('\n'))
+    .join('\n');
+  const used = new Set<string>([`${pascalName}Symbols`]);
+  if (/\bPointer\b/.test(blob)) used.add('Pointer');
+  if (/\bAnyPointer\b/.test(blob)) used.add('AnyPointer');
+  for (const h of tables.handleTypes) {
+    if (new RegExp(`\\b${h}\\b`).test(blob)) used.add(h);
+  }
+  L.push(`import type { ${[...used].sort().join(', ')} } from "./types.ts";`);
   L.push(``);
   L.push(`/**`);
   L.push(` * Object-param surface over the raw symbols — the toolkit convention`);
@@ -191,13 +208,13 @@ function generateFunctions(tables: FfiTables, pascalName: string): string {
   L.push(`export interface ${pascalName}Functions {`);
   for (const fn of tables.functions) {
     if (fn.args.length === 0) {
-      L.push(`  ${fn.name}(): ${tsType(fn.returns, 'return')};`);
+      L.push(`  ${fn.name}(): ${fn.returns.ts};`);
       continue;
     }
     const fields = fn.args
-      .map((a) => `${a.name}: ${tsType(a.kind, 'param')}`)
+      .map((a) => `${a.name}: ${a.ts}`)
       .join('; ');
-    L.push(`  ${fn.name}(opts: { ${fields} }): ${tsType(fn.returns, 'return')};`);
+    L.push(`  ${fn.name}(opts: { ${fields} }): ${fn.returns.ts};`);
   }
   L.push(`}`);
   L.push(``);
@@ -221,10 +238,11 @@ function generateFunctions(tables: FfiTables, pascalName: string): string {
 
 export function generateTypesAndFunctions(
   tables: FfiTables,
-  pascalName: string
+  pascalName: string,
+  namePrefix: string
 ): { types: string; functions: string } {
   return {
-    types: generateSymbolsType(tables, pascalName),
+    types: generateTypes(tables, pascalName, namePrefix),
     functions: generateFunctions(tables, pascalName),
   };
 }

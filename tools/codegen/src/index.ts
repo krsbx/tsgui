@@ -136,7 +136,8 @@ async function generateTarget(spec: TargetSpec, check: boolean): Promise<void> {
   const nodeDefs = generateNodeDefs(tables, spec.origin, `${spec.name}Defs`);
   const { types, functions } = generateTypesAndFunctions(
     tables,
-    pascalCase(spec.name)
+    pascalCase(spec.name),
+    spec.prefix
   );
 
   const outputs: [string, string][] = [
