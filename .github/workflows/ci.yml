@@ -23,7 +23,7 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
       - name: Codegen is up to date
-        run: bun run codegen -- --check
+        run: bun run codegen:all -- --check
       - name: Smoke (bun:ffi)
         run: bun run smoke
       - name: Smoke (node:ffi)

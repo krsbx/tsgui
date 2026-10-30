@@ -5,11 +5,11 @@
  *   bun run examples/hello.ts              # run until the window closes
  *   bun run examples/hello.ts --selftest   # exit after ~120 frames (CI)
  */
-import { EventType, Define, Scancode, sdl } from "@tsgui/bindings";
+import { EventType, SdlDefines, Scancode, sdl } from "@tsgui/bindings";
 
 const selftest = process.argv.includes("--selftest");
 
-if (!sdl.SDL_Init(Define.SDL_INIT_VIDEO)) {
+if (!sdl.SDL_Init(SdlDefines.SDL_INIT_VIDEO)) {
   throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
 }
 
@@ -17,7 +17,7 @@ const window = sdl.SDL_CreateWindow(
   "tsgui — phase 0",
   1280,
   800,
-  Define.SDL_WINDOW_RESIZABLE
+  SdlDefines.SDL_WINDOW_RESIZABLE
 );
 if (!window) {
   sdl.SDL_Quit();

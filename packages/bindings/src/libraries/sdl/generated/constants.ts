@@ -1452,7 +1452,7 @@ export const TimeFormat = {
 } as const;
 
 /** Numeric #define constants (invisible to the AST). */
-export const Define = {
+export const SdlDefines = {
   SDL_ALPHA_OPAQUE: 255,
   SDL_ALPHA_OPAQUE_FLOAT: 1,
   SDL_ALPHA_TRANSPARENT: 0,

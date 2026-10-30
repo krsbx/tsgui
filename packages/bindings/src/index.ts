@@ -1,29 +1,16 @@
 /**
  * @tsgui/bindings — the ONLY package that talks to native code.
  *
- * Exports:
- *   - `sdl`        raw SDL3 surface (backend-mapped, flying-pan style —
- *                  hardcore mode: everything the FFI table carries)
- *   - constants    `EventType`, `Define`, … generated from the SDL headers
- *   - `runtime`    which backend loaded
+ * One folder per library under `libraries/<name>/` (loaders, path
+ * resolution, generated tables). Adding a library = adding a folder +
+ * one re-export line here. Nothing library-specific lives above this file.
  *
- * Both backends borrow ArrayBuffers for pointer arguments and keep pointer
- * values opaque within a process — code written against `sdl` is
- * backend-agnostic as long as handles only flow through FFI calls.
+ * Libraries currently load eagerly at import; if one ever becomes
+ * optional-heavy, give it a lazy `loadXxx()` instead of eager top-level await.
  */
-import type { sdl as sdlBunType } from "./sdl-bun.ts";
+export { runtime, type Runtime } from "./runtime.ts";
 
-export * from "./generated/sdl-constants.ts";
-
-export type Sdl = typeof sdlBunType;
-export type Runtime = "bun" | "node";
-
-export const runtime: Runtime =
-  typeof globalThis.Bun !== "undefined" ? "bun" : "node";
-
-const backend = await (runtime === "bun"
-  ? import("./sdl-bun.ts")
-  : import("./sdl-node.ts"));
-
-/** Raw SDL3, loaded through the runtime's FFI. */
-export const sdl: Sdl = backend.sdl as unknown as Sdl;
+export * from "./libraries/sdl/index.ts";
+export * from "./libraries/image/index.ts";
+export * from "./libraries/ttf/index.ts";
+export * from "./libraries/mixer/index.ts";

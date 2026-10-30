@@ -31,16 +31,16 @@ sdl.SDL_CreateWindow("hi", 1280, 800, Define.SDL_WINDOW_RESIZABLE);
 
 ## Codegen: real headers in, tables out
 
-`bun run codegen` (tools/codegen) dumps SDL3's headers through clang's AST
+`bun run codegen:all` (tools/codegen) dumps the SDL3 family headers through clang's AST
 JSON (`clang -Xclang -ast-dump=json`) and generates:
 
 | Output | Consumed by |
 |---|---|
-| `sdl-constants.ts` — 95 enums + 245 numeric `#define`s | both backends |
-| `sdl-defs-bun.ts` — declarative dlopen table | `bun:ffi` |
-| `sdl-defs-node.ts` — same table in node:ffi dialect | `node:ffi` |
+| `<lib>-constants.ts` — enums + numeric `#define`s, per library | both backends |
+| `<lib>-defs-bun.ts` — declarative dlopen table | `bun:ffi` |
+| `<lib>-defs-node.ts` — same table in node:ffi dialect | `node:ffi` |
 
-**Phase 0 result: 1087 functions exposed, 95 enums, 245 defines.**
+**Result: 1378 functions across 4 libraries** — sdl 1087, image 102, ttf 100, mixer 89 — plus 101 enums and 267 numeric defines.
 
 Macros never appear in the AST, so `SDL_INIT_VIDEO`-style constants come
 from a textual `#define` scanner (flying-pan solved this with a
@@ -48,8 +48,11 @@ hand-maintained `.macros` file; ours scans the headers directly).
 
 **The pipeline is library-agnostic.** `clang/`, `model`, and `gen` know
 nothing about SDL — binding another C library means adding one `Target`
-(header path, symbol prefix, output names) to `tools/codegen/src/index.ts`
-and one loader in `@tsgui/bindings`. SDL is just the first target.
+(header path, symbol prefix, output dir) to `tools/codegen/src/index.ts`
+and one folder: `@tsgui/bindings/src/libraries/<name>/` holds that
+library's loaders (`bun.ts`, `node.ts`), dylib resolution (`path.ts`), and
+generated tables (`generated/`), exposed through a single re-export line in
+the package root. SDL is just the first target.
 
 Two AST subtleties the parser handles (flying-pan's parser got these wrong
 too, silently):
