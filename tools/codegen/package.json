@@ -1,0 +1,13 @@
+{
+  "name": "@tsgui/codegen",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "tsgui-codegen": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.6.6"
+  }
+}
