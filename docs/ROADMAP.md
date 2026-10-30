@@ -4,34 +4,36 @@ Phases are ordered so that each one has a demoable exit and de-risks the
 next. Phase 1 is the pivotal one: it proves or kills the chunky-ABI thesis
 before anything else gets built on it.
 
-## Phase 0 — Skeleton (days)
+## Phase 0 — SDL FFI vertical slice ✅ (2026-10-30)
 
-- [ ] Monorepo: `packages/*` per ARCHITECTURE.md, ESLint import-boundary rule
+- [x] Monorepo: `packages/*` + `tools/*`, ESLint import-boundary rules
       enforcing the layering.
-- [ ] Port flying-pan's Clang AST parser + codegen into `tools/codegen/`;
-      add the napi-glue, ts-bindings, and struct-writer generators (see
-      FFI.md).
-- [ ] `native/` skeleton: `tsgui_core.c/.h` on SDL3 with `abi_version`,
-      `init`, `window_create`, `window_render` (clear-color only at first);
-      vendored SDL3 + stb; cmake-js build wired to postinstall.
-- [ ] Generate the N-API glue + object-style TS bindings from the header;
-      CI builds the addon on macOS.
+- [x] Port flying-pan's Clang AST parser into `tools/codegen/`; add the
+      FFI-table generators (bun:ffi + node:ffi) and the numeric-`#define`
+      scanner (see FFI.md).
+- [x] Generate SDL3 tables: 1087 functions, 95 enums, 245 defines; 144
+      FFI-unsafe exclusions reported (callbacks, variadics, struct-by-value).
+- [x] `@tsgui/bindings`: runtime detection, SDL3 dylib resolution
+      (`TSGUI_SDL3_PATH` → platform paths → soname), `sdl` hardcore tier.
+- [x] `examples/hello.ts`: window + clear + event polling, zero compiled
+      code.
 
-**Exit:** an SDL3 window clears to a color from JS, via the generated
-N-API bindings, on Node and Bun.
+**Exit (met):** an SDL3 window clears to a color from pure TypeScript on
+**Bun (bun:ffi)** and **Node ≥ 26.9 (node:ffi)** — `bun run examples/hello.ts
+--selftest` and `node examples/hello.ts --selftest` both pass, plus a
+headless smoke (`bun run smoke`).
 
-## Phase 1 — Chunky ABI vertical slice (the thesis test)
+## Phase 1 — `libtsgui` chunky-render vertical slice (the thesis test)
 
-- [ ] Shader build step: HLSL sources + SDL_shadercross offline script,
-      compiled blobs checked in (one pipeline to start).
-- [ ] `tsgui_window_render(h, verts, n, idxs, m, batches, k)` as specced in
-      PLATFORM.md; SDL_GPU implementation (transfer buffers, one render
-      pass, k draw calls).
+- [ ] `native/libtsgui`: the renderer-only C core from PLATFORM.md's sketch
+      (SDL_GPU device, batched draw, no windowing/event code — that stays
+      direct SDL).
+- [ ] Shader build step: HLSL + SDL_shadercross offline script, compiled
+      blobs checked in (one pipeline to start).
+- [ ] `tsgui_window_render(window, verts, n, idxs, m, batches, k)` —
+      transfer buffers, one render pass, k draw calls.
 - [ ] Encoder prototype in `@tsgui/gpu`: fill 10k solid rects into a reused
       ArrayBuffer from JS.
-- [ ] Verify the same addon runs on **Node and Bun** — this is the moment
-      the cross-runtime requirement is actually proven, before binding-choice
-      doubts can return.
 - [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms — on macOS,
       Windows, and Linux.
 

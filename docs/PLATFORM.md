@@ -68,6 +68,48 @@ Polled, never callbacks across the FFI boundary:
 SDL's own internal callbacks (audio device thread) stay inside C and never
 reach JS.
 
+## Maintenance reality: the cost we chose
+
+A from-scratch toolkit cannot avoid owning an OS boundary — windowing,
+events, input, audio must be talked to in ~1–2k lines of C somewhere, in
+every architecture. The wrapper is not that cost; it is the *containment*
+of that cost:
+
+- **Ours:** one file — event mapping switch, handle registry, init/quit,
+  the render path (our logic, SDL's API).
+- **SDL's:** platform quirks (Wayland/X11/Win32/Cocoa), the entire GPU
+  backend layer (SDL_GPU *is* the Metal/D3D12/Vulkan backend — zero backend
+  code of ours), audio devices, DPI, input edge cases.
+
+Binding SDL (or GLFW) directly from JS — the flying-pan model — does not
+remove this code; it relocates it into TS, where the API shape and
+threading rules leak into the toolkit and the FFI surface grows from ~20
+functions to hundreds. The wrapper keeps the platform swappable and the TS
+pure.
+
+Accepted residual costs: SDL 3.x breaking changes land as a small diff in
+`tsgui_core.c` plus a rebuild; exotic platform features SDL does not expose
+require per-platform native code we write. Both costs exist under any
+library choice.
+
+## Capability exposure: two tiers, flying-pan's reachability
+
+Both tiers ship in `@tsgui/bindings` (see FFI.md for the binding mechanics):
+
+- **`sdl` — the hardcore tier.** SDL3 bound directly through generated FFI
+  tables: 1000+ functions, all enum/macro constants, everything reachable
+  that is FFI-expressible. App developers drop to this whenever tsgui has
+  no wrapper for what they need. This is flying-pan's model, kept.
+- **`tsgui` — the curated tier (Phase 1+).** A small `libtsgui.dylib`
+  exposing only the things SDL cannot express through plain FFI — chiefly
+  the batched SDL_GPU render call and (later) audio. Object-style
+  TypeScript on top; this is what widgets are built on.
+
+What we give up vs the earlier curated-only design: SDL's API shape is
+visible to app code that chooses `sdl`. What we keep: the *toolkit's* own
+layers never touch SDL — widgets/layout/render talk to `tsgui`, so a
+backend swap is still one dylib away.
+
 ## Main-thread rule
 
 SDL3's video/event subsystems must be pumped on the main thread (AppKit
@@ -75,26 +117,20 @@ requirement on macOS; same constraint GLFW had). The UI loop therefore runs
 on the JS thread, same as flying-pan's proven model — JS loop, `setImmediate`
 yield, ~3–6 FFI calls per frame.
 
-## Core ABI sketch (v1, ~20 functions)
+## Core ABI sketch (`libtsgui`, Phase 1 — renderer + audio only)
+
+Windowing and input are **direct SDL through the `sdl` tier** — they never
+enter this dylib. `libtsgui` exists only for what plain FFI cannot express
+well: the SDL_GPU batch orchestration and the audio callback thread.
 
 ```c
-// lifecycle
 uint32 tsgui_abi_version(void);
-int32  tsgui_init(void);
+int32  tsgui_init(void);                      // SDL_GPU device boot
 void   tsgui_terminate(void);
 
-// window (handles are uint32, never pointers)
-int32  tsgui_window_create(uint32* out_handle, const tsgui_window_opts* o);
-void   tsgui_window_destroy(uint32 h);
-int32  tsgui_window_should_close(uint32 h);
-void   tsgui_window_set_title(uint32 h, const char* s);
-
-// events — polled, not callbacks. Native fills a caller-owned ring.
-int32  tsgui_poll_events(void);                 // pump OS queue
-int32  tsgui_events_read(ptr buf, uint32 max);  // returns count of tsgui_event
-
-// render — the one hot call
-int32  tsgui_window_render(uint32 h,
+// render — the one hot call. window is the SDL_Window* as a raw pointer
+// (obtained from JS via SDL_CreateWindow in the sdl tier).
+int32  tsgui_window_render(ptr   sdl_window,
                            ptr   vertices, uint32 vertex_count,
                            ptr   indices,  uint32 index_count,
                            ptr   batches,  uint32 batch_count);
@@ -103,7 +139,7 @@ int32  tsgui_window_render(uint32 h,
 int32  tsgui_texture_create(uint32* out_id, ptr pixels, uint32 w, uint32 h);
 void   tsgui_texture_destroy(uint32 id);
 
-// audio
+// audio (phase 6) — the device callback thread lives here, in C
 int32  tsgui_audio_init(const tsgui_audio_opts* o);
 int32  tsgui_audio_write(ptr frames, uint32 count);
 ```
@@ -117,6 +153,6 @@ to the swapchain. Still one FFI call from JS.
 a handful of draws — one per texture/atlas page — while staying a single FFI
 call.
 
-**Rule:** no SDL types may appear in the public C ABI (no `SDL_Window*` in
-signatures — windows are opaque `uint32` handles). The GPU API stays an
-implementation detail behind this ABI.
+**Rule:** no SDL types in the public C ABI — raw pointers only (`ptr
+sdl_window`, not `SDL_Window*`). The GPU API stays an implementation detail
+behind this ABI, which is what keeps a future backend swap contained.

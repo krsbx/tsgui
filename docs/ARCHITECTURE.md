@@ -16,8 +16,9 @@ packages/
   devtools/     @tsgui/devtools   Inspector server + headless test harness.
 examples/                         Sample apps.
 native/                           C core (tsgui_core.c/.h) + vendored SDL3/stb.
-tools/codegen/                    Clang AST → N-API glue + TS bindings
-                                  (ported from flying-pan).
+tools/codegen/                    Clang AST → FFI tables (bun:ffi / node:ffi)
+                                  + constants, from real C headers
+                                  (parser ported from flying-pan).
 docs/                             These documents.
 ```
 

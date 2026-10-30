@@ -1,23 +1,29 @@
 # tsgui
 
-To install dependencies:
+A from-the-ground-up retained-mode GUI toolkit for Node and Bun, built
+directly on SDL3 through runtime FFI — no compiled addon, no build step.
+
+**Status:** Phase 0 complete — SDL3 bound via generated FFI tables
+(1087 functions), clear-color window demo running on Bun and Node ≥ 26.9.
+
+## Quick start
 
 ```bash
 bun install
+bun run smoke              # headless: load SDL3, print version
+bun run hello              # open the phase-0 demo window
+bun run hello -- --selftest  # 120 frames then exit (CI-safe)
 ```
 
-To run:
+Requires [Bun](https://bun.com) and SDL3 (`brew install sdl3` on macOS).
+Node 26.9+ works too via `node:ffi`.
 
-```bash
-bun run index.ts
-```
+## How it works
 
-To type check:
+`tools/codegen` dumps SDL3's headers through clang's AST and generates
+`bun:ffi` / `node:ffi` tables — flying-pan's "expose everything" model,
+with FFI-unsafe functions (callbacks, struct-by-value, variadics) filtered
+and reported. The toolkit's own layers stay pure TypeScript; a small
+`libtsgui` C core arrives in Phase 1 for the batched SDL_GPU renderer only.
 
-```bash
-bun check
-```
-
-Run `bun fmt` to format the code.
-
-This project was created using `bun init` in bun v1.4.4. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+See [docs/](./docs/README.md) for the architecture and the full plan.

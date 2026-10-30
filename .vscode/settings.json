@@ -18,5 +18,6 @@
   "js/ts.preferences.organizeImports": {
     "typeOrder": "inline",
     "caseSensitivity": "caseInsensitive"
-  }
+  },
+  "cmake.sourceDirectory": "${workspaceFolder}/native"
 }

@@ -17,8 +17,8 @@ restructured around three goals flying-pan lacked:
 | Doc | Covers |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Monorepo package layout, layering rules, frame loop, threading model |
-| [FFI.md](./FFI.md) | Generated N-API addon built from source at install; codegen pipeline; object-style TS bindings |
-| [PLATFORM.md](./PLATFORM.md) | SDL3 as the all-in-one platform (windowing/input/audio/SDL_GPU), native ABI sketch, rejected alternatives |
+| [FFI.md](./FFI.md) | Runtime-split dlopen (bun:ffi / node:ffi), tables generated from SDL3 headers, FFI-safety filter |
+| [PLATFORM.md](./PLATFORM.md) | SDL3 platform, two-tier exposure (`sdl` hardcore + `tsgui` core), `libtsgui` ABI sketch |
 | [RENDERING.md](./RENDERING.md) | Batched renderer, vertex format, SDF shapes, fonts, canvas/SVG strategy |
 | [ROADMAP.md](./ROADMAP.md) | Build phases with exit criteria |
 
