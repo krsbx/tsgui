@@ -4,7 +4,8 @@ import { runtime } from "../../runtime.ts";
 export * from "./generated/constants.ts";
 export type { SdlSymbols } from "./generated/types.ts";
 export type { SdlFunctions } from "./generated/functions.ts";
-import type { SdlSymbols, SdlFunctions } from "./generated/functions.ts";
+import type { SdlSymbols } from "./generated/types.ts";
+import type { SdlFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")

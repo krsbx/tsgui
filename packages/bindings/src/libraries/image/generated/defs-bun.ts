@@ -92,7 +92,7 @@ export const imageDefs = {
   IMG_SaveGIFAnimation_IO: { args: [FFIType.pointer, FFIType.pointer, FFIType.bool], returns: FFIType.bool },
   IMG_SaveWEBPAnimation_IO: { args: [FFIType.pointer, FFIType.pointer, FFIType.bool, FFIType.i32], returns: FFIType.bool },
   IMG_CreateAnimatedCursor: { args: [FFIType.pointer, FFIType.i32, FFIType.i32], returns: FFIType.pointer },
-  IMG_FreeAnimation: { args: [FFIType.pointer], returns: FFIType.void },
+  IMG_FreeAnimation: { args: [FFIType.pointer] },
   IMG_CreateAnimationEncoder: { args: [FFIType.cstring], returns: FFIType.pointer },
   IMG_CreateAnimationEncoder_IO: { args: [FFIType.pointer, FFIType.bool, FFIType.cstring], returns: FFIType.pointer },
   IMG_CreateAnimationEncoderWithProperties: { args: [FFIType.u32], returns: FFIType.pointer },

@@ -4,7 +4,8 @@ import { runtime } from "../../runtime.ts";
 export * from "./generated/constants.ts";
 export type { ImageSymbols } from "./generated/types.ts";
 export type { ImageFunctions } from "./generated/functions.ts";
-import type { ImageSymbols, ImageFunctions } from "./generated/functions.ts";
+import type { ImageSymbols } from "./generated/types.ts";
+import type { ImageFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")
