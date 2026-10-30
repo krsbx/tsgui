@@ -30,12 +30,18 @@
     "packages/bindings": {
       "name": "@tsgui/bindings",
       "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
     },
     "packages/gpu": {
       "name": "@tsgui/gpu",
       "version": "0.0.1",
       "dependencies": {
         "@tsgui/bindings": "workspace:*",
+      },
+      "devDependencies": {
         "@types/bun": "latest",
         "@types/node": "^26.6.6",
       },

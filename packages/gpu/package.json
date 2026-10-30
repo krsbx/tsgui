@@ -4,7 +4,9 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/bindings": "workspace:*",
+    "@tsgui/bindings": "workspace:*"
+  },
+  "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.6.6"
   },
