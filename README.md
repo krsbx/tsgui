@@ -20,10 +20,11 @@ Node 26.9+ works too via `node:ffi`.
 
 ## How it works
 
-`tools/codegen` dumps SDL3's headers through clang's AST and generates
-`bun:ffi` / `node:ffi` tables — flying-pan's "expose everything" model,
-with FFI-unsafe functions (callbacks, struct-by-value, variadics) filtered
-and reported. The toolkit's own layers stay pure TypeScript; a small
-`libtsgui` C core arrives in Phase 1 for the batched SDL_GPU renderer only.
+`tools/codegen` dumps the SDL3 family headers through clang's AST and
+generates `bun:ffi` / `node:ffi` tables — flying-pan's "expose everything"
+model, with FFI-unsafe functions (callbacks, struct-by-value, variadics)
+filtered and reported. The entire toolkit — renderer included — stays pure
+TypeScript: batched drawing goes through SDL_Renderer's GPU backend via
+`SDL_RenderGeometryRaw`.
 
 See [docs/](./docs/README.md) for the architecture and the full plan.

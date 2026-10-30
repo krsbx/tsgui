@@ -15,7 +15,6 @@ packages/
   widgets/      @tsgui/widgets    Widget set, reconciler, state, animation.
   devtools/     @tsgui/devtools   Inspector server + headless test harness.
 examples/                         Sample apps.
-native/                           C core (tsgui_core.c/.h) + vendored SDL3/stb.
 tools/codegen/                    Clang AST → FFI tables (bun:ffi / node:ffi)
                                   + constants, from real C headers
                                   (parser ported from flying-pan).

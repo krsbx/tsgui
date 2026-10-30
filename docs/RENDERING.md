@@ -96,13 +96,12 @@ use FFI." With this architecture that happens **automatically**, because
   debuggable — the same reason the layout engine stays in TS). Parsed SVG
   becomes `Path2D` + paint, which reuses everything above.
 - What *does* go native, when it's worth it:
-  - **Image decode** — `stb_image` behind `tsgui_image_decode(ptr, len) →
-    RGBA pixels`, since decoding is pure CPU bulk work and JS decode of PNG/
-    JPEG is not something we want to write or bundle.
-  - **Tessellation**, later and only if profiling demands: flattening curves
-    is the CPU-heavy part; it can move into `tsgui_core` behind a
-    `tsgui_tessellate(paths...) → triangles` call without touching any API
-    above the encoder. Until measured, it stays in TS.
+  - **Image decode** — the `image` tier (SDL3_image, already bound) covers
+    PNG/JPEG/WebP decode natively; no stb needed.
+  - **Tessellation** stays in TypeScript (flying-pan's Path2D → flatten →
+    earclip port). It is CPU bulk work, but moving it native would mean
+    reintroducing a compiled artifact for something that is testable and
+    debuggable in TS — revisit only if profiling demands it.
 
 So the rule is: **geometry in TS, pixels via native, vertices across the
 boundary** — and nothing above the encoder can tell the difference between a

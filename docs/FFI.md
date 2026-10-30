@@ -7,7 +7,7 @@ all — no N-API addon, no `node_api.h`, no cmake for bindings. Both runtimes
 `dlopen` SDL3 directly through their first-party FFI:
 
 ```
-        SDL3 (system dylib)          libtsgui.dylib (Phase 1: batch renderer only)
+        SDL3 + SDL3_image/ttf/mixer (system dylibs)
               ↘                            ↙
         bun:ffi table               node:ffi table        ← generated from real headers
               ↘                            ↙
@@ -84,14 +84,15 @@ shim, not redesigning.
 
 - **Chunky at the core.** Direct SDL calls are fine for windowing/events —
   they're low-frequency. Per-frame GPU work goes through the Phase 1
-  `libtsgui` dylib: JS fills one preallocated buffer, one FFI call draws.
+  batching: JS fills one preallocated buffer per batch, one
+  `SDL_RenderGeometryRaw` call draws it.
   Target ≤ 6 hot-path calls per frame.
 - **No allocations across the boundary.** Frame buffers are JS-owned
   ArrayBuffers, borrowed for the call; GPU resources are opaque handles
   that flow function → function and never cross backends.
 - **No callbacks.** SDL3 is polled (`SDL_PollEvent` takes a pointer — JS
   decodes the event struct with a DataView). Audio later: the callback
-  thread lives inside `libtsgui`, never reaches JS.
+  thread lives inside SDL3_mixer, never reaches JS.
 - **Errors fail loud.** `SDL_GetError()` is surfaced in thrown JS errors.
 
 ## Build & distribution
@@ -100,9 +101,9 @@ shim, not redesigning.
   macOS, distro packages on Linux, official binaries on Windows).
   Resolution: `TSGUI_SDL3_PATH` env → platform-conventional paths → bare
   soname (system loader search).
-- **Phase 1's `libtsgui.dylib`** is the only artifact we'll ever compile:
-  one C file, one `cc` invocation, gitignored build output.
-- App distribution (phase 6): apps bundle SDL3 + libtsgui; their users
+- **There is nothing to compile.** Not bindings (dlopen), not the renderer
+  (SDL_Renderer through FFI). The toolkit is pure TypeScript end to end.
+- App distribution (phase 6): apps bundle the SDL dylibs; their users
   compile nothing.
 
 ## Historical notes (so we don't relitigate)

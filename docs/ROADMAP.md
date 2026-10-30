@@ -23,21 +23,24 @@ before anything else gets built on it.
 --selftest` and `node examples/hello.ts --selftest` both pass, plus a
 headless smoke (`bun run smoke`).
 
-## Phase 1 — `libtsgui` chunky-render vertical slice (the thesis test)
+## Phase 1 — Batched renderer in TypeScript (the thesis test, zero C)
 
-- [ ] `native/libtsgui`: the renderer-only C core from PLATFORM.md's sketch
-      (SDL_GPU device, batched draw, no windowing/event code — that stays
-      direct SDL).
-- [ ] Shader build step: HLSL + SDL_shadercross offline script, compiled
-      blobs checked in (one pipeline to start).
-- [ ] `tsgui_window_render(window, verts, n, idxs, m, batches, k)` —
-      transfer buffers, one render pass, k draw calls.
-- [ ] Encoder prototype in `@tsgui/gpu`: fill 10k solid rects into a reused
-      ArrayBuffer from JS.
-- [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms — on macOS,
-      Windows, and Linux.
+Revised: the `libtsgui` C core is retired — SDL_Renderer's GPU backend +
+`SDL_RenderGeometryRaw` + `SDL_SetGPURenderState` cover it entirely through
+FFI (see PLATFORM.md).
 
-**Exit:** 10k rects at 60fps with ≤ 6 FFI calls/frame on Node and Bun.
+- [ ] Renderer module in `@tsgui/gpu`: GPU-backend renderer per window
+      (`SDL_CreateRendererWithProperties`), batch accumulator into a reused
+      ArrayBuffer, flush = `SDL_RenderGeometryRaw` per texture batch.
+- [ ] Shader build step: SDF shaders authored offline (SDL_shadercross),
+      attached via `SDL_SetGPURenderState`. Fallback if immature: CPU
+      tessellation for rounded rects (flying-pan's Path2D port).
+- [ ] Texture path: `image` tier decodes → `SDL_CreateGPUTexture`-family
+      upload through the renderer.
+- [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms — macOS
+      first, then Windows/Linux.
+
+**Exit:** 10k rects at 60fps with ≤ 10 FFI calls/frame, on Node and Bun.
 
 ## Phase 2 — Renderer core
 

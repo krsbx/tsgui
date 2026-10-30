@@ -19,14 +19,10 @@ The earlier plan (GLFW + GL for v1, SDL3 later) rested on reusing
 flying-pan's GLFW bindings and GL familiarity. Both arguments dissolve in
 tsgui's architecture:
 
-- **JS never binds the windowing library.** It only sees `tsgui_core.h`'s
-  ~20 functions. flying-pan's Clang-AST GLFW bindings existed because JS
-  drove GLFW directly; that artifact has no successor here. The binding
-  surface is ours and tiny — hand-written, no codegen needed.
-- **The GL renderer was getting thrown away regardless.** We are writing a
-  new batched renderer either way; the only question is whether it targets
-  deprecated-on-macOS GL (to be rewritten at Vulkan time) or SDL_GPU
-  (never rewritten).
+- **The GL renderer was getting thrown away regardless.** We were writing
+  a new batched renderer either way; SDL3's GPU-backed SDL_Renderer means
+  it targets Metal/D3D12/Vulkan from day one — through FFI, with zero C
+  (see the renderer architecture section below).
 
 Result: the dependency stack collapses to **SDL3 + stb_truetype +
 stb_image**, and the "GLFW + miniaudio grab-bag" problem stops existing.
@@ -87,28 +83,30 @@ threading rules leak into the toolkit and the FFI surface grows from ~20
 functions to hundreds. The wrapper keeps the platform swappable and the TS
 pure.
 
-Accepted residual costs: SDL 3.x breaking changes land as a small diff in
-`tsgui_core.c` plus a rebuild; exotic platform features SDL does not expose
-require per-platform native code we write. Both costs exist under any
-library choice.
+Accepted residual costs: SDL 3.x breaking changes land as a table
+regeneration (`bun run codegen:all`) plus small TS adjustments; exotic
+platform features SDL does not expose require per-platform native code we
+write. The first cost exists under every binding strategy; the second under
+every library choice.
 
 ## Capability exposure: two tiers, flying-pan's reachability
 
-Both tiers ship in `@tsgui/bindings` (see FFI.md for the binding mechanics):
-
-- **`sdl` — the hardcore tier.** SDL3 bound directly through generated FFI
-  tables: 1000+ functions, all enum/macro constants, everything reachable
-  that is FFI-expressible. App developers drop to this whenever tsgui has
-  no wrapper for what they need. This is flying-pan's model, kept.
-- **`tsgui` — the curated tier (Phase 1+).** A small `libtsgui.dylib`
-  exposing only the things SDL cannot express through plain FFI — chiefly
-  the batched SDL_GPU render call and (later) audio. Object-style
-  TypeScript on top; this is what widgets are built on.
+- **`sdl` / `image` / `ttf` / `mixer` — the hardcore tiers.** The SDL3
+  family bound directly through generated FFI tables: 1000+ functions, all
+  enum/macro constants, everything reachable that is FFI-expressible. App
+  developers drop to these whenever tsgui has no wrapper for what they
+  need. This is flying-pan's model, kept.
+- **`tsgui` — the toolkit layer (pure TypeScript, later phases).** Widgets,
+  layout, the renderer module: all ordinary TS built on the tiers above.
+  There is **no compiled toolkit artifact at all** — the earlier plan for a
+  `libtsgui.dylib` renderer core was retired when SDL_Renderer proved
+  sufficient (below).
 
 What we give up vs the earlier curated-only design: SDL's API shape is
-visible to app code that chooses `sdl`. What we keep: the *toolkit's* own
-layers never touch SDL — widgets/layout/render talk to `tsgui`, so a
-backend swap is still one dylib away.
+visible to app code that chooses the hardcore tiers. What we keep: the
+*toolkit's* own layers sit in `@tsgui/gpu` and `@tsgui/widgets` as plain
+TypeScript — a future platform swap is table regeneration plus one TS
+module.
 
 ## Main-thread rule
 
@@ -117,42 +115,34 @@ requirement on macOS; same constraint GLFW had). The UI loop therefore runs
 on the JS thread, same as flying-pan's proven model — JS loop, `setImmediate`
 yield, ~3–6 FFI calls per frame.
 
-## Core ABI sketch (`libtsgui`, Phase 1 — renderer + audio only)
+## Renderer architecture (Phase 1): SDL_Renderer, zero C
 
-Windowing and input are **direct SDL through the `sdl` tier** — they never
-enter this dylib. `libtsgui` exists only for what plain FFI cannot express
-well: the SDL_GPU batch orchestration and the audio callback thread.
+The earlier plan — a `libtsgui.dylib` wrapping SDL_GPU — is retired. The
+per-frame call-count math made it unnecessary once rendering became
+batched: a frame is ~10 FFI calls (acquire, set state, `SDL_RenderGeometryRaw`
+per texture batch, `SDL_RenderPresent`), **constant** regardless of widget
+count. flying-pan's failure was calls-per-primitive (thousands); calls-per-
+frame-pipeline was never the problem.
 
-```c
-uint32 tsgui_abi_version(void);
-int32  tsgui_init(void);                      // SDL_GPU device boot
-void   tsgui_terminate(void);
+The stack, all through FFI from TypeScript:
 
-// render — the one hot call. window is the SDL_Window* as a raw pointer
-// (obtained from JS via SDL_CreateWindow in the sdl tier).
-int32  tsgui_window_render(ptr   sdl_window,
-                           ptr   vertices, uint32 vertex_count,
-                           ptr   indices,  uint32 index_count,
-                           ptr   batches,  uint32 batch_count);
+- **`SDL_CreateRendererWithProperties` with the GPU backend** — SDL3's
+  `SDL_RENDERER_GPU` batches geometry internally on Metal/D3D12/Vulkan.
+- **`SDL_RenderGeometryRaw`** — one call per batch: raw client pointers to
+  JS-owned vertex/index ArrayBuffers (16-byte vertices), FFI-perfect.
+- **`SDL_SetGPURenderState`** (new in SDL 3.4) — custom pipelines/shaders
+  attach to the 2D renderer: SDF rounded-rects/borders/shadows without
+  leaving SDL_Renderer. Shaders authored offline, blobs loaded at init.
+- **Audio** — SDL3_mixer (already bound) runs its own callback thread
+  internally; JS only queues. No C audio code either.
 
-// textures (font atlas, images) — upload is occasional, not per-frame
-int32  tsgui_texture_create(uint32* out_id, ptr pixels, uint32 w, uint32 h);
-void   tsgui_texture_destroy(uint32 id);
+If a future GPU API (wgpu/Dawn-class) ever becomes necessary, the swap is:
+regenerate tables against the new library + rewrite one TS module
+(`@tsgui/gpu`). The batch/encoder boundary stays fixed either way — that
+boundary, not a dylib, is what contains platform risk.
 
-// audio (phase 6) — the device callback thread lives here, in C
-int32  tsgui_audio_init(const tsgui_audio_opts* o);
-int32  tsgui_audio_write(ptr frames, uint32 count);
-```
-
-Under SDL_GPU, `tsgui_window_render` maps to: upload via transfer buffer →
-copy into per-window GPU vertex/index buffers → acquire command buffer →
-render pass → k draw calls (one per batch/texture page) → submit + present
-to the swapchain. Still one FFI call from JS.
-
-`batches` (texture id, index range, scissor rect) lets one render call issue
-a handful of draws — one per texture/atlas page — while staying a single FFI
-call.
-
-**Rule:** no SDL types in the public C ABI — raw pointers only (`ptr
-sdl_window`, not `SDL_Window*`). The GPU API stays an implementation detail
-behind this ABI, which is what keeps a future backend swap contained.
+Known risks: `SDL_SetGPURenderState` is new (3.4) — if it proves immature,
+v1 falls back to CPU geometry for rounded rects (tessellated in TS, porting
+flying-pan's Path2D/tessellation — fully sufficient for v1 shapes). The GPU
+renderer backend needs Metal/D3D12/Vulkan; SDL falls back to other renderer
+backends elsewhere, where custom GPU render state is unavailable.
