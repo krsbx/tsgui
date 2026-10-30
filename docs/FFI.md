@@ -2,94 +2,163 @@
 
 ## Requirement
 
-One binding approach that works on **both Node and Bun** (Deno would be free
-if it falls out), calling our own small native platform layer, with:
+One native binding approach that is **stable across Node and Bun majors**,
+calling our own small native platform layer, with:
 
 - bulk buffer passing (megabytes of vertex data per frame),
-- struct-by-value where unavoidable,
-- callbacks only if we choose the callback event model (we don't — see
-  PLATFORM.md),
-- zero per-frame per-call overhead.
+- pointers to caller-owned memory where a struct is needed,
+- no callbacks in the binding layer (events are polled — see PLATFORM.md),
+- zero per-frame per-call overhead,
+- **no per-platform binary publishing pipeline**,
+- **TypeScript API in single-object parameters** (flying-pan convention),
+  never positional arguments.
 
-## Candidates evaluated
-
-| Approach | Node | Bun | Verdict |
-|---|---|---|---|
-| `bun:ffi` | ❌ | ✅ | Fast, zero build step, but Bun-only. Great as a dev backend, not the product path. |
-| **koffi** | ✅ | ⚠️ | Node-first N-API FFI. Not officially supported on Bun; a May 2025 report ([koffi#234](https://github.com/Koromix/koffi/issues/234)) shows basic examples installing fine but **crashing on real native calls** under Bun. Does not satisfy the cross-runtime requirement. Re-evaluate only if koffi ships official Bun support. |
-| `node-ffi-napi` | ❌ dead | ❌ | Unmaintained. Not an option. |
-| **N-API addon** (hand-written C against `node_api.h`) | ✅ | ✅ | Both runtimes load `.node` addons natively. This is the genuine cross-runtime path — the same conclusion [opentui reached](https://github.com/anomalyco/opentui) moving off `bun:ffi`. |
-| **napi-rs** (Rust) | ✅ | ✅ | Same runtime story, excellent build/prebuild tooling, but adds a Rust toolchain for a ~600-line wrapper. |
-| node-addon-api (C++) | ✅ | ✅ | C++ comfort layer over N-API; fine, but our wrapper is small enough that plain C keeps the toolchain uniform. |
-
-Precedent: this exact decision (bun:ffi vs koffi vs NAPI for Bun+Node) was
-worked through publicly by the opentui project in mid-2025; they landed on
-NAPI addons.
-
-## Recommendation
-
-**One C core, two thin frontends, chosen at import time:**
+## Decision: generated N-API addon, built from source at install
 
 ```
-native/
-  tsgui_core.c/.h      Pure C ABI (no Node/Bun knowledge): window, events,
-                       batch draw, textures, audio. Links SDL3
-                       (windowing/input/audio/SDL_GPU) + stb_truetype/stb_image.
-  tsgui_napi.c         ~600 lines of node_api.h glue exposing the same ABI
-                       as functions taking ArrayBuffer-backed pointers.
-                       Build output: tsgui.node (prebuilt per platform/arch).
-
-packages/bindings/
-  src/index.ts         Detects runtime, loads the right frontend:
-                         typeof Bun !== "undefined" → try tsgui.node (N-API),
-                                                     fallback bun:ffi
-                         Node                      → tsgui.node
-  src/bun-ffi.ts       bun:ffi frontend (dlopen libtsgui.dylib/.so/.dll).
-  src/napi.ts          tsgui.node frontend.
-  src/types.ts         The PlatformBridge interface both frontends implement.
+                 tsgui_core.h  ← the spec; hand-written once
+                        │
+              tools/codegen (Clang AST → generators)
+        ┌───────────────┼──────────────────────────┐
+        ▼               ▼                          ▼
+  tsgui_napi.c    bindings/napi.ts          struct writers
+  (N-API glue)    (object-style API)        (CStruct layout)
+        │               │                          │
+        └─────── cmake-js build at install ───────┘
+                        │
+              tsgui.node  ← works on Node AND Bun
 ```
 
-Why this shape:
+- **N-API for stability.** Node-API's contract is *ABI* stability: the addon
+  is compiled once and keeps working across Node and Bun major versions.
+  That is precisely the guarantee the dlopen FFI APIs (`node:ffi` Stability 1
+  experimental, `bun:ffi` runtime-specific) do not give. Bun loads N-API
+  addons natively; our surface (plain calls, ArrayBuffers, error throwing)
+  is the well-trodden subset.
+- **Codegen for the bridge.** The C glue, the TypeScript bindings, and the
+  struct writers are all generated from `tsgui_core.h`. Hand-maintained
+  bridge code: zero. The header is the spec; the codegen (ported from
+  flying-pan's Clang AST pipeline) is the compiler.
+- **Source build for distribution.** No platform binaries are published.
+  SDL3 (CMake) and stb headers are vendored in-repo; `cmake-js` compiles
+  SDL3 + `tsgui_core.c` + glue at install. A user-level cache
+  (keyed by package version + arch) makes it once per machine, not per
+  project.
 
-1. **The C core stays dependency-free** — no `node_api.h` inside the core. It
-   stays loadable by `dlopen` (bun:ffi), wrappable by N-API, and reusable by
-   anything else later (Python, Zig, whatever).
-2. **The N-API frontend is the product path** — it is the only mechanism both
-   runtimes officially support, and it lets us return proper JS errors,
-   validate arguments, and hand back `Buffer`/`ArrayBuffer` views over native
-   memory without copy gymnastics.
-3. **The bun:ffi frontend is the dev iteration path** — while the ABI is
-   churning (phase 1), edit `tsgui_core.c`, recompile, reload, no `.node`
-   rebuild in the loop. It also serves as a canary: if the ABI needs exotic
-   types that bun:ffi can't express, the ABI is wrong.
+### TypeScript API shape
 
-### What we do NOT use koffi for
+Every function maps to a single options object; out-params become return
+values. App code never sees the C ABI:
 
-Nothing, for now. It would be a third binding implementation we don't control,
-it is Node-only in practice today, and its N-API-under-Bun reliability is
-unproven ([koffi#234](https://github.com/Koromix/koffi/issues/234)). Keep it on
-the radar: if koffi adds official Bun support it becomes a legitimate
-zero-C-wrapper alternative to `tsgui_napi.c` for Node-only consumers.
+```ts
+// generated — object-style, out-param promoted to return value
+const win = bridge.createWindow({ title: "App", width: 1280, height: 800 });
+bridge.render({ window: win, vertices, indices, batches });
+```
 
-## ABI rules (applies to both frontends)
+Inside the generated backend, the object is destructured and marshalled
+positionally to the C call. Object allocation cost is irrelevant at the
+target of ≤ 6 calls per frame.
+
+### Build-on-user-machine: who compiles what
+
+- **Framework consumers (developers)** run the install-time build. That is
+  the entire exposed audience: Xcode CLT on macOS, MSVC Build Tools on
+  Windows, gcc/clang + dev headers on Linux.
+- **Users of apps built with tsgui never compile anything.** The app author
+  bundles the compiled binary with their app; for them it is just a file in
+  the package.
+- **Prebuilt platform packages** may be added later as an *optional*
+  convenience for compile-less environments (managed CI, locked-down hosts).
+  They are an optimization, not a requirement — the inversion of the usual
+  N-API distribution story, where prebuilts are mandatory and source build
+  is the fallback.
+
+### Why the earlier "dlopen split" plan was superseded
+
+`bun:ffi`/`node:ffi` avoided packaging machinery but bought runtime-API
+churn: `node:ffi` is experimental (Stability 1) and both APIs reshape across
+majors. With codegen making every backend nearly free, that trade is no
+longer worth it: the generated tables (`bun-ffi.ts`, `node-ffi.ts`) are
+kept as **escape hatches** — regenerate them if the N-API path ever
+misbehaves on a specific runtime.
+
+## Codegen
+
+Port flying-pan's Clang AST parser + codegen (`src/ffi/ast`, `src/ffi/parser`,
+`src/ffi/codegen`) into `tools/codegen/`. It is small here because the ABI
+vocabulary is deliberately tiny:
+
+- scalars: `int32 / uint32 / uint64 / double`, plus `ptr` and `string`
+- one direction of out-params (`uint32* out_handle`) → promoted to return values
+- structs by pointer, with generated writers (flying-pan's `CStruct` /
+  `BaseStruct` utilities handle alignment/layout already)
+
+Generators (all from the same parsed header):
+
+| Generator | Output |
+|---|---|
+| napi-glue | `tsgui_napi.c`: registration table, arg extraction, out-param returns, negative return codes → thrown `Error` with `tsgui_error_string(code)` |
+| ts-bindings | `bindings/napi.ts`: typed object-style API over the glue |
+| struct-writers | TS classes writing/reading ABI structs into `ArrayBuffer`s at generated offsets |
+| ffi-tables *(optional)* | `bun-ffi.ts` / `node-ffi.ts` dlopen tables for the escape hatches |
+
+Regeneration is part of the build (`bun run codegen`); the header changes →
+all surfaces regenerate together. Generated files carry a header marking them
+do-not-edit.
+
+## Language split
+
+| File | Written by | Why |
+|---|---|---|
+| `tsgui_core.c/.h` | hand-written C (~1–2k lines) | SDL plumbing, event mapping, one batched draw. The header is the spec. |
+| `tsgui_napi.c` | **generated** | Mechanical N-API glue. |
+| `bindings/*.ts` | **generated** | Object-style TS API + struct writers. |
+| `tools/codegen/*` | hand-written TS | Port of flying-pan's parser/codegen. |
+| `bun-ffi.ts`, `node-ffi.ts` *(escape hatches)* | **generated** | dlopen tables, regenerated on demand. |
+
+Everything above the boundary — layout, widgets, reconciler, encoder,
+devtools — stays TypeScript. The C surface is small, dumb, and specified by
+one header; the bridge maintains itself.
+
+## ABI rules (enforced by the header + codegen)
 
 - **Chunky, not chatty.** Target ≤ 30 functions total; ≤ 6 calls per frame.
 - **No allocations across the boundary.** JS owns the frame buffers (passes
   `ptr, len`); native owns GPU resources and returns opaque handles (`uint32`).
 - **No callbacks in v1.** Input events are polled: native fills a preallocated
-  event ring during `poll_events`, JS reads it. Callbacks via FFI are the
-  least portable, hardest-to-debug mechanism in every runtime.
-- **Plain C ABI** on the core: `int32/uint32/uint64/double/ptr` scalars only.
-  No struct-by-value parameters (pass pointers into caller-owned scratch if a
-  struct is needed) — struct-by-value is where every FFI library's bugs live.
-- **Errors are return codes** (`0 = ok`, negative = typed error), converted to
-  thrown JS errors in `bindings`. Fail loud, per flying-pan convention.
-- Version the ABI: `tsgui_abi_version()` checked at load, so a stale
-  `.node`/dylib fails with a clear message instead of corrupting memory.
+  event ring during `poll_events`, JS reads it.
+- **Plain C ABI**: `int32/uint32/uint64/double/ptr/string` only; structs by
+  pointer, never by value. Struct-by-value is where every FFI bridge's bugs
+  live.
+- **Errors are return codes** (`0 = ok`, negative = typed error); the glue
+  converts them to thrown JS errors. Fail loud, per flying-pan convention.
+- Version the ABI: `tsgui_abi_version()` checked at load; a stale addon
+  fails with a clear message instead of corrupting memory.
 
-## First build target
+## Build & distribution
 
-A function-per-platform matrix via the napi-rs CLI's build recipe or
-`prebuildify`: macOS (arm64, x64), Windows (x64), Linux (x64, glibc + musl).
-CI releases binaries as GitHub release assets; `bindings` resolves and
-downloads them on install, with a source-build fallback (`cc`).
+- **Dev:** `cmake-js build` (or `bun run build:native`) compiles the addon
+  locally; `TSGUI_NATIVE_PATH` overrides the search path for experiments.
+- **Install:** `cmake-js` in a postinstall hook; vendored SDL3 + stb mean no
+  system packages. User-level cache keyed by (version, platform, arch).
+- **Ship (apps):** app authors bundle the built binary with their app —
+  their users compile nothing.
+- **Ship (optional):** prebuilt platform packages as opt-in convenience;
+  source build remains the default and the fallback.
+- **Source fallback is the primary path** — keep it green in CI on all
+  three platforms; it is also what makes CI a test matrix instead of a
+  release pipeline.
+
+## Historical notes (kept so we don't relitigate)
+
+- **koffi** — mature third-party FFI, Node-first; crash-prone on Bun
+  ([koffi#234](https://github.com/Koromix/koffi/issues/234)). Superseded by
+  `node:ffi`, then by this plan.
+- **Runtime-split dlopen** (`bun:ffi` on Bun, `node:ffi` on Node) — sound
+  while both APIs were stable enough; abandoned when stability across
+  majors became the requirement and codegen made backend switching free.
+- **N-API with hand-written glue + npm platform packages** — the original
+  objection (maintaining bridge C by hand, publishing per-platform
+  binaries) is answered by codegen and source build, not by abandoning
+  N-API.

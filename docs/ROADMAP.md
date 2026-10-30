@@ -8,13 +8,17 @@ before anything else gets built on it.
 
 - [ ] Monorepo: `packages/*` per ARCHITECTURE.md, ESLint import-boundary rule
       enforcing the layering.
-- [ ] `native/` skeleton: `tsgui_core.c` on SDL3 with `abi_version`, `init`,
-      `window_create`, `window_render` (clear-color only at first), plus the
-      hand-written bun:ffi frontend. The ABI is ~20 functions — no codegen
-      needed; flying-pan's Clang AST codegen is ported only if the ABI ever
-      grows large enough to warrant it. CI builds the dylib on macOS.
+- [ ] Port flying-pan's Clang AST parser + codegen into `tools/codegen/`;
+      add the napi-glue, ts-bindings, and struct-writer generators (see
+      FFI.md).
+- [ ] `native/` skeleton: `tsgui_core.c/.h` on SDL3 with `abi_version`,
+      `init`, `window_create`, `window_render` (clear-color only at first);
+      vendored SDL3 + stb; cmake-js build wired to postinstall.
+- [ ] Generate the N-API glue + object-style TS bindings from the header;
+      CI builds the addon on macOS.
 
-**Exit:** an SDL3 window clears to a color from JS, via bun:ffi.
+**Exit:** an SDL3 window clears to a color from JS, via the generated
+N-API bindings, on Node and Bun.
 
 ## Phase 1 — Chunky ABI vertical slice (the thesis test)
 
@@ -25,12 +29,13 @@ before anything else gets built on it.
       pass, k draw calls).
 - [ ] Encoder prototype in `@tsgui/gpu`: fill 10k solid rects into a reused
       ArrayBuffer from JS.
-- [ ] Wire the N-API wrapper (`tsgui_napi.c`) and verify the same app runs
-      through **both** frontends — this is the moment the cross-runtime
-      requirement is actually proven, before koffi-style doubts can return.
-- [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms.
+- [ ] Verify the same addon runs on **Node and Bun** — this is the moment
+      the cross-runtime requirement is actually proven, before binding-choice
+      doubts can return.
+- [ ] Benchmark: FFI calls/frame, JS encode ms, total frame ms — on macOS,
+      Windows, and Linux.
 
-**Exit:** 10k rects at 60fps with ≤ 6 FFI calls/frame on both Node and Bun.
+**Exit:** 10k rects at 60fps with ≤ 6 FFI calls/frame on Node and Bun.
 
 ## Phase 2 — Renderer core
 
@@ -38,7 +43,8 @@ before anything else gets built on it.
 - [ ] Font atlas (port stb_truetype baking from flying-pan), text quads.
 - [ ] Image textures via `tsgui_image_decode` + upload.
 - [ ] Scissor-in-batch clipping.
-- [ ] `native/` prebuild pipeline: macOS arm64/x64 first, then Linux, Windows.
+- [ ] Install-time source build verified end-to-end (cmake-js + vendored
+      deps + user-level cache) on macOS, Linux, and Windows.
 
 **Exit:** a static "kitchen sink" window — decorated boxes, text, images —
 drawn with one render call, on Node and Bun.
@@ -78,8 +84,9 @@ click a widget, see why.
 ## Phase 6 — Audio + packaging
 
 - [ ] SDL3 audio stream behind `tsgui_audio_*`.
-- [ ] Distribution: prebuilt binaries per platform/arch, install-time
-      resolution with source fallback; codesigning + icons for macOS/Windows.
+- [ ] Distribution: app-bundling story (app authors ship the compiled binary
+      — their users compile nothing); optional prebuilt platform packages as
+      opt-in convenience; codesigning + icons for macOS/Windows.
 
 ## Deliberately deferred (with reasons)
 
