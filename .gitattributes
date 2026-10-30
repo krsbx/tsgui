@@ -1,0 +1,4 @@
+# Drizzle-generated database artifacts — SQL migrations and schema snapshots.
+# Mark as generated so GitHub Linguist excludes them from language stats and
+# collapses them in diffs/PRs.
+packages/bindings/src/** linguist-generated=true
