@@ -36,9 +36,19 @@ JSON (`clang -Xclang -ast-dump=json`) and generates:
 
 | Output | Consumed by |
 |---|---|
-| `<lib>-constants.ts` — enums + numeric `#define`s, per library | both backends |
-| `<lib>-defs-bun.ts` — declarative dlopen table | `bun:ffi` |
-| `<lib>-defs-node.ts` — same table in node:ffi dialect | `node:ffi` |
+| `constants.ts` — enums + numeric `#define`s, per library | both backends |
+| `defs-bun.ts` / `defs-node.ts` — declarative dlopen tables | the loaders |
+| `types.ts` — `<Lib>Symbols`: typed positional surface | loaders, hot paths |
+| `functions.ts` — `<Lib>Functions`: **single-object-param wrappers** with real param names from the headers (`SDL_CreateWindow({ title, w, h, flags })`), plus the `create<Lib>Functions()` factory | the primary export (`sdl`, `image`, …) |
+
+Two surfaces per library, both convention-compliant:
+- **`sdl`** (object-param) — the primary export; flying-pan's binding-level
+  convention. String params are `string \| null` (C `char*` reality —
+  `SDL_CreateRenderer({ window, name: null })` is the default-backend call).
+- **`sdlRaw`** (positional, typed via `<Lib>Symbols`) — the documented
+  escape hatch for hot paths and toolkit internals; `@tsgui/gpu` uses it
+  so the render path carries zero wrapper overhead. Both surfaces behave
+  identically on Bun and Node (node loaders convert `'string'` returns).
 
 **Result: 1378 functions across 4 libraries** — sdl 1087, image 102, ttf 100, mixer 89 — plus 101 enums and 267 numeric defines.
 

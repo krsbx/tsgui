@@ -110,10 +110,15 @@ function classifyFfiType(
   return 'pointer';
 }
 
+export interface FfiArg {
+  name: string;
+  kind: FfiType;
+}
+
 export interface FfiFunction {
   name: string;
   returns: FfiType;
-  args: FfiType[];
+  args: FfiArg[];
 }
 
 export interface UnsafeFunction {
@@ -206,6 +211,18 @@ function collectEnums(
   return { enums, unresolved };
 }
 
+const JS_RESERVED = new Set([
+  'arguments', 'await', 'break', 'case', 'catch', 'class', 'const', 'continue',
+  'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false',
+  'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'let',
+  'new', 'null', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try',
+  'typeof', 'var', 'void', 'while', 'with', 'yield',
+]);
+
+function jsSafeName(name: string): string {
+  return JS_RESERVED.has(name) ? `_${name}` : name;
+}
+
 export function buildFfiTables(
   header: CHeaderDecl,
   opts: FfiFilterOptions
@@ -249,7 +266,7 @@ export function buildFfiTables(
     }
 
     let ok = true;
-    const args: FfiType[] = [];
+    const args: FfiArg[] = [];
     for (const p of fn.params) {
       const kind = classifyFfiType(p.type, aliases, enumNames);
       if (kind === null) {
@@ -260,7 +277,7 @@ export function buildFfiTables(
         ok = false;
         break;
       }
-      args.push(kind);
+      args.push({ name: jsSafeName(p.name), kind });
     }
     if (!ok) continue;
 

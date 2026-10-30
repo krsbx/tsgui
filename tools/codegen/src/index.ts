@@ -17,6 +17,7 @@ import {
   generateBunDefs,
   generateFfiConstants,
   generateNodeDefs,
+  generateTypesAndFunctions,
   summarizeUnsafe,
 } from './gen/ffi';
 import { pascalCase } from './model';
@@ -133,11 +134,17 @@ async function generateTarget(spec: TargetSpec, check: boolean): Promise<void> {
   );
   const bunDefs = generateBunDefs(tables, spec.origin, `${spec.name}Defs`);
   const nodeDefs = generateNodeDefs(tables, spec.origin, `${spec.name}Defs`);
+  const { types, functions } = generateTypesAndFunctions(
+    tables,
+    pascalCase(spec.name)
+  );
 
   const outputs: [string, string][] = [
     [join(outDir, 'constants.ts'), constants],
     [join(outDir, 'defs-bun.ts'), bunDefs],
     [join(outDir, 'defs-node.ts'), nodeDefs],
+    [join(outDir, 'types.ts'), types],
+    [join(outDir, 'functions.ts'), functions],
   ];
 
   if (check) {

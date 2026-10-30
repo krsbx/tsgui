@@ -10,6 +10,7 @@
  * hand-written parts of @tsgui/bindings.
  */
 import type { FfiTables } from '../model';
+import type { FfiType } from '../model';
 
 /** C kind → bun:ffi FFIType member. */
 const BUN_TYPE: Record<string, string> = {
@@ -97,7 +98,7 @@ export function generateBunDefs(
     const args =
       fn.args.length === 0
         ? `[]`
-        : `[${fn.args.map((a) => `FFIType.${BUN_TYPE[a]}`).join(', ')}]`;
+        : `[${fn.args.map((a) => `FFIType.${BUN_TYPE[a.kind]}`).join(', ')}]`;
     L.push(
       `  ${fn.name}: { args: ${args}, returns: FFIType.${BUN_TYPE[fn.returns]} },`
     );
@@ -119,12 +120,113 @@ export function generateNodeDefs(
     const args =
       fn.args.length === 0
         ? `[]`
-        : `[${fn.args.map((a) => JSON.stringify(NODE_TYPE[a])).join(', ')}]`;
+        : `[${fn.args.map((a) => JSON.stringify(NODE_TYPE[a.kind])).join(', ')}]`;
     L.push(`  ${fn.name}: { arguments: ${args}, return: ${JSON.stringify(NODE_TYPE[fn.returns])} },`);
   }
   L.push(`} as const;`);
   L.push(``);
   return L.join('\n');
+}
+
+/* ------------------------------------------------------------------ */
+/* Typed symbol surface + single-object-param wrappers                 */
+/* ------------------------------------------------------------------ */
+
+/** TS type for one FfiType — shared by the symbols and functions surfaces. */
+function tsType(kind: FfiType, position: 'param' | 'return'): string {
+  switch (kind) {
+    case 'void':
+      return position === 'return' ? 'void' : 'never';
+    case 'bool':
+      return 'boolean';
+    case 'i64':
+    case 'u64':
+      // 64-bit ints cross FFI as bigint.
+      return position === 'param' ? 'number | bigint' : 'bigint';
+    case 'i8':
+    case 'u8':
+    case 'i16':
+    case 'u16':
+    case 'i32':
+    case 'u32':
+    case 'f32':
+    case 'f64':
+      return 'number';
+    case 'string':
+      // C char* is nullable unless documented otherwise — SDL's
+      // SDL_CreateRenderer(w, null)-style default-arg patterns rely on it.
+      return position === 'param' ? 'string | null' : 'string';
+    case 'pointer':
+      // Opaque handles and borrowed buffers; backend-shaped values flow
+      // function → function without inspection.
+      return 'unknown';
+  }
+}
+
+function generateSymbolsType(tables: FfiTables, pascalName: string): string {
+  const L = banner(`symbols type for ${pascalName}`);
+  L.push(`/** Raw positional surface of the loaded ${pascalName} library. */`);
+  L.push(`export interface ${pascalName}Symbols {`);
+  for (const fn of tables.functions) {
+    const args = fn.args
+      .map((a) => `${a.name}: ${tsType(a.kind, 'param')}`)
+      .join(', ');
+    L.push(`  ${fn.name}(${args}): ${tsType(fn.returns, 'return')};`);
+  }
+  L.push(`}`);
+  L.push(``);
+  return L.join('\n');
+}
+
+function generateFunctions(tables: FfiTables, pascalName: string): string {
+  const L = banner(`single-object-param wrappers for ${pascalName}`);
+  L.push(`import type { ${pascalName}Symbols } from "./types.ts";`);
+  L.push(`export type { ${pascalName}Symbols } from "./types.ts";`);
+  L.push(``);
+  L.push(`/**`);
+  L.push(` * Object-param surface over the raw symbols — the toolkit convention`);
+  L.push(` * (docs/ARCHITECTURE.md). One options object per call; no-arg`);
+  L.push(` * functions stay no-arg.`);
+  L.push(` */`);
+  L.push(`export interface ${pascalName}Functions {`);
+  for (const fn of tables.functions) {
+    if (fn.args.length === 0) {
+      L.push(`  ${fn.name}(): ${tsType(fn.returns, 'return')};`);
+      continue;
+    }
+    const fields = fn.args
+      .map((a) => `${a.name}: ${tsType(a.kind, 'param')}`)
+      .join('; ');
+    L.push(`  ${fn.name}(opts: { ${fields} }): ${tsType(fn.returns, 'return')};`);
+  }
+  L.push(`}`);
+  L.push(``);
+  L.push(
+    `export function create${pascalName}Functions(symbols: ${pascalName}Symbols): ${pascalName}Functions {`
+  );
+  L.push(`  return {`);
+  for (const fn of tables.functions) {
+    if (fn.args.length === 0) {
+      L.push(`    ${fn.name}: () => symbols.${fn.name}(),`);
+      continue;
+    }
+    const positional = fn.args.map((a) => `opts.${a.name}`).join(', ');
+    L.push(`    ${fn.name}: (opts) => symbols.${fn.name}(${positional}),`);
+  }
+  L.push(`  };`);
+  L.push(`}`);
+  L.push(``);
+  return L.join('\n');
+}
+
+export function generateTypesAndFunctions(
+  tables: FfiTables,
+  pascalName: string
+): { types: string; functions: string } {
+  return {
+    types: generateSymbolsType(tables, pascalName),
+    functions: generateFunctions(tables, pascalName),
+  };
 }
 
 /** Used by the CLI report so missing capabilities are visible, not silent. */

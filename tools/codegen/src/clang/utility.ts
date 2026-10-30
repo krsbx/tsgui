@@ -18,6 +18,11 @@ export function parseCTypeDeclFromString(qualType: string): CTypeDecl {
   const isConst = name.includes('const ');
   name = name.replace(/\bconst\b/g, '').trim();
 
+  // Desugared enum/struct/union types carry the C tag keyword
+  // ("enum SDL_PixelFormat") — strip it so the bare name resolves against
+  // the model's enum set.
+  name = name.replace(/^(enum|struct|union)\s+/, '').trim();
+
   let pointerDepth = 0;
   while (name.endsWith('*')) {
     pointerDepth++;
