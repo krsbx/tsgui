@@ -1,5 +1,5 @@
 /** Texture creation/destruction over the SDL3 properties API. */
-import { SdlDefines, sdlRaw } from "@tsgui/bindings";
+import { SdlDefines, sdl } from "@tsgui/bindings";
 import type { TextureFromPixelsOptions, TextureHandle } from "./types.ts";
 
 // Prop names are string #defines — invisible to the codegen's numeric
@@ -20,33 +20,33 @@ export function createTextureFromPixels({
   pixels,
   format,
 }: TextureFromPixelsOptions): TextureHandle {
-  const props = sdlRaw.SDL_CreateProperties();
+  const props = sdl.SDL_CreateProperties();
 
-  sdlRaw.SDL_SetNumberProperty(props, PROP_TEXTURE_CREATE_FORMAT, format);
-  sdlRaw.SDL_SetNumberProperty(
+  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_FORMAT, value: format });
+  sdl.SDL_SetNumberProperty({
     props,
-    PROP_TEXTURE_CREATE_ACCESS,
-    0 /* static */
-  );
-  sdlRaw.SDL_SetNumberProperty(props, PROP_TEXTURE_CREATE_WIDTH, width);
-  sdlRaw.SDL_SetNumberProperty(props, PROP_TEXTURE_CREATE_HEIGHT, height);
+    name: PROP_TEXTURE_CREATE_ACCESS,
+    value: 0 /* static */,
+  });
+  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_WIDTH, value: width });
+  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_HEIGHT, value: height });
 
-  const texture = sdlRaw.SDL_CreateTextureWithProperties(renderer, props);
-  sdlRaw.SDL_DestroyProperties(props);
+  const texture = sdl.SDL_CreateTextureWithProperties({ renderer, props });
+  sdl.SDL_DestroyProperties({ props });
 
   if (!texture) {
-    throw new Error(`createTextureFromPixels: ${sdlRaw.SDL_GetError()}`);
+    throw new Error(`createTextureFromPixels: ${sdl.SDL_GetError()}`);
   }
 
-  if (!sdlRaw.SDL_UpdateTexture(texture, null, pixels, width * 4)) {
-    throw new Error(`SDL_UpdateTexture: ${sdlRaw.SDL_GetError()}`);
+  if (!sdl.SDL_UpdateTexture({ texture, rect: null, pixels, pitch: width * 4 })) {
+    throw new Error(`SDL_UpdateTexture: ${sdl.SDL_GetError()}`);
   }
 
-  sdlRaw.SDL_SetTextureBlendMode(texture, SdlDefines.SDL_BLENDMODE_BLEND);
+  sdl.SDL_SetTextureBlendMode({ texture, blendMode: SdlDefines.SDL_BLENDMODE_BLEND });
 
   return texture;
 }
 
 export function destroyTexture(texture: TextureHandle): void {
-  sdlRaw.SDL_DestroyTexture(texture);
+  sdl.SDL_DestroyTexture({ texture });
 }

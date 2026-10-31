@@ -1,5 +1,5 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
-import { SdlDefines, sdlRaw } from "@tsgui/bindings";
+import { SdlDefines, sdl } from "@tsgui/bindings";
 import type {
   Rect,
   RectOptions,
@@ -37,7 +37,7 @@ export class GpuRenderer {
   private batchTexture: TextureHandle | null = null;
 
   /** Scissor stack; empty = no clip. Applied at batch flush boundaries. */
-  private readonly clipStack: Array<{ x: number; y: number; w: number; h: number }> = [];
+  private readonly clipStack: Array<Rect> = [];
   private readonly clipData = new Int32Array(4);
 
   clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
@@ -45,29 +45,29 @@ export class GpuRenderer {
   constructor(window: WindowHandle, options: RendererOptions = {}) {
     // Prefer the GPU backend; fall back to SDL's default choice. Tests pin
     // `driver` (e.g. "software") for deterministic pixel readback.
-    const props = sdlRaw.SDL_CreateProperties();
-    sdlRaw.SDL_SetStringProperty(props, PROP_RENDERER_CREATE_NAME, options.driver ?? "gpu");
-    sdlRaw.SDL_SetPointerProperty(props, PROP_RENDERER_CREATE_WINDOW, window);
-    const renderer = sdlRaw.SDL_CreateRendererWithProperties(props);
-    sdlRaw.SDL_DestroyProperties(props);
+    const props = sdl.SDL_CreateProperties();
+    sdl.SDL_SetStringProperty({ props, name: PROP_RENDERER_CREATE_NAME, value: options.driver ?? "gpu" });
+    sdl.SDL_SetPointerProperty({ props, name: PROP_RENDERER_CREATE_WINDOW, value: window });
+    const renderer = sdl.SDL_CreateRendererWithProperties({ props });
+    sdl.SDL_DestroyProperties({ props });
 
     if (renderer) {
       this.renderer = renderer;
     } else {
       // SDL_GetError is sticky from the props attempt — clear so the throw
       // names the fallback's own failure.
-      sdlRaw.SDL_ClearError();
-      const fallback = sdlRaw.SDL_CreateRenderer(window, null);
+      sdl.SDL_ClearError();
+      const fallback = sdl.SDL_CreateRenderer({ window, name: null });
       if (!fallback) {
-        throw new Error(`GpuRenderer: ${sdlRaw.SDL_GetError()}`);
+        throw new Error(`GpuRenderer: ${sdl.SDL_GetError()}`);
       }
       this.renderer = fallback;
     }
-    this.name = sdlRaw.SDL_GetRendererName(this.renderer) ?? "";
-    sdlRaw.SDL_SetRenderDrawBlendMode(
-      this.renderer,
-      SdlDefines.SDL_BLENDMODE_BLEND
-    );
+    this.name = sdl.SDL_GetRendererName({ renderer: this.renderer }) ?? "";
+    sdl.SDL_SetRenderDrawBlendMode({
+      renderer: this.renderer,
+      blendMode: SdlDefines.SDL_BLENDMODE_BLEND,
+    });
 
     this.vertexData = new Uint8Array(INITIAL_VERTICES * BYTES_PER_VERTEX);
     this.vertexF32 = new Float32Array(this.vertexData.buffer);
@@ -83,9 +83,9 @@ export class GpuRenderer {
     this.indexCount = 0;
     this.batchTexture = null;
     const c = this.clearColor;
-    sdlRaw.SDL_SetRenderDrawColor(this.renderer, c.r, c.g, c.b, c.a);
-    if (!sdlRaw.SDL_RenderClear(this.renderer)) {
-      throw new Error(`SDL_RenderClear: ${sdlRaw.SDL_GetError()}`);
+    sdl.SDL_SetRenderDrawColor({ renderer: this.renderer, r: c.r, g: c.g, b: c.b, a: c.a });
+    if (!sdl.SDL_RenderClear({ renderer: this.renderer })) {
+      throw new Error(`SDL_RenderClear: ${sdl.SDL_GetError()}`);
     }
   }
 
@@ -96,11 +96,11 @@ export class GpuRenderer {
       this.clipData[1] = top.y;
       this.clipData[2] = top.w;
       this.clipData[3] = top.h;
-      if (!sdlRaw.SDL_SetRenderClipRect(this.renderer, this.clipData)) {
-        throw new Error(`SDL_SetRenderClipRect: ${sdlRaw.SDL_GetError()}`);
+      if (!sdl.SDL_SetRenderClipRect({ renderer: this.renderer, rect: this.clipData })) {
+        throw new Error(`SDL_SetRenderClipRect: ${sdl.SDL_GetError()}`);
       }
-    } else if (!sdlRaw.SDL_SetRenderClipRect(this.renderer, null)) {
-      throw new Error(`SDL_SetRenderClipRect: ${sdlRaw.SDL_GetError()}`);
+    } else if (!sdl.SDL_SetRenderClipRect({ renderer: this.renderer, rect: null })) {
+      throw new Error(`SDL_SetRenderClipRect: ${sdl.SDL_GetError()}`);
     }
   }
 
@@ -277,16 +277,16 @@ export class GpuRenderer {
 
   private flushBatch(): void {
     if (this.indexCount === 0) return;
-    const ok = sdlRaw.SDL_RenderGeometry(
-      this.renderer,
-      this.batchTexture,
-      new Uint8Array(this.vertexData.buffer, 0, this.vertexCount * BYTES_PER_VERTEX),
-      this.vertexCount,
-      new Int32Array(this.indexData.buffer, 0, this.indexCount),
-      this.indexCount
-    );
+    const ok = sdl.SDL_RenderGeometry({
+      renderer: this.renderer,
+      texture: this.batchTexture,
+      vertices: new Uint8Array(this.vertexData.buffer, 0, this.vertexCount * BYTES_PER_VERTEX),
+      num_vertices: this.vertexCount,
+      indices: new Int32Array(this.indexData.buffer, 0, this.indexCount),
+      num_indices: this.indexCount,
+    });
     if (!ok) {
-      throw new Error(`SDL_RenderGeometry: ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`SDL_RenderGeometry: ${sdl.SDL_GetError()}`);
     }
     // The batch is sent — restart accumulation, or the next flush re-renders
     // every earlier quad under the newer batch's texture.
@@ -303,12 +303,12 @@ export class GpuRenderer {
   /** Flush remaining batches and present the frame. */
   present(): void {
     this.flushBatch();
-    if (!sdlRaw.SDL_RenderPresent(this.renderer)) {
-      throw new Error(`SDL_RenderPresent: ${sdlRaw.SDL_GetError()}`);
+    if (!sdl.SDL_RenderPresent({ renderer: this.renderer })) {
+      throw new Error(`SDL_RenderPresent: ${sdl.SDL_GetError()}`);
     }
   }
 
   destroy(): void {
-    sdlRaw.SDL_DestroyRenderer(this.renderer);
+    sdl.SDL_DestroyRenderer({ renderer: this.renderer });
   }
 }

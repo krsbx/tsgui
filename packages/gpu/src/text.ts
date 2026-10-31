@@ -2,7 +2,7 @@
  * Text via the SDL3_ttf tier — white glyph runs rendered to surfaces,
  * uploaded as textures, tinted at draw time, cached per string.
  */
-import { sdlRaw, ttf, type TtfExtensionSymbols } from "@tsgui/bindings";
+import { sdl, ttf, type TtfExtensionSymbols } from "@tsgui/bindings";
 import type {
   RendererHandle,
   TextureDrawOptions,
@@ -36,11 +36,11 @@ export class TtfFont {
     pt: number
   ) {
     if (!ttf.TTF_Init()) {
-      throw new Error(`TTF_Init: ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`TTF_Init: ${sdl.SDL_GetError()}`);
     }
     const font = ttf.TTF_OpenFont({ file: fontPath, ptsize: pt });
     if (!font) {
-      throw new Error(`TTF_OpenFont(${fontPath}): ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`TTF_OpenFont(${fontPath}): ${sdl.SDL_GetError()}`);
     }
     this.font = font;
     this.renderer = renderer;
@@ -51,7 +51,7 @@ export class TtfFont {
     const w = new Int32Array(1);
     const h = new Int32Array(1);
     if (!ttf.TTF_GetStringSize({ font: this.font, text, length: 0, w, h })) {
-      throw new Error(`TTF_GetStringSize: ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`TTF_GetStringSize: ${sdl.SDL_GetError()}`);
     }
     return { w: w[0]!, h: h[0]! };
   }
@@ -82,12 +82,12 @@ export class TtfFont {
       color: 0xffffffff,
     });
     if (!surface) {
-      throw new Error(`TTF_RenderText_Blended: ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`TTF_RenderText_Blended: ${sdl.SDL_GetError()}`);
     }
-    const texture = sdlRaw.SDL_CreateTextureFromSurface(this.renderer, surface);
-    sdlRaw.SDL_DestroySurface(surface);
+    const texture = sdl.SDL_CreateTextureFromSurface({ renderer: this.renderer, surface });
+    sdl.SDL_DestroySurface({ surface });
     if (!texture) {
-      throw new Error(`SDL_CreateTextureFromSurface: ${sdlRaw.SDL_GetError()}`);
+      throw new Error(`SDL_CreateTextureFromSurface: ${sdl.SDL_GetError()}`);
     }
     const { w, h } = this.measure(text);
     return { texture, w, h };
@@ -95,7 +95,7 @@ export class TtfFont {
 
   destroy(): void {
     for (const run of this.cache.values()) {
-      sdlRaw.SDL_DestroyTexture(run.texture);
+      sdl.SDL_DestroyTexture({ texture: run.texture });
     }
     this.cache.clear();
     ttf.TTF_CloseFont({ font: this.font });

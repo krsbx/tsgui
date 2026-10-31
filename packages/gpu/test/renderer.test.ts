@@ -8,7 +8,7 @@
  * Runs against the software driver so readback is deterministic; skipped
  * when there is no display (headless CI).
  */
-import { PixelFormat, sdl, SdlDefines, sdlRaw } from "@tsgui/bindings";
+import { PixelFormat, sdl, SdlDefines } from "@tsgui/bindings";
 import { afterAll, describe, expect, test } from "bun:test";
 import {
   createTextureFromPixels,
@@ -30,7 +30,7 @@ const window = initOk
   : null;
 
 type ReadbackSurface = NonNullable<
-  ReturnType<typeof sdlRaw.SDL_RenderReadPixels>
+  ReturnType<typeof sdl.SDL_RenderReadPixels>
 >;
 
 function readPixel(
@@ -42,9 +42,9 @@ function readPixel(
   const g = new Float32Array(1);
   const b = new Float32Array(1);
   const a = new Float32Array(1);
-  if (!sdlRaw.SDL_ReadSurfacePixelFloat(surface, x, y, r, g, b, a)) {
+  if (!sdl.SDL_ReadSurfacePixelFloat({ surface, x, y, r, g, b, a })) {
     throw new Error(
-      `SDL_ReadSurfacePixelFloat(${x},${y}): ${sdlRaw.SDL_GetError()}`
+      `SDL_ReadSurfacePixelFloat(${x},${y}): ${sdl.SDL_GetError()}`
     );
   }
   return [r[0]!, g[0]!, b[0]!, a[0]!];
@@ -53,9 +53,9 @@ function readPixel(
 function readback(gpu: GpuRenderer): ReadbackSurface {
   gpu.flush();
   const rect = new Int32Array([0, 0, 64, 64]);
-  const surface = sdlRaw.SDL_RenderReadPixels(gpu.renderer, rect);
+  const surface = sdl.SDL_RenderReadPixels({ renderer: gpu.renderer, rect });
   if (!surface)
-    throw new Error(`SDL_RenderReadPixels: ${sdlRaw.SDL_GetError()}`);
+    throw new Error(`SDL_RenderReadPixels: ${sdl.SDL_GetError()}`);
   return surface;
 }
 
