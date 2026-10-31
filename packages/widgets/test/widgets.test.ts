@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
-import { label, paintTree, Reconciler, StateStore, view } from "../src/index.ts";
+import { Label, paintTree, Reconciler, StateStore, View } from "../src/index.ts";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
 
 // ————— reconciler —————
@@ -11,13 +11,13 @@ describe("Reconciler", () => {
     const reconciler = new Reconciler(new StateStore());
 
     const frame1 = reconciler.reconcile(
-      view({ children: [label({ text: "a" }), label({ text: "b" })] })
+      View({ children: [Label({ text: "a" }), Label({ text: "b" })] })
     );
     const idRoot = frame1.stableId;
     const idChild = frame1.children[0]!.stableId;
 
     const frame2 = reconciler.reconcile(
-      view({ children: [label({ text: "a2" }), label({ text: "b2" })] })
+      View({ children: [Label({ text: "a2" }), Label({ text: "b2" })] })
     );
 
     expect(reconciler.changed).toBe(true);
@@ -27,7 +27,7 @@ describe("Reconciler", () => {
 
   test("identity short-circuit skips diffing for static trees", () => {
     const reconciler = new Reconciler(new StateStore());
-    const tree = view({ children: [label({ text: "static" })] });
+    const tree = View({ children: [Label({ text: "static" })] });
 
     reconciler.reconcile(tree);
     reconciler.reconcile(tree); // same reference — free
@@ -39,10 +39,10 @@ describe("Reconciler", () => {
     const reconciler = new Reconciler(new StateStore());
 
     const frame1 = reconciler.reconcile(
-      view({
+      View({
         children: [
-          { ...label({ text: "one" }), key: "one" },
-          { ...label({ text: "two" }), key: "two" },
+          { ...Label({ text: "one" }), key: "one" },
+          { ...Label({ text: "two" }), key: "two" },
         ],
       })
     );
@@ -50,10 +50,10 @@ describe("Reconciler", () => {
     const idTwo = frame1.children[1]!.stableId;
 
     const frame2 = reconciler.reconcile(
-      view({
+      View({
         children: [
-          { ...label({ text: "two" }), key: "two" },
-          { ...label({ text: "one" }), key: "one" },
+          { ...Label({ text: "two" }), key: "two" },
+          { ...Label({ text: "one" }), key: "one" },
         ],
       })
     );
@@ -69,7 +69,7 @@ describe("Reconciler", () => {
 
     const events: string[] = [];
     const frame1 = reconciler.reconcile(
-      view({
+      View({
         children: [
           {
             type: "View",
@@ -83,7 +83,7 @@ describe("Reconciler", () => {
     const childId = frame1.children[0]!.stableId;
 
     store.setState({ stableId: childId, value: { n: 1 } });
-    reconciler.reconcile(view({ children: [] }));
+    reconciler.reconcile(View({ children: [] }));
 
     expect(events).toEqual(["unmounted"]);
     // state was destroyed: a fresh stateFor returns the new initial
@@ -134,11 +134,11 @@ describe("pipeline", () => {
       getImageSize: () => null,
     };
 
-    const tree = view({
+    const tree = View({
       style: { width: 300, height: 200, flexDirection: FlexDirection.Row },
       children: [
-        label({ text: "hello", style: { backgroundColor: "#334455" } }),
-        view({ style: { width: 100, height: 50, backgroundColor: "#cc8844" } }),
+        Label({ text: "hello", style: { backgroundColor: "#334455" } }),
+        View({ style: { width: 100, height: 50, backgroundColor: "#cc8844" } }),
       ],
     });
 
