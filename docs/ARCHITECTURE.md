@@ -7,35 +7,39 @@ Bun workspaces (`packages/*`), one package per layer:
 ```
 packages/
   bindings/     @tsgui/bindings   Native entry points (see FFI.md). The ONLY
-                                  package allowed to load native code.
-  platform/     @tsgui/platform   Window/input/audio lifecycle over bindings.
-  gpu/          @tsgui/gpu        Frame encoder: widget-agnostic geometry →
-                                  typed-array vertex/index buffers.
+                                  package allowed to dlopen native code.
+  gpu/          @tsgui/gpu        Batched renderer: geometry → SDL_Vertex
+                                  buffers → SDL_RenderGeometry (see RENDERING.md).
   layout/       @tsgui/layout     Flexbox engine. Pure TS.
-  widgets/      @tsgui/widgets    Widget set, reconciler, state, animation.
-  devtools/     @tsgui/devtools   Inspector server + headless test harness.
-examples/                         Sample apps.
+  widgets/      @tsgui/widgets    Widget set, reconciler, dispatchers,
+                                  headless harness. Pure TS at runtime.
+examples/                         Sample apps (hello, showcase, gallery).
 tools/codegen/                    Clang AST → FFI tables (bun:ffi / node:ffi)
                                   + constants, from real C headers
                                   (parser ported from flying-pan).
 docs/                             These documents.
 ```
 
+Planned packages (see ROADMAP.md): `@tsgui/platform` (window/input/audio
+lifecycle), `@tsgui/devtools` (inspector server, phase 5).
+
 ## The layering rule
 
-**`layout`, `gpu`, `widgets`, and `devtools` must never import `@tsgui/bindings`
-(or anything that does, transitively, except through `platform`).**
+**`layout` is pure TypeScript** — no FFI, no native code, no window.
+**`widgets` never imports `@tsgui/bindings`** — its SDL-adjacent needs go
+through `@tsgui/gpu` or injectable seams (clipboard). `bindings` is the only
+package that dlopens native code.
 
 Concretely:
 
 | Package | May import | Never imports |
 |---|---|---|
-| `bindings` | generated N-API addon (dlopen tables: escape hatches) | anything else in the repo |
-| `platform` | `bindings` | `gpu`, `layout`, `widgets` |
-| `gpu` | nothing (pure TS) | everything |
+| `bindings` | `bun:ffi` / `node:ffi` dlopen tables + runtime split (escape hatch: `sdlRaw`) | anything else in the repo |
+| `gpu` | `bindings` (SDL calls) | `layout`, `widgets` |
 | `layout` | nothing (pure TS) | everything |
-| `widgets` | `layout`, `gpu`, (types of) `platform` | `bindings` |
-| `devtools` | any package (it's tooling) | — but is optional at runtime |
+| `widgets` | `layout`, `@tsgui/gpu` types, injectable seams (clipboard) | `bindings` |
+| `platform` (planned) | `bindings` | `gpu`, `layout`, `widgets` |
+| `devtools` (planned) | any package (it's tooling) | — but is optional at runtime |
 
 This is enforced by an ESLint `no-restricted-imports` rule per package, not by
 convention. The payoff: `bun test packages/layout` runs the entire flexbox
@@ -44,42 +48,46 @@ flying-pan lacks and it is the foundation of headless snapshot testing.
 
 ## Frame loop
 
-JS-driven (same shape as flying-pan's, proven on macOS; SDL3 likewise requires
-the main thread for video/events):
+JS-driven; SDL3 requires the main thread for video/events. The gallery
+(`examples/gallery.ts`) is the reference implementation:
 
 ```
-while (!window.shouldClose):
-  events  = platform.pollEvents()        # one FFI call → packed event batch
-  tree    = userRebuild()                # declarative rebuild (or manual API)
-  reconciler.diff(prev, tree)            # stableIds, state preservation
-  layout = flexbox.measure(tree)         # pure TS → LayoutNode tree
-  frame  = encoder.encode(layout, state) # pure TS → vertex/index ArrayBuffers
-  platform.render(frame)                 # ONE FFI call: upload + draw + swap
-  animation.tick()
-  await yield()                          # setImmediate — unblock JS event loop
+while (running):
+  while (SDL_PollEvent):               # decode SDL events → typed events
+    pointerEvents / keyboardEvents     # (down/up/move, keys, chars)
+  if (dirty): tree = rebuild()         # declarative rebuild on state change
+  reconciled = reconciler.diff(tree)   # stableIds, identity short-circuit
+  root = layoutFlex(reconciled)        # pure TS → LayoutNode tree
+  pointer.dispatch(events)             # hover/press/click + drag capture
+  focus.dispatch(events)               # focus, key/char routing
+  paintTree(ctx, root)                 # queues batches into the renderer
+  gpu.present()
 ```
 
-Per frame: ~3–6 FFI calls total (poll, render, occasional texture uploads),
-regardless of how many widgets are on screen. In flying-pan the count scales
-with widget count; here it is constant.
+Per frame the FFI count is constant **per texture batch** (see
+RENDERING.md) — it does not scale with widget count.
+
+### Dispatchers
+
+Pointer (hover/press/click/drag), focus (click-to-focus, tab cycling,
+key/char routing) and — planned — scroll are event-fed dispatchers in
+`widgets/src/interactions/`: the app decodes SDL events into typed events
+and feeds them per frame. Pure TypeScript — headless-testable, never touch
+SDL themselves.
 
 ### GC discipline
 
-The frame buffers are **preallocated and reused** (one `ArrayBuffer` per
-window, ring-allocated text quads). The hot path does zero allocation. GC
-pauses at 60fps are invisible in dev and painful in production — this removes
-the main source.
+Vertex/index buffers are **preallocated and reused** (grown by doubling);
+text runs are cached per unique string as GPU textures. Steady-state
+per-frame allocation is the batch views at flush only.
 
 ## Threading model
 
-- The UI loop runs on the main thread (JS thread) — required by macOS AppKit
-  and simplest everywhere else.
-- Heavy non-UI work (file IO, network) stays in normal JS async land; worker
-  threads may call into the native layer for non-window things (audio mixing,
-  image decode) because those don't touch AppKit/GLFW.
-- The native layer is single-threaded by contract, except audio which owns its
-  own callback thread inside C (SDL3 audio stream model) and never calls back
-  into JS from it.
+- The UI loop runs on the main thread (JS thread) — required by macOS and
+  simplest everywhere else.
+- Heavy non-UI work (file IO, network) stays in normal JS async land.
+- SDL owns its internal threads (audio callback, etc.) and never calls back
+  into JS from them; everything above the bindings is single-threaded JS.
 
 ## Design decisions carried over from flying-pan
 

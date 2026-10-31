@@ -1,117 +1,142 @@
 # Rendering
 
-## Model: retained tree in, vertex buffer out
+## Model: batched SDL_RenderGeometry — JS writes vertices, SDL draws
 
-The renderer is a **frame encoder**, not a draw-call walker. Everything JS
-knows how to draw becomes typed-array writes; the GPU work is one FFI call.
+The renderer (`GpuRenderer` in `@tsgui/gpu`) is a **geometry batcher** over
+SDL3's `SDL_Renderer` GPU backend. JS writes typed-array vertices; the GPU
+work is one `SDL_RenderGeometry` call per texture batch.
 
 ```
-LayoutNode tree ──encode──▶ [Vertex; N] + [u32; M] + [Batch; k]
-                                   │  preallocated ArrayBuffers, reused
-                                   ▼
-                    tsgui_window_render(h, verts, n, idxs, m, batches, k)
-                                   │
-                                   ▼
-        native (SDL_GPU): transfer-buffer upload → copy to GPU vertex/index
-        buffers → command buffer → render pass → k draw calls → submit+present
+paint walk ──queue──▶ [vertexData: Uint8Array]  +  [indexData: Int32Array]
+                          │ preallocated, reused, grown by doubling
+                          ▼
+       flushBatch() ──▶ SDL_RenderGeometry(renderer, batchTexture,
+                                           verts, n, idxs, m)
+       present()   ──▶ SDL_RenderPresent
 ```
 
-This replaces flying-pan's per-primitive `glBegin/glEnd` (the throughput
-ceiling called out in its own docs). Throughput stops depending on widget
-count and starts depending only on vertex count.
+Per frame the FFI count is constant **per texture batch**, not per
+primitive: `SetRenderDrawColor`, `RenderClear`, one `RenderGeometry` per
+batch, `RenderPresent` — plus event polling. Widgets only change the batch
+count (one per distinct texture); untextured geometry shares one batch.
 
-## GPU backend
+## Backend
 
-SDL_GPU (see PLATFORM.md) with one pipeline set — solid / atlas / SDF
-dispatched by the vertex `flags` byte. Shaders are authored in HLSL and
-cross-compiled offline with SDL_shadercross to SPIR-V / DXIL / MSL; compiled
-blobs are checked in and loaded at init. Backends: Metal (macOS), D3D12
-(Windows), Vulkan (Linux). No GL fallback — v1 desktop targets only.
+SDL_Renderer with the **GPU driver** (`SDL.renderer.create.name = "gpu"`,
+SDL's Metal/D3D12/Vulkan abstraction), created through the properties API —
+`SDL.renderer.create.window` must be set or the attempt silently fails and
+the fallback picks SDL's default driver. `RendererOptions.driver` pins a
+specific backend; tests pin `"software"` for deterministic pixel readback.
 
 ## Vertex format
 
-16 bytes, packed, interleaved — chosen so one shader handles everything v1:
+SDL3's `SDL_Vertex` — 32 bytes, written through a `Float32Array` view:
 
 ```c
-struct Vertex {        // 16 bytes
-  float x, y;          // position, px, y-down, window space
-  float u, v;          // uv → font atlas / image / SDF mask
-  uint8 r, g, b, a;    // color, sRGB assumed
-  uint8 flags;         // kind: solid | image | text | sdf-rect
-  uint8 pad[3];
+struct SDL_Vertex {     // 32 bytes
+  float x, y;           // position, px, y-down, window space
+  SDL_FColor color;     // r,g,b,a — packed u32 decoded to 4 floats
+  float u, v;           // uv → texture; solid fills write (0,0)
 };
 ```
 
-`(u,v)` is overloaded by `kind`: solid ignores it, image/text sample the
-atlas, `sdf-rect` feeds the rounded-rect SDF (corner radius, border width and
-shadow params ride in a small per-batch uniform or a second attribute stream).
+The SDL2-era 20-byte layout with a packed-u32 color draws *nothing* here —
+SDL3 changed the struct and `SDL_RenderGeometry` takes a bare pointer, so
+the mismatch fails silently (see CONVENTIONS: verify pixels, not return
+codes). Shapes are **CPU-tessellated** into this format:
 
-## Shapes: SDF, not tessellation
+| Primitive | Tessellation |
+|---|---|
+| `fillRect` | 4 verts, 2 tris |
+| `fillRoundedRect` | center fan, 8 segments/corner |
+| `fillArc` / `fillRing` | center fan / quad strip, density per full circle |
+| `drawTexture` | 4 verts, uv 0..1, white tint by default |
 
-Rounded rects, borders, shadows — the 95% case of widget chrome — are drawn
-as one quad each through an **SDF fragment shader** (the classic single
-rounded-box SDF; borders/shadows are derived from the same distance value).
-Consequences:
+## Batch discipline
 
-- one quad + one shader per decorated box, versus flying-pan's
-  border-as-4-quads + tessellated corner arcs;
-- antialiasing for free from the SDF, no MSAA dependency;
-- the whole earclip/flatten code path leaves the hot path.
+`batchTexture` (null = untextured) decides where a primitive lands:
 
-**Tessellation stays** — as flying-pan's `Path2D → flatten → earclip →
-TriangleList` pipeline (it's pure TS and good) — but only for arbitrary
-vector paths (canvas `fill/stroke`, future SVG shapes). Those feed the same
-vertex buffer as regular geometry. Both paths converge on one encoder.
-
-## Fonts
-
-Same as flying-pan, kept: stb_truetype bakes a **glyph atlas once per
-(font, size, weight)**; text emits quads referencing the atlas. Atlas grows
-by re-bake on demand; eviction is LRU (flying-pan has an LRU utility
-already). No per-frame native work beyond the quads themselves.
-
-Sub-pixel positioning and hinting stay simple in v1 (grayscale AA, no LCD
-subpixel rendering) — revisit with the text-shaping non-goal.
+- untextured draws (`fillRect`, `fillRoundedRect`, `fillArc`, `fillRing`)
+  flush an open **textured** batch first — a quad must never sample the
+  previous batch's texture;
+- `drawTexture` flushes on **any** texture change, including
+  untextured → textured;
+- `flushBatch()` resets the accumulation — without the reset, every later
+  flush re-renders earlier quads under the newer batch's texture (the
+  "tiled glyph noise" regression; guarded by pixel tests).
 
 ## Clipping
 
-Scissor-rect clipping (as in flying-pan), but expressed through the batch
-list: each `Batch` carries its scissor rect; native applies
-`SDL_SetGPUScissor` on batch switch. Nested clips intersect during encode
-(pure TS, testable) so the GPU sees a flat batch list — no stack discipline
-required on the native side.
+`SDL_SetRenderClipRect` push/pop around batch flush boundaries
+(`pushClip`/`popClip` flush first — a clip change is a batch change).
+`pushClip`/`popClip` are optional on the structural `Painter` surface;
+the software-driver pixel tests exercise readback without needing them.
 
-## Canvas 2D / SVG — what actually crosses the FFI
+## Decoration layers
 
-Premise: "if we use FFI most of the time, SVG/canvas rendering should also
-use FFI." With this architecture that happens **automatically**, because
-"rendering" *is* "writing vertices":
+Widget chrome is painted per widget from `paint/` modules, in
+flying-pan's order: **shadow → border → background → widget content →
+children**:
 
-- `CanvasContext` (the browser-compatible 2D API) records path/fill/stroke
-  ops and resolves them against the same encoder — `fill()` emits either a
-  solid-quad batch or a tessellated triangle batch. Zero extra FFI; canvas
-  output is just more vertices in the same buffer.
-- SVG files are parsed in **TypeScript** (own parser or a small port; XML +
-  path-data is plain data, and TS parsing keeps it unit-testable and
-  debuggable — the same reason the layout engine stays in TS). Parsed SVG
-  becomes `Path2D` + paint, which reuses everything above.
-- What *does* go native, when it's worth it:
-  - **Image decode** — the `image` tier (SDL3_image, already bound) covers
-    PNG/JPEG/WebP decode natively; no stb needed.
-  - **Tessellation** stays in TypeScript (flying-pan's Path2D → flatten →
-    earclip port). It is CPU bulk work, but moving it native would mean
-    reintroducing a compiled artifact for something that is testable and
-    debuggable in TS — revisit only if profiling demands it.
+- `shadow.ts` — stacked rounded-rect falloff layers (blur lands with the
+  SDF spike);
+- `shape.ts` — `fillShape` / `paintBorder` / `paintBackground` primitives
+  (border ring under background fill: net stroke = borderWidth/2);
+- `fill.ts` + `color-stops.ts` — value fills, continuous and stepped
+  (segments + gaps), with threshold color stops;
+- per-widget painters (`progress/bar`, `circular`, `slider-bar`,
+  `slider-marks`, `slider-handle`, `meter`, `checkbox`, `toggle`, `radio`,
+  `text-input`, `label`) — one file per concern.
 
-So the rule is: **geometry in TS, pixels via native, vertices across the
-boundary** — and nothing above the encoder can tell the difference between a
-rect, a canvas path, or an SVG shape.
+## Text
 
-## Perf targets (phase 1 exit criteria)
+The SDL3_ttf tier: white glyph runs rendered per unique string
+(`TTF_RenderText_Blended`, length 0 = NUL-terminated), uploaded as
+textures, tinted at draw, cached per string in the `TtfFont`. The
+`TextPainter` surface adds optional `measure` (backed by
+`TTF_GetStringSize`) which inline value labels and the text-input caret
+math use. Caret blink waits for the AnimationManager (needs a clock).
 
-| Scenario | Target |
+## Text input
+
+`TextInput`'s painter draws the live editing state
+(`peekEditingState` — no controlled reconciliation; see the state module)
+clipped to the field: placeholder when empty, selection highlight, text,
+static caret. Focus comes from the focus dispatcher through
+`PaintContext.statesOf`.
+
+## Images
+
+The SDL3_image tier: `IMG_LoadTexture` for files, runtime PNG via
+`SDL_CreateSurface` + `SDL_SavePNG` → `IMG_LoadTexture` (the examples
+generate their assets this way — no checked-in binaries).
+
+## Pixel guard
+
+Renderer behavior is pinned by **software-driver readback tests**
+(`SDL_RenderReadPixels` + `SDL_ReadSurfacePixelFloat` on the software
+driver, skipped on headless CI): red square, rounded corners, ring/pie
+arcs, multi-batch isolation, and the text/selection/caret paints. The
+op-count selftests cannot see pixels — two shipped regressions were
+invisible to them.
+
+## SDF spike (parked)
+
+SDF rounded-rect/border/shadow via `SDL_SetGPURenderState` replaces the
+stacked-layer shadows and CPU tessellation when the SDL_shadercross
+toolchain is available — see the Phase 2.5 section in ROADMAP.md.
+Everything needed is already bound.
+
+## Canvas 2D / SVG (phase 5)
+
+`CanvasContext` and the Path2D → tessellation port land with devtools
+(phase 5). They feed the same vertex batches — geometry in TS, pixels via
+SDL, vertices across the boundary.
+
+## Perf (measured, Apple M-series)
+
+| Scenario | Measured |
 |---|---|
-| 10,000 solid rects, single window | 60fps, < 2ms JS encode |
-| 2,000 decorated boxes (SDF) + 500 text spans | 60fps |
-| FFI calls per frame | ≤ 6, constant |
-| JS allocations per frame | 0 steady-state |
+| 10,000 solid rects + 1 textured quad | ~76–120 fps (GPU backend), ~2,000+ on other drivers |
+| Gallery (48 nodes, 6 textures) | 240-frame selftest, both runtimes |
+| FFI calls per frame | constant per texture batch |

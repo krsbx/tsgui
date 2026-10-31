@@ -61,7 +61,7 @@ These are flying-pan semantics, preserved faithfully and codified in
 | `flow.ts` | Positions flow children along the main axis (justify/align/flex-grow), recursing via `layoutFlex` |
 | `wrap.ts` | Line breaking + per-line layout for `flexWrap: wrap` |
 | `absolute.ts` | `left`/`top`/`right`/`bottom` positioning against the padding box |
-| `measurement.ts` | One-pass child measurement (flow vs absolute + content-fit aggregates) + wrap measurement + justify calculation |
+| `measurement.ts` | Child measurement (flow vs absolute + content-fit aggregates) + wrap measurement + justify calculation. Auto-sized containers measure **recursively** — intrinsic size is bottom-up content size (web model), so nested auto containers never collapse |
 | `calculator.ts` | flex-grow distribution and flex-shrink |
 | `utility.ts` | Main-axis clamp + cross-axis fill, fused with totals accumulation |
 | `resolver.ts` | Per-widget intrinsic size: Label/Button via injected `measureText`, Image via props/injected metadata, default from style |

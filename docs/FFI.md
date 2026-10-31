@@ -49,6 +49,12 @@ Two surfaces per library, both convention-compliant:
   escape hatch for hot paths and toolkit internals; `@tsgui/gpu` uses it
   so the render path carries zero wrapper overhead. Both surfaces behave
   identically on Bun and Node (node loaders convert `'string'` returns).
+- **`readCString(pointer)`** — runtime-split helper (bun:ffi `CString` /
+  node:ffi `toString`) for `const char *` fields inside SDL *events*
+  (e.g. `SDL_EVENT_TEXT_INPUT.text`), which event structs carry as raw
+  addresses the wrapped tables can't convert. Note `sdlRaw` is for
+  bindings internals and hot paths only — toolkit code uses the wrapped
+  `sdl`/`ttf` object surface.
 
 **Result: 1378 functions across 4 libraries** — sdl 1087, image 102, ttf 100, mixer 89 — plus 101 enums and 267 numeric defines.
 
