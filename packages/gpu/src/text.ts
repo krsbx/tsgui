@@ -47,13 +47,13 @@ export class TtfFont {
   }
 
   /** Rendered size of a string at this font's size. */
-  measure(text: string): { w: number; h: number } {
+  measure(text: string): { width: number; height: number } {
     const w = new Int32Array(1);
     const h = new Int32Array(1);
     if (!ttf.TTF_GetStringSize({ font: this.font, text, length: 0, w, h })) {
       throw new Error(`TTF_GetStringSize: ${sdl.SDL_GetError()}`);
     }
-    return { w: w[0]!, h: h[0]! };
+    return { width: w[0]!, height: h[0]! };
   }
 
   /**
@@ -89,8 +89,8 @@ export class TtfFont {
     if (!texture) {
       throw new Error(`SDL_CreateTextureFromSurface: ${sdl.SDL_GetError()}`);
     }
-    const { w, h } = this.measure(text);
-    return { texture, w, h };
+    const measured = this.measure(text);
+    return { texture, w: measured.width, h: measured.height };
   }
 
   destroy(): void {

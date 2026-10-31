@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
-import type { RectOptions, TextureDrawOptions, TextDrawOptions } from "@tsgui/gpu";
+import type { ArcOptions, RectOptions, RingOptions, TextureDrawOptions, TextDrawOptions } from "@tsgui/gpu";
 import { Label, paintTree, Reconciler, StateStore, View } from "../src/index.ts";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
 
@@ -149,6 +149,8 @@ describe("pipeline", () => {
       fillRoundedRect: (o: RectOptions & { radius: number }) =>
         recorded.push({ op: "rrect", ...o }),
       drawTexture: (o: TextureDrawOptions) => recorded.push({ op: "tex", ...o }),
+      fillArc: (o: ArcOptions) => recorded.push({ op: "arc", ...o }),
+      fillRing: (o: RingOptions) => recorded.push({ op: "ring", ...o }),
     };
     const font = {
       draw: (_gpu: unknown, o: TextDrawOptions) => recorded.push({ op: "text", ...o }),
