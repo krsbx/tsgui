@@ -52,6 +52,7 @@ import {
   Reconciler,
   SliderBar,
   StateStore,
+  TextInput,
   Toggle,
   View,
 } from "@tsgui/widgets";
@@ -116,6 +117,7 @@ let wifi = true;
 let flavor = "mint";
 let volume = 65;
 let tone = 30;
+let name = "";
 let dirty = true;
 
 function buildTree(): ReconcilableWidget {
@@ -268,6 +270,26 @@ function buildTree(): ReconcilableWidget {
               tone = next;
               dirty = true;
             },
+          }),
+        ],
+      }),
+
+      // text input — focus via click, edit through the keyboard dispatch
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 12, alignItems: FlexAlign.Center },
+        children: [
+          TextInput({
+            value: name,
+            placeholder: "Type your name…",
+            style: { width: 220, height: 28 },
+            onChange: (next) => {
+              name = next;
+              dirty = true;
+            },
+          }),
+          Label({
+            text: name.length > 0 ? `hello, ${name}` : "hello, stranger",
+            style: { color: Palette.textMuted },
           }),
         ],
       }),

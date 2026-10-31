@@ -167,7 +167,7 @@ the dispatcher exists to replace):
 | 1 | `ProgressBar`, `CircularProgress`, `Meter` | paint only | ✅ Phase 3.5 (2026-10-31) |
 | 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | ✅ (2026-10-31) |
 | 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | ✅ (2026-10-31) |
-| 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | phase 4, last milestone |
+| 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | ✅ (2026-11-01) — clipboard wired via the injectable seam; vertical `TextArea` is a post-parity addition built on the same editing core |
 | 5 | `Canvas`, `Custom` painter | CanvasContext + Path2D/tessellation port | phase 5 |
 
 Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
