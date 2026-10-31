@@ -10,7 +10,7 @@ import {
   valueToRatio,
   WidgetType,
 } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import {
   HANDLE_SIZE,
@@ -89,19 +89,13 @@ export function SliderBar(props: SliderBarProps): ReconcilableWidget {
         backgroundColor: Palette.surfaceActive,
         borderRadius: TRACK_THICKNESS / 2,
         ...trackStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...trackStyle?._disabled,
-        },
+        _disabled: disabledStyle(trackStyle),
       },
       filledStyle: {
         backgroundColor: Palette.accent,
         borderRadius: TRACK_THICKNESS / 2,
         ...filledStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...filledStyle?._disabled,
-        },
+        _disabled: disabledStyle(filledStyle),
       },
       handleStyle: {
         backgroundColor: Palette.surface,
@@ -109,10 +103,7 @@ export function SliderBar(props: SliderBarProps): ReconcilableWidget {
         borderColor: Palette.border,
         borderRadius: HANDLE_SIZE / 2,
         ...handleStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...handleStyle?._disabled,
-        },
+        _disabled: disabledStyle(handleStyle),
       },
     },
     style: {
@@ -120,17 +111,11 @@ export function SliderBar(props: SliderBarProps): ReconcilableWidget {
       height: isHorizontal ? 24 : 200,
       // The control paints its own track — the box itself is hit space.
       backgroundColor: "transparent",
-      focusable: !props.disabled,
+      focusable: focusableWhen(props.disabled),
       pointerEvents: PointerEvents.Auto,
       ...style,
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers: {

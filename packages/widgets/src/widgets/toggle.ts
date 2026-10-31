@@ -3,7 +3,7 @@
  * contract as Checkbox; uncontrolled lands with the state milestone).
  */
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 import type {
   InteractionProps,
@@ -42,10 +42,7 @@ export function Toggle(props: ToggleProps): ReconcilableWidget {
       knobStyle: {
         backgroundColor: Palette.surface,
         ...knobStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...knobStyle?._disabled,
-        },
+        _disabled: disabledStyle(knobStyle),
       },
     },
     style: {
@@ -55,21 +52,15 @@ export function Toggle(props: ToggleProps): ReconcilableWidget {
       borderWidth: Metrics.borderWidth,
       borderColor: Palette.border,
       backgroundColor: Palette.surfaceActive,
-      focusable: !disabled,
+      focusable: focusableWhen(disabled),
       ...style,
       _checked: {
         backgroundColor: Palette.accent,
         borderColor: Palette.accent,
         ...style?._checked,
       },
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers: {

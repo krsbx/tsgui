@@ -7,7 +7,7 @@
  * milestone.
  */
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import {
   backspace,
@@ -170,20 +170,14 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
       placeholderColor: Palette.textMuted,
       caretColor: Palette.text,
       selectionColor: Palette.selection,
-      focusable: !disabled,
+      focusable: focusableWhen(disabled),
       ...style,
       _hover: {
         backgroundColor: Palette.surfaceHover,
         ...style?._hover,
       },
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers: {

@@ -4,7 +4,7 @@
  * lands with the state foundation milestone.
  */
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 import type {
   InteractionProps,
@@ -47,10 +47,7 @@ export function Checkbox(props: CheckboxProps): ReconcilableWidget {
       tickStyle: {
         backgroundColor: Palette.textOnAccent,
         ...tickStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...tickStyle?._disabled,
-        },
+        _disabled: disabledStyle(tickStyle),
       },
     },
     style: {
@@ -60,21 +57,15 @@ export function Checkbox(props: CheckboxProps): ReconcilableWidget {
       borderWidth: Metrics.borderWidth,
       borderColor: Palette.border,
       backgroundColor: Palette.surface,
-      focusable: !disabled,
+      focusable: focusableWhen(disabled),
       ...style,
       _checked: {
         borderColor: Palette.accent,
         backgroundColor: Palette.accent,
         ...style?._checked,
       },
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers: {

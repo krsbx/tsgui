@@ -6,7 +6,7 @@
  */
 import { clamp, type LayoutNode } from "@tsgui/layout";
 import { PointerEvents, WidgetType } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import {
   DEFAULT_CIRCULAR_SIZE,
@@ -88,18 +88,12 @@ export function CircularSlider(props: CircularSliderProps): ReconcilableWidget {
       trackStyle: {
         backgroundColor: Palette.surfaceActive,
         ...trackStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...trackStyle?._disabled,
-        },
+        _disabled: disabledStyle(trackStyle),
       },
       filledStyle: {
         backgroundColor: Palette.accent,
         ...filledStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...filledStyle?._disabled,
-        },
+        _disabled: disabledStyle(filledStyle),
       },
       handleStyle: {
         backgroundColor: Palette.surface,
@@ -107,10 +101,7 @@ export function CircularSlider(props: CircularSliderProps): ReconcilableWidget {
         borderColor: Palette.border,
         borderRadius: HANDLE_SIZE / 2,
         ...handleStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...handleStyle?._disabled,
-        },
+        _disabled: disabledStyle(handleStyle),
       },
     },
     style: {
@@ -118,17 +109,11 @@ export function CircularSlider(props: CircularSliderProps): ReconcilableWidget {
       height: size,
       // The control paints its own ring — the box is hit space only.
       backgroundColor: "transparent",
-      focusable: !props.disabled,
+      focusable: focusableWhen(props.disabled),
       pointerEvents: PointerEvents.Auto,
       ...style,
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers: {

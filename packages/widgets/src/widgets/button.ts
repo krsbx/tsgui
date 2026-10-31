@@ -4,7 +4,13 @@
  */
 import { WidgetType } from "@tsgui/layout";
 import type { ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import {
+  disabledStyle,
+  focusStyle,
+  focusableWhen,
+  Metrics,
+  Palette,
+} from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
 
@@ -29,26 +35,19 @@ export function Button(props: ButtonProps): ReconcilableWidget {
       borderWidth: Metrics.borderWidth,
       borderColor: Palette.border,
       backgroundColor: Palette.surface,
-      focusable: !disabled,
+      focusable: focusableWhen(disabled),
       ...style,
       // Baked pseudo-states; user overrides win via spread order.
       _hover: {
         backgroundColor: Palette.surfaceHover,
         ...style?._hover,
       },
-      _focus: {
-        borderColor: Palette.borderFocus,
-        backgroundColor: Palette.surfaceHover,
-        ...style?._focus,
-      },
+      _focus: focusStyle(style, { backgroundColor: Palette.surfaceHover }),
       _active: {
         backgroundColor: Palette.surfaceActive,
         ...style?._active,
       },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _disabled: disabledStyle(style),
     },
     children,
     key,

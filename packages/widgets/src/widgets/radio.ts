@@ -1,6 +1,6 @@
 /** Radio — the dot control; selection logic lives in RadioGroup. */
 import { WidgetType, type TextStyle, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
 
@@ -35,10 +35,7 @@ export function Radio(props: RadioProps): ReconcilableWidget {
       dotStyle: {
         backgroundColor: Palette.accent,
         ...dotStyle,
-        _disabled: {
-          opacity: 0.5,
-          ...dotStyle?._disabled,
-        },
+        _disabled: disabledStyle(dotStyle),
       },
     },
     style: {
@@ -48,20 +45,14 @@ export function Radio(props: RadioProps): ReconcilableWidget {
       borderWidth: Metrics.borderWidth,
       borderColor: Palette.border,
       backgroundColor: Palette.surface,
-      focusable: !props.disabled,
+      focusable: focusableWhen(props.disabled),
       ...style,
       _checked: {
         borderColor: Palette.accent,
         ...style?._checked,
       },
-      _focus: {
-        borderColor: Palette.borderFocus,
-        ...style?._focus,
-      },
-      _disabled: {
-        opacity: 0.5,
-        ...style?._disabled,
-      },
+      _focus: focusStyle(style),
+      _disabled: disabledStyle(style),
     },
     key,
     handlers,
