@@ -5,10 +5,10 @@
  * a no-op seam — the gallery/desktop shell binds SDL's clipboard; tests
  * inject fakes.
  */
-import type { TextInputState } from "./text-input-core.ts";
+import type { TextInputState } from "./core.ts";
 
 export type { TextInputState };
-import { makeTextInputState } from "./text-input-core.ts";
+import { makeTextInputState } from "./core.ts";
 
 const editingStates = new Map<number, TextInputState>();
 

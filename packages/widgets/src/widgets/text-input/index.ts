@@ -7,8 +7,8 @@
  * milestone.
  */
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
-import { createWidget } from "../create-widget.ts";
+import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../../design.ts";
+import { createWidget } from "../../create-widget.ts";
 import {
   backspace,
   CaretDirection,
@@ -20,21 +20,21 @@ import {
   selectAll,
   type TextInputState,
   xToCaret,
-} from "./text-input-core.ts";
+} from "./core.ts";
 import {
   deleteEditingState,
   editingStateOf,
   textInputClipboard,
   writeEditingState,
-} from "./text-input-state.ts";
+} from "./state.ts";
 
 export type { TextInputState };
-import type { BaseWidgetProps } from "../types.ts";
+import type { BaseWidgetProps } from "../../types.ts";
 import {
   KeyCode,
   KeyModifiers,
   type ReconcilableWidget,
-} from "../types.ts";
+} from "../../types.ts";
 
 /** Text-field paint hints layered on ViewStyle. */
 export interface TextInputStyle extends ViewStyle {

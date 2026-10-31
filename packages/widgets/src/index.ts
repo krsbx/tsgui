@@ -28,12 +28,12 @@ export {
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
-export { TextInput, type TextInputProps, type TextInputStyle } from "./widgets/text-input.ts";
+export { TextInput, type TextInputProps, type TextInputStyle } from "./widgets/text-input/index.ts";
 export {
   editingStateOf,
   textInputClipboard,
   type TextInputState,
-} from "./widgets/text-input-state.ts";
+} from "./widgets/text-input/state.ts";
 export {
   isOnBarHandle,
   isOnCircularHandle,

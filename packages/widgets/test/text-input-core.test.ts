@@ -11,7 +11,7 @@ import {
   selectAll,
   selectionRange,
   xToCaret,
-} from "../src/widgets/text-input-core.ts";
+} from "../src/widgets/text-input/core.ts";
 
 const state = (over: Partial<ReturnType<typeof makeTextInputState>> = {}) => ({
   ...makeTextInputState({ value: "hello" }),
