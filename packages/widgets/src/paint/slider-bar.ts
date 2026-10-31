@@ -5,21 +5,19 @@ import {
   valueToRatio,
   type LayoutNode,
 } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
-import { parseColor } from "../style-resolve.ts";
+import { Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
+import { paintBackground } from "./shape.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintInlineValueLabel } from "./label.ts";
 import {
   HANDLE_SIZE,
-  TICK_LABEL_FONT_SIZE,
-  TICK_SIZE,
   TRACK_THICKNESS,
 } from "../widgets/slider/geometry.ts";
-import type { SliderMark } from "../widgets/slider/types.ts";
 import { propsOf } from "../types.ts";
 import type { SliderBarProps } from "../widgets/slider/types.ts";
+import { paintSliderHandle } from "./slider-handle.ts";
+import { paintSliderMarks } from "./slider-marks.ts";
 
 export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
   const props = propsOf<SliderBarProps>(node.widget);
@@ -79,30 +77,21 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
     filledRadius
   );
 
-  paintSliderMarks(ctx, node, props.marks ?? [], min, max, trackX, trackY, isVertical);
+  paintSliderMarks(ctx, {
+    marks: props.marks ?? [],
+    min,
+    max,
+    x: node.screenX,
+    y: node.screenY,
+    width: node.width,
+    height: node.height,
+    trackX,
+    trackY,
+    isVertical,
+  });
 
   // Handle — a bordered disc centered on the value's position.
-  paintBorder(
-    ctx.gpu,
-    { x: handleX, y: handleY, w: HANDLE_SIZE, h: HANDLE_SIZE },
-    {
-      borderWidth: Metrics.borderWidth,
-      borderColor: Palette.border,
-      borderRadius: HANDLE_SIZE / 2,
-      ...handleStyle,
-    },
-    HANDLE_SIZE / 2
-  );
-  paintBackground(
-    ctx.gpu,
-    { x: handleX, y: handleY, w: HANDLE_SIZE, h: HANDLE_SIZE },
-    {
-      backgroundColor: Palette.surface,
-      borderRadius: HANDLE_SIZE / 2,
-      ...handleStyle,
-    },
-    HANDLE_SIZE / 2
-  );
+  paintSliderHandle(ctx, handleX, handleY, handleStyle as never);
 
   paintInlineValueLabel(ctx.gpu, ctx.font, {
     x: node.screenX,
@@ -116,71 +105,4 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
     max,
     showValue: props.showValue ? ProgressValueType.Percent : undefined,
   });
-}
-
-function paintSliderMarks(
-  ctx: PaintContext,
-  node: LayoutNode,
-  marks: SliderMark[],
-  min: number,
-  max: number,
-  trackX: number,
-  trackY: number,
-  isVertical: boolean
-): void {
-  if (marks.length === 0) return;
-
-  for (const mark of marks) {
-    if (mark.value < min || mark.value > max) continue;
-
-    const markRatio = valueToRatio({ value: mark.value, min, max });
-
-    if (isVertical) {
-      const my = node.screenY + (1 - markRatio) * node.height;
-
-      paintBackground(
-        ctx.gpu,
-        {
-          x: trackX + (TRACK_THICKNESS - TICK_SIZE) / 2,
-          y: my - TICK_SIZE / 2,
-          w: TICK_SIZE,
-          h: TICK_SIZE,
-        },
-        { backgroundColor: Palette.border },
-        0
-      );
-
-      if (mark.label) {
-        ctx.font.draw(ctx.gpu, {
-          x: trackX + TRACK_THICKNESS + 2,
-          y: my - TICK_LABEL_FONT_SIZE / 2,
-          text: mark.label,
-          tint: parseColor(Palette.text),
-        });
-      }
-    } else {
-      const mx = node.screenX + markRatio * node.width;
-
-      paintBackground(
-        ctx.gpu,
-        {
-          x: mx - TICK_SIZE / 2,
-          y: trackY + (TRACK_THICKNESS - TICK_SIZE) / 2,
-          w: TICK_SIZE,
-          h: TICK_SIZE,
-        },
-        { backgroundColor: Palette.border },
-        0
-      );
-
-      if (mark.label) {
-        ctx.font.draw(ctx.gpu, {
-          x: mx - 20,
-          y: trackY + TRACK_THICKNESS + 2,
-          text: mark.label,
-          tint: parseColor(Palette.text),
-        });
-      }
-    }
-  }
 }

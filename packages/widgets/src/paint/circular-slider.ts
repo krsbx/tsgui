@@ -11,6 +11,7 @@ import type { PaintContext } from "../paint.ts";
 import { resolveFillColorClamped } from "./fill.ts";
 import { paintInlineValueLabel } from "./label.ts";
 import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
+import { paintSliderHandle } from "./slider-handle.ts";
 import { propsOf } from "../types.ts";
 import type { CircularSliderProps } from "../widgets/slider/types.ts";
 
@@ -70,30 +71,13 @@ export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
     ),
   });
 
-  // Handle dot on the ring's mid radius — border ring first, surface
-  // fill over its inner half (net stroke = borderWidth/2).
-  const hx = cx + Math.cos(handleAngle) * midRadius - HANDLE_SIZE / 2;
-  const hy = cy + Math.sin(handleAngle) * midRadius - HANDLE_SIZE / 2;
-  const bw = handleStyle.borderWidth ?? 0;
-
-  if (bw) {
-    ctx.gpu.fillRoundedRect({
-      x: hx - bw / 2,
-      y: hy - bw / 2,
-      w: HANDLE_SIZE + bw,
-      h: HANDLE_SIZE + bw,
-      radius: HANDLE_SIZE / 2 + bw / 2,
-      color: parseColor(handleStyle.borderColor ?? Palette.border),
-    });
-  }
-  ctx.gpu.fillRoundedRect({
-    x: hx,
-    y: hy,
-    w: HANDLE_SIZE,
-    h: HANDLE_SIZE,
-    radius: HANDLE_SIZE / 2,
-    color: parseColor(handleStyle.backgroundColor ?? Palette.surface),
-  });
+  // Handle dot on the ring's mid radius — the shared bordered disc.
+  paintSliderHandle(
+    ctx,
+    cx + Math.cos(handleAngle) * midRadius - HANDLE_SIZE / 2,
+    cy + Math.sin(handleAngle) * midRadius - HANDLE_SIZE / 2,
+    handleStyle as never
+  );
 
   paintInlineValueLabel(ctx.gpu, ctx.font, {
     x: node.screenX,
