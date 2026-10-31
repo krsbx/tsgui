@@ -32,3 +32,11 @@ jobs:
         run: bun run hello -- --selftest
       - name: Hello selftest (node:ffi)
         run: node examples/hello.ts --selftest
+      - name: Tests (incl. golden snapshots)
+        run: bun test
+      - name: Showcase selftest (bun:ffi)
+        run: bun run examples/showcase.ts --selftest
+      - name: Gallery selftest (bun:ffi)
+        run: bun run examples/gallery.ts --selftest
+      - name: Gallery selftest (node:ffi)
+        run: node examples/gallery.ts --selftest
