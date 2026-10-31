@@ -26,6 +26,7 @@ export {
 } from "./widgets/progress.ts";
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
+export { CircularSlider } from "./widgets/circular-slider.ts";
 export {
   isOnBarHandle,
   isOnCircularHandle,

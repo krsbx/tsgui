@@ -1,6 +1,8 @@
 /** Reconcilable widget trees + interaction contract. */
 import type { LayoutNode, WidgetDescriptor } from "@tsgui/layout";
 
+export type { LayoutNode };
+
 export type Key = string | number;
 
 /** SDL mouse button codes (SDL_MouseButtonEvent.button). */
