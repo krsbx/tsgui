@@ -7,17 +7,16 @@
  * of a dlopen table so behavior matches the bun:ffi backend.
  */
 import { toString as ffiToString } from "node:ffi";
+import type { FnDef } from "./resolve-defs";
 
-type AnyDefs = Record<string, { return?: string }>;
-
-export function wrapStringReturns(
-  defs: AnyDefs,
-  functions: Record<string, (...args: never[]) => unknown>
-): Record<string, (...args: never[]) => unknown> {
+export function wrapStringReturns<
+  T extends Record<string, FnDef>,
+  U extends Record<string, (...args: never[]) => unknown>,
+>(defs: T, functions: U): U {
   return Object.fromEntries(
     Object.entries(defs).map(([name, def]) => {
       const fn = functions[name]!;
-      if (def.return !== "string") return [name, fn];
+      if ((def as { return?: string }).return !== "string") return [name, fn];
       return [
         name,
         (...args: never[]) => {
@@ -28,5 +27,5 @@ export function wrapStringReturns(
         },
       ];
     })
-  );
+  ) as U;
 }
