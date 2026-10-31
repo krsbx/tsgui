@@ -15,7 +15,8 @@ bun run hello              # open the phase-0 demo window
 bun run hello -- --selftest  # 120 frames then exit (CI-safe)
 ```
 
-Requires [Bun](https://bun.com) and SDL3 (`brew install sdl3` on macOS).
+Requires [Bun](https://bun.com) and SDL3 plus its image/ttf/mixer libraries
+(`brew install sdl3 sdl3_image sdl3_ttf sdl3_mixer` on macOS).
 Node 26.9+ works too via `node:ffi`.
 
 ## How it works

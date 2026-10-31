@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 26
       - name: Install SDL3
-        run: brew install sdl3
+        run: brew install sdl3 sdl3_image sdl3_ttf sdl3_mixer
       - name: Install dependencies
         run: bun install
       - name: Lint
