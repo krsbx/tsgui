@@ -2,6 +2,7 @@
 export { StateStore } from "./state.ts";
 export { Reconciler } from "./reconciler.ts";
 export { Palette, Metrics, type PaletteColor, type MetricKey } from "./design.ts";
+export { createWidget, type CreateWidgetOptions } from "./create-widget.ts";
 export * from "./types.ts";
 
 // Per-widget modules — factories + props

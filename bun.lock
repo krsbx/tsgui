@@ -58,6 +58,7 @@
       "name": "@tsgui/widgets",
       "version": "0.0.1",
       "dependencies": {
+        "@tsgui/gpu": "workspace:*",
         "@tsgui/layout": "workspace:*",
       },
       "devDependencies": {

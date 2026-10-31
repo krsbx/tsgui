@@ -2,42 +2,35 @@
  * Paint bridge — walks a LayoutNode tree and issues draw calls in
  * flying-pan's proven order: shadow → border → background → per-widget
  * painter → children. Phase 4's dispatch feeds real interaction states.
+ *
+ * The Painter surface is STRUCTURAL and reuses @tsgui/gpu's option types,
+ * so GpuRenderer satisfies it while headless tests mock it.
  */
 import { WidgetType, type LayoutNode, type ViewStyle } from "@tsgui/layout";
+import type {
+  Rect,
+  RectOptions,
+  TextureDrawOptions,
+} from "@tsgui/gpu";
+import type { TextDrawOptions } from "@tsgui/gpu";
 import {
   colorWithOpacity,
   parseColor,
   resolveStyle,
   type InteractionStates,
 } from "./style-resolve.ts";
+import { Palette } from "./design.ts";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
-  fillRect(opts: { x: number; y: number; w: number; h: number; color: number }): void;
-  fillRoundedRect(opts: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    radius: number;
-    color: number;
-  }): void;
-  drawTexture(opts: {
-    texture: unknown;
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    tint?: number;
-  }): void;
+  fillRect(opts: RectOptions): void;
+  fillRoundedRect(opts: RectOptions & { radius: number }): void;
+  drawTexture(opts: TextureDrawOptions): void;
 }
 
 export interface TextPainter {
   /** Queues a text run at x/y with the packed tint. */
-  draw(
-    gpu: Painter,
-    opts: { x: number; y: number; text: string; tint?: number }
-  ): void;
+  draw(gpu: Painter, opts: TextDrawOptions): void;
 }
 
 export interface PaintContext {
@@ -50,12 +43,14 @@ export interface PaintContext {
 export { parseColor, colorWithOpacity, resolveStyle } from "./style-resolve.ts";
 export type { InteractionStates };
 
-interface Rect {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+/** Interaction states when no dispatch is wired — every flag off. */
+const STATES_NONE: InteractionStates = {
+  hovered: false,
+  focused: false,
+  pressed: false,
+  checked: false,
+  disabled: false,
+};
 
 /**
  * Stacked rounded-rect layers approximate the Gaussian falloff with the
@@ -93,6 +88,23 @@ function paintShadow(
   }
 }
 
+/**
+ * One shape for both corners paths — square `fillRect` when no radius,
+ * concentric rounded fan otherwise. Border and background share it.
+ */
+function fillShape(
+  gpu: Painter,
+  rect: Rect,
+  radius: number | undefined,
+  color: number
+): void {
+  if (radius && radius > 0) {
+    gpu.fillRoundedRect({ ...rect, radius, color });
+  } else {
+    gpu.fillRect({ ...rect, color });
+  }
+}
+
 /** Fill-only ring: a slightly larger shape in the border color, painted first. */
 function paintBorder(
   gpu: Painter,
@@ -103,51 +115,46 @@ function paintBorder(
   const bw = style.borderWidth;
   if (!bw || !style.borderColor) return;
 
-  const color = parseColor(style.borderColor);
-  if (radius && radius > 0) {
-    gpu.fillRoundedRect({
+  fillShape(
+    gpu,
+    {
       x: rect.x - bw / 2,
       y: rect.y - bw / 2,
       w: rect.w + bw,
       h: rect.h + bw,
-      radius: radius + bw / 2,
-      color,
-    });
-  } else {
-    gpu.fillRect({
-      x: rect.x - bw / 2,
-      y: rect.y - bw / 2,
-      w: rect.w + bw,
-      h: rect.h + bw,
-      color,
-    });
-  }
+    },
+    radius ? radius + bw / 2 : undefined,
+    parseColor(style.borderColor)
+  );
   // The background paints over the inner half of the border — net stroke = bw/2.
 }
 
-function paintBackground(gpu: Painter, rect: Rect, style: ViewStyle, radius: number | undefined): void {
+function paintBackground(
+  gpu: Painter,
+  rect: Rect,
+  style: ViewStyle,
+  radius: number | undefined
+): void {
   if (!style.backgroundColor) return;
 
-  const color = colorWithOpacity(parseColor(style.backgroundColor), style.opacity ?? 1);
-  if (radius && radius > 0) {
-    gpu.fillRoundedRect({ x: rect.x, y: rect.y, w: rect.w, h: rect.h, radius, color });
-  } else {
-    gpu.fillRect({ x: rect.x, y: rect.y, w: rect.w, h: rect.h, color });
-  }
+  fillShape(
+    gpu,
+    rect,
+    radius,
+    colorWithOpacity(parseColor(style.backgroundColor), style.opacity ?? 1)
+  );
 }
 
 function paintNode(ctx: PaintContext, node: LayoutNode): void {
   const base = node.widget.style ?? {};
-  const states = ctx.statesOf?.(node) ?? {
-    hovered: false,
-    focused: false,
-    pressed: false,
-    checked: false,
-    disabled: false,
-  };
-  const style = resolveStyle(base, states);
+  const style = resolveStyle(base, ctx.statesOf?.(node) ?? STATES_NONE);
 
-  const rect = { x: node.screenX, y: node.screenY, w: node.width, h: node.height };
+  const rect: Rect = {
+    x: node.screenX,
+    y: node.screenY,
+    w: node.width,
+    h: node.height,
+  };
   const radius = style.borderRadius;
 
   paintShadow(ctx.gpu, rect, style, radius);
@@ -163,21 +170,17 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
           x: node.screenX,
           y: node.screenY,
           text,
-          tint: parseColor(ts.color ?? "#1f2937"),
+          tint: parseColor(ts.color ?? Palette.text),
         });
       }
       break;
     }
     case WidgetType.Image: {
-      const texture = node.widget.props["texture"];
+      // Descriptors carry the texture as an opaque prop; the paint bridge
+      // trusts the app layer to store a real texture handle there.
+      const texture = node.widget.props["texture"] as TextureDrawOptions["texture"];
       if (texture) {
-        ctx.gpu.drawTexture({
-          texture,
-          x: node.screenX,
-          y: node.screenY,
-          w: node.width,
-          h: node.height,
-        });
+        ctx.gpu.drawTexture({ texture, ...rect });
       }
       break;
     }

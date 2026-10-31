@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/layout": "workspace:*"
+    "@tsgui/layout": "workspace:*",
+    "@tsgui/gpu": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -5,25 +5,20 @@
 import { WidgetType } from "@tsgui/layout";
 import type { ViewStyle } from "@tsgui/layout";
 import { Metrics, Palette } from "../design.ts";
-import type { InteractionProps, ReconcilableWidget } from "../types.ts";
+import { createWidget } from "../create-widget.ts";
+import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
 
 export interface ButtonProps extends InteractionProps {
   style?: ViewStyle;
   children?: ReconcilableWidget[];
   disabled?: boolean;
-  key?: string | number;
+  key?: Key;
 }
 
 export function Button(props: ButtonProps): ReconcilableWidget {
-  const {
-    style,
-    children,
-    disabled,
-    key,
-    ...handlers
-  } = props;
+  const { style, children, disabled, key, ...handlers } = props;
 
-  return {
+  return createWidget({
     type: WidgetType.Button,
     props: { disabled },
     style: {
@@ -57,6 +52,6 @@ export function Button(props: ButtonProps): ReconcilableWidget {
     },
     children,
     key,
-    ...handlers,
-  };
+    handlers,
+  });
 }

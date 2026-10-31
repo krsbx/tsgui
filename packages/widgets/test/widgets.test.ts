@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
+import type { RectOptions, TextureDrawOptions, TextDrawOptions } from "@tsgui/gpu";
 import { Label, paintTree, Reconciler, StateStore, View } from "../src/index.ts";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
 
@@ -144,12 +145,13 @@ describe("pipeline", () => {
 
     const recorded: Array<Record<string, unknown>> = [];
     const gpu = {
-      fillRect: (o: Record<string, unknown>) => recorded.push({ op: "rect", ...o }),
-      fillRoundedRect: (o: Record<string, unknown>) => recorded.push({ op: "rrect", ...o }),
-      drawTexture: (o: Record<string, unknown>) => recorded.push({ op: "tex", ...o }),
+      fillRect: (o: RectOptions) => recorded.push({ op: "rect", ...o }),
+      fillRoundedRect: (o: RectOptions & { radius: number }) =>
+        recorded.push({ op: "rrect", ...o }),
+      drawTexture: (o: TextureDrawOptions) => recorded.push({ op: "tex", ...o }),
     };
     const font = {
-      draw: (_gpu: unknown, o: Record<string, unknown>) => recorded.push({ op: "text", ...o }),
+      draw: (_gpu: unknown, o: TextDrawOptions) => recorded.push({ op: "text", ...o }),
     };
 
     const root = layoutFlex({
