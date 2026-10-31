@@ -143,18 +143,36 @@ runtimes.
 
 ## Phase 4 — Interactions + animation
 
-- [ ] Event ring decode on the JS side (pointer/focus/scroll dispatch, ported
-      logic, new data source) — replaces gallery.ts's hand-rolled hit-test.
+Foundation work (each item unblocks a widget batch):
+
+- [ ] Event dispatch port — pointer/focus/scroll dispatchers + typed event
+      decode + the hit-test utility from flying-pan's
+      `flying/interactions` (~1.4k lines, already decoupled from GL);
+      replaces gallery.ts's hand-rolled hit-test.
 - [ ] AnimationManager port (transitions, easing) — also drives progress
       indeterminate motion.
 - [ ] Controlled/uncontrolled state, pseudo-states (`:hover` etc.) —
       StateStore drives re-renders; the dispatcher feeds `statesOf`.
-- [ ] Interaction widgets (flying-pan parity): `Checkbox`, `Toggle`,
-      `Radio` (click), `SliderBar`/`CircularSlider` (drag, ticks + tick
-      labels), `TextInput` (char/pointer handlers, selection, scroll-x).
 - [ ] Multi-window (deferred from the ABI work — handles already flow).
 
-**Exit:** the flying-pan example apps rebuilt on tsgui, interactive at 60fps.
+Widget parity batches — each batch lands when its capability exists, not
+before (a widget painted without its input path is the hand-wired glue
+the dispatcher exists to replace):
+
+| Batch | Widgets | Needs | Status |
+|---|---|---|---|
+| 1 | `ProgressBar`, `CircularProgress`, `Meter` | paint only | ✅ Phase 3.5 (2026-10-31) |
+| 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | phase 4, first milestone |
+| 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | phase 4, second milestone |
+| 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | phase 4, last milestone |
+| 5 | `Canvas`, `Custom` painter | CanvasContext + Path2D/tessellation port | phase 5 |
+
+Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
+enums); `List` (virtualized — `listLayoutFlex` already ported) and a
+`Flex` factory are candidate mini-batches after batch 3.
+
+**Exit:** the flying-pan example apps rebuilt on tsgui — batches 1–4
+complete, interactive at 60fps.
 
 ## Phase 5 — Devtools (the debuggability payoff)
 
