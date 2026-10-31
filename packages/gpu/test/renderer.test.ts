@@ -214,6 +214,75 @@ describe("GpuRenderer pixels", () => {
       gpu.destroy();
     }
   );
+
+  test.skipIf(!window)(
+    "arc primitives rasterize pies and rings at the right angles",
+    () => {
+      const gpu = new GpuRenderer(window!, { driver: "software" });
+      gpu.clearColor = { r: 0, g: 0, b: 0, a: 255 };
+      gpu.beginFrame();
+
+      // Quarter pie, down-right of its center, at (20,20) r16.
+      gpu.fillArc({
+        cx: 20,
+        cy: 20,
+        radius: 16,
+        startAngle: 0,
+        endAngle: Math.PI / 2,
+        color: rgba({ r: 255, g: 0, b: 0 }),
+      });
+      // Right-half ring, at (44,44) band [6,14] — disjoint from the pie.
+      gpu.fillRing({
+        cx: 44,
+        cy: 44,
+        innerRadius: 6,
+        radius: 14,
+        startAngle: -Math.PI / 2,
+        endAngle: Math.PI / 2,
+        color: rgba({ r: 0, g: 200, b: 0 }),
+      });
+
+      const surface = readback(gpu);
+
+      // Pie interior and center.
+      {
+        const [r, g, b] = readPixel(surface, 26, 26);
+        expect(r).toBeGreaterThan(0.9);
+        expect(g).toBeLessThan(0.1);
+        expect(b).toBeLessThan(0.1);
+      }
+      {
+        const [r] = readPixel(surface, 20, 20);
+        expect(r).toBeGreaterThan(0.9);
+      }
+
+      // Ring band inside the sweep (off the segment seam at y=44).
+      {
+        const [r, g] = readPixel(surface, 54, 40);
+        expect(g).toBeGreaterThan(0.5);
+        expect(r).toBeLessThan(0.2);
+      }
+
+      // Ring band outside the sweep — clear.
+      {
+        const [r, g, b] = readPixel(surface, 34, 44);
+        expect(r).toBeLessThan(0.1);
+        expect(g).toBeLessThan(0.1);
+        expect(b).toBeLessThan(0.1);
+      }
+
+      // Ring hole — clear.
+      {
+        const [r, g, b] = readPixel(surface, 44, 44);
+        expect(r).toBeLessThan(0.1);
+        expect(g).toBeLessThan(0.1);
+        expect(b).toBeLessThan(0.1);
+      }
+
+      sdl.SDL_DestroySurface({ surface });
+      gpu.destroy();
+    }
+  );
 });
 
 // describe() only registers — cleanup must wait for the tests to run.

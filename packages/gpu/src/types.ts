@@ -50,6 +50,25 @@ export interface RoundedRectOptions extends RectOptions {
   segments?: number;
 }
 
+export interface ArcOptions {
+  cx: number;
+  cy: number;
+  /** Outer radius. */
+  radius: number;
+  /** Radians; a negative sweep draws counter-clockwise. */
+  startAngle: number;
+  endAngle: number;
+  /** Packed color — see {@link rgba}. */
+  color: number;
+  /** Tessellation density per full circle. */
+  segments?: number;
+}
+
+export interface RingOptions extends ArcOptions {
+  /** Hole radius — `0` degenerates to a pie via {@link ArcOptions}. */
+  innerRadius: number;
+}
+
 export interface TextureDrawOptions extends Rect {
   texture: TextureHandle;
   /** Packed tint — defaults to opaque white. */

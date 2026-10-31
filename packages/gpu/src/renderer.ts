@@ -1,11 +1,13 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
 import { SdlDefines, sdl } from "@tsgui/bindings";
 import type {
+  ArcOptions,
   Rect,
   RectOptions,
   RendererHandle,
   RendererOptions,
   Rgba,
+  RingOptions,
   RoundedRectOptions,
   TextureDrawOptions,
   TextureHandle,
@@ -272,6 +274,109 @@ export class GpuRenderer {
     }
 
     this.vertexCount += 1 + P;
+    this.indexCount = ii;
+  }
+
+  /**
+   * Queue a filled circular sector (pie slice) — tessellated fan from the
+   * center. A zero sweep draws nothing; negative sweeps run backwards.
+   */
+  fillArc({
+    cx,
+    cy,
+    radius,
+    startAngle,
+    endAngle,
+    color,
+    segments = 64,
+  }: ArcOptions): void {
+    // Untextured geometry can't join an open textured batch.
+    if (this.batchTexture !== null) this.flushBatch();
+
+    const sweep = endAngle - startAngle;
+    if (sweep === 0) return;
+    const count = Math.max(
+      2,
+      Math.ceil((Math.abs(sweep) / (Math.PI * 2)) * segments)
+    );
+    this.ensureCapacity(2 + count, count * 3);
+
+    const base = this.vertexCount;
+    const S = FLOATS_PER_VERTEX;
+    let vi = base * S;
+    this.writeVertex(vi, cx, cy, color, 0, 0);
+    vi += S;
+    for (let i = 0; i <= count; i++) {
+      const a = startAngle + (sweep * i) / count;
+      this.writeVertex(vi, cx + radius * Math.cos(a), cy + radius * Math.sin(a), color, 0, 0);
+      vi += S;
+    }
+
+    let ii = this.indexCount;
+    for (let i = 1; i <= count; i++) {
+      this.indexData[ii++] = base;
+      this.indexData[ii++] = base + i;
+      this.indexData[ii++] = base + i + 1;
+    }
+
+    this.vertexCount += 2 + count;
+    this.indexCount = ii;
+  }
+
+  /**
+   * Queue an annular sector (ring segment) — tessellated quad strip between
+   * the outer and inner radii. `innerRadius: 0` degenerates to a pie; use
+   * {@link fillArc} for that.
+   */
+  fillRing({
+    cx,
+    cy,
+    innerRadius,
+    radius,
+    startAngle,
+    endAngle,
+    color,
+    segments = 64,
+  }: RingOptions): void {
+    // Untextured geometry can't join an open textured batch.
+    if (this.batchTexture !== null) this.flushBatch();
+
+    const sweep = endAngle - startAngle;
+    if (sweep === 0) return;
+    const count = Math.max(
+      2,
+      Math.ceil((Math.abs(sweep) / (Math.PI * 2)) * segments)
+    );
+    this.ensureCapacity((count + 1) * 2, count * 6);
+
+    const base = this.vertexCount;
+    const S = FLOATS_PER_VERTEX;
+    let vi = base * S;
+    for (let i = 0; i <= count; i++) {
+      const a = startAngle + (sweep * i) / count;
+      const cos = Math.cos(a);
+      const sin = Math.sin(a);
+      this.writeVertex(vi, cx + radius * cos, cy + radius * sin, color, 0, 0);
+      vi += S;
+      this.writeVertex(vi, cx + innerRadius * cos, cy + innerRadius * sin, color, 0, 0);
+      vi += S;
+    }
+
+    let ii = this.indexCount;
+    for (let i = 0; i < count; i++) {
+      const outer = base + i * 2;
+      const inner = outer + 1;
+      const nextOuter = outer + 2;
+      const nextInner = outer + 3;
+      this.indexData[ii++] = outer;
+      this.indexData[ii++] = inner;
+      this.indexData[ii++] = nextOuter;
+      this.indexData[ii++] = nextOuter;
+      this.indexData[ii++] = inner;
+      this.indexData[ii++] = nextInner;
+    }
+
+    this.vertexCount += (count + 1) * 2;
     this.indexCount = ii;
   }
 

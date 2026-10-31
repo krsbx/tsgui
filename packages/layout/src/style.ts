@@ -1,5 +1,6 @@
 /** Style model + size/spacing resolution — ported from flying-pan's widget styles. */
 import type {
+  BackgroundType,
   FlexAlign,
   FlexDirection,
   FlexJustify,
@@ -7,6 +8,7 @@ import type {
   Overflow,
   PointerEvents,
   Position,
+  TextAlign,
 } from "./enums.ts";
 import { SizeUnit } from "./enums.ts";
 
@@ -44,7 +46,7 @@ export interface GradientStop {
 }
 
 export interface Background {
-  type: "linear";
+  type: BackgroundType;
   angle?: number;
   stops: GradientStop[];
 }
@@ -130,7 +132,7 @@ export interface PseudoStateStyle {
 export interface TextStyle extends ViewStyle {
   fontSize?: number;
   color?: ValidColor;
-  textAlign?: "left" | "center" | "right";
+  textAlign?: TextAlign;
   lineHeight?: number;
   letterSpacing?: number;
 }

@@ -29,6 +29,12 @@ export const TextAlign = {
 
 export type TextAlign = (typeof TextAlign)[keyof typeof TextAlign];
 
+export const BackgroundType = {
+  Linear: "linear",
+} as const;
+
+export type BackgroundType = (typeof BackgroundType)[keyof typeof BackgroundType];
+
 export const Position = {
   Relative: "relative",
   Absolute: "absolute",
@@ -56,12 +62,56 @@ export const WidgetType = {
   Label: "Label",
   Button: "Button",
   Image: "Image",
+  ProgressBar: "ProgressBar",
+  CircularProgress: "CircularProgress",
+  Meter: "Meter",
   TextInput: "TextInput",
   List: "List",
   Custom: "Custom",
 } as const;
 
 export type WidgetType = (typeof WidgetType)[keyof typeof WidgetType];
+
+export const ProgressBarOrientation = {
+  Horizontal: "horizontal",
+  Vertical: "vertical",
+} as const;
+
+export type ProgressBarOrientation =
+  (typeof ProgressBarOrientation)[keyof typeof ProgressBarOrientation];
+
+export const ProgressDirection = {
+  Forward: "forward",
+  Backward: "backward",
+} as const;
+
+export type ProgressDirection =
+  (typeof ProgressDirection)[keyof typeof ProgressDirection];
+
+export const ProgressType = {
+  Determinate: "determinate",
+  Indeterminate: "indeterminate",
+} as const;
+
+export type ProgressType = (typeof ProgressType)[keyof typeof ProgressType];
+
+/** `showValue` label formatting — percent, 0–1 fraction, or raw value. */
+export const ProgressValueType = {
+  Percent: "percent",
+  Fraction: "fraction",
+  Value: "value",
+} as const;
+
+export type ProgressValueType =
+  (typeof ProgressValueType)[keyof typeof ProgressValueType];
+
+export const CircularProgressDirection = {
+  Clockwise: "clockwise",
+  CounterClockwise: "counterclockwise",
+} as const;
+
+export type CircularProgressDirection =
+  (typeof CircularProgressDirection)[keyof typeof CircularProgressDirection];
 
 export const SizeUnit = {
   Pixel: "px",

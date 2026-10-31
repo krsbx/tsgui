@@ -88,6 +88,27 @@ compiles at all.
 widget-layer kitchen sink) render on Node and Bun; `bun test` includes
 pixel-readback guards for the geometry/vertex ABI and batch isolation.
 
+## Phase 3.5 — Widget parity batch 1 (paint-only) (2026-10-31)
+
+tsgui shipped 4 widgets against flying-pan's ~14. The paint-only widgets
+port now; interaction widgets wait for the phase 4 dispatch.
+
+- [x] Shared fill painters — continuous + stepped fills (orientation/
+      direction aware, buffer behind main fill), color-stop resolution,
+      inline value labels (`formatValueLabel`: percent / fraction / value).
+- [x] `ProgressBar` — horizontal/vertical, forward/backward, stepped mode
+      (`steps` + `stepGap`), buffer track, `colorStops`, inline label.
+- [x] `CircularProgress` — ring (`thickness < 1`) or pie (`≥ 1`), start
+      angle, clockwise/counter-clockwise, buffer arc; backed by new
+      `GpuRenderer.fillArc`/`fillRing` tessellation primitives.
+- [x] `Meter` — HTML-`<meter>` low/high/optimum zones mapped to the
+      success/warning/error palette.
+- Indeterminate motion waits for phase 4's AnimationManager; determinate
+      paints today.
+
+**Exit:** the new widgets render through the headless harness with golden
+snapshots and in the gallery, on Node and Bun.
+
 ## Phase 2.5 — SDF decoration spike (parked)
 
 - [ ] `SDL_SetGPURenderState` + a fragment shader for rounded-rect /
@@ -123,9 +144,15 @@ runtimes.
 ## Phase 4 — Interactions + animation
 
 - [ ] Event ring decode on the JS side (pointer/focus/scroll dispatch, ported
-      logic, new data source).
-- [ ] AnimationManager port (transitions, easing).
-- [ ] Controlled/uncontrolled state, pseudo-states (`:hover` etc.).
+      logic, new data source) — replaces gallery.ts's hand-rolled hit-test.
+- [ ] AnimationManager port (transitions, easing) — also drives progress
+      indeterminate motion.
+- [ ] Controlled/uncontrolled state, pseudo-states (`:hover` etc.) —
+      StateStore drives re-renders; the dispatcher feeds `statesOf`.
+- [ ] Interaction widgets (flying-pan parity): `Checkbox`, `Toggle`,
+      `Radio` (click), `SliderBar`/`CircularSlider` (drag, ticks + tick
+      labels), `TextInput` (char/pointer handlers, selection, scroll-x).
+- [ ] Multi-window (deferred from the ABI work — handles already flow).
 
 **Exit:** the flying-pan example apps rebuilt on tsgui, interactive at 60fps.
 
