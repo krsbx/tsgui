@@ -1,9 +1,21 @@
-import { describe, expect, test } from "bun:test";
+import type {
+  ArcOptions,
+  RectOptions,
+  RingOptions,
+  TextDrawOptions,
+  TextureDrawOptions,
+} from "@tsgui/gpu";
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
-import type { ArcOptions, RectOptions, RingOptions, TextureDrawOptions, TextDrawOptions } from "@tsgui/gpu";
-import { Label, paintTree, Reconciler, StateStore, View } from "../src/index.ts";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
+import { describe, expect, test } from "bun:test";
+import {
+  Label,
+  paintTree,
+  Reconciler,
+  StateStore,
+  View,
+} from "../src/index.ts";
 
 // ————— reconciler —————
 
@@ -88,7 +100,9 @@ describe("Reconciler", () => {
 
     expect(events).toEqual(["unmounted"]);
     // state was destroyed: a fresh stateFor returns the new initial
-    expect(store.stateFor({ stableId: childId, initial: { fresh: true } })).toEqual({
+    expect(
+      store.stateFor({ stableId: childId, initial: { fresh: true } })
+    ).toEqual({
       fresh: true,
     });
   });
@@ -148,12 +162,14 @@ describe("pipeline", () => {
       fillRect: (o: RectOptions) => recorded.push({ op: "rect", ...o }),
       fillRoundedRect: (o: RectOptions & { radius: number }) =>
         recorded.push({ op: "rrect", ...o }),
-      drawTexture: (o: TextureDrawOptions) => recorded.push({ op: "tex", ...o }),
+      drawTexture: (o: TextureDrawOptions) =>
+        recorded.push({ op: "tex", ...o }),
       fillArc: (o: ArcOptions) => recorded.push({ op: "arc", ...o }),
       fillRing: (o: RingOptions) => recorded.push({ op: "ring", ...o }),
     };
     const font = {
-      draw: (_gpu: unknown, o: TextDrawOptions) => recorded.push({ op: "text", ...o }),
+      draw: (_gpu: unknown, o: TextDrawOptions) =>
+        recorded.push({ op: "text", ...o }),
     };
 
     const root = layoutFlex({
@@ -170,6 +186,12 @@ describe("pipeline", () => {
     expect(recorded.length).toBe(3);
     expect(recorded[0]).toMatchObject({ op: "rect", x: 0, y: 0, w: 50, h: 20 });
     expect(recorded[1]).toMatchObject({ op: "text", x: 0, y: 0 });
-    expect(recorded[2]).toMatchObject({ op: "rect", x: 50, y: 0, w: 100, h: 50 });
+    expect(recorded[2]).toMatchObject({
+      op: "rect",
+      x: 50,
+      y: 0,
+      w: 100,
+      h: 50,
+    });
   });
 });

@@ -3,30 +3,30 @@
  * dead-space clicks, tab cycling with shift, key/char routing to the
  * focused widget, and Enter/Space activation synthesis.
  */
-import { describe, expect, test } from "bun:test";
 import {
   FlexDirection,
-  layoutFlex,
   type LayoutContext,
+  layoutFlex,
   type LayoutNode,
 } from "@tsgui/layout";
+import { describe, expect, test } from "bun:test";
 import {
   Button,
   Checkbox,
   FocusDispatcher,
-  KeyCode,
-  PointerDispatcher,
-  KeyModifiers,
+  type KeyboardInputEvent,
   KeyboardInputKind,
+  KeyCode,
+  KeyModifiers,
   Label,
   MouseButton,
+  PointerDispatcher,
+  type PointerInputEvent,
   PointerInputKind,
+  type ReconcilableWidget,
   Reconciler,
   StateStore,
   View,
-  type KeyboardInputEvent,
-  type PointerInputEvent,
-  type ReconcilableWidget,
 } from "../src/index.ts";
 
 interface Harness {
@@ -137,7 +137,8 @@ function setup(widget: ReconcilableWidget): Harness {
     },
     stableIdOf(key: string): number {
       for (const node of layoutIndex.values()) {
-        if ((node.widget as ReconcilableWidget).key === key) return node.stableId;
+        if ((node.widget as ReconcilableWidget).key === key)
+          return node.stableId;
       }
       return 0;
     },

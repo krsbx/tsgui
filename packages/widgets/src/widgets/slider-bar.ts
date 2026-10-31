@@ -10,18 +10,24 @@ import {
   valueToRatio,
   WidgetType,
 } from "@tsgui/layout";
-import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
+import {
+  disabledStyle,
+  focusableWhen,
+  focusStyle,
+  Metrics,
+  Palette,
+} from "../design.ts";
+import type { ReconcilableWidget } from "../types.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {
   HANDLE_SIZE,
-  TRACK_THICKNESS,
   isOnBarHandle,
   pointerToValue,
   sliderValue,
+  TRACK_THICKNESS,
 } from "./slider/geometry.ts";
 import type { SliderBarProps } from "./slider/types.ts";
-import type { ReconcilableWidget } from "../types.ts";
 
 export type { SliderBarProps };
 

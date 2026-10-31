@@ -1,11 +1,11 @@
 /** TextInput painter — selection, text/placeholder, caret. */
+import type { LayoutNode } from "@tsgui/layout";
 import { Metrics, Palette } from "../design.ts";
-import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
+import { parseColor } from "../style-resolve.ts";
 import { propsOf } from "../types.ts";
 import type { TextInputProps } from "../widgets/text-input/index.ts";
 import { peekEditingState } from "../widgets/text-input/state.ts";
-import type { LayoutNode } from "@tsgui/layout";
 
 export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
   const props = propsOf<TextInputProps>(node.widget);
@@ -24,7 +24,8 @@ export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
   if (!text) return;
 
   // The painter measures per character via the injected font.
-  const measure = (sub: string): number => ctx.font.measure?.(sub)?.width ?? sub.length * 8;
+  const measure = (sub: string): number =>
+    ctx.font.measure?.(sub)?.width ?? sub.length * 8;
   const textHeight = ctx.font.measure?.("H")?.height ?? 18;
 
   const padLeft = Metrics.defaultPadding;

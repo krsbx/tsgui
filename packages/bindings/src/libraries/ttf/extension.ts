@@ -8,7 +8,11 @@
  *   - `ttfExtension(symbols)` object-param wrappers over the extended
  *                             symbol surface, merged into `ttf` by the loaders
  */
-import { type FnDef, handle, type SymbolsFromDefs } from "../../resolve-defs.ts";
+import {
+  type FnDef,
+  handle,
+  type SymbolsFromDefs,
+} from "../../resolve-defs.ts";
 import type { SDL_Surface, TTF_Font, TtfSymbols } from "./generated/types.ts";
 
 /** Raw dlopen defs — backend-neutral string dialect. */

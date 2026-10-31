@@ -1,19 +1,19 @@
 /** CircularSlider painter — track arc, filled arc, handle dot. */
 import {
   CircularProgressDirection,
+  type LayoutNode,
   ProgressValueType,
   valueToRatio,
-  type LayoutNode,
 } from "@tsgui/layout";
 import { Palette } from "../design.ts";
-import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
+import { parseColor } from "../style-resolve.ts";
+import { propsOf } from "../types.ts";
+import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
+import type { CircularSliderProps } from "../widgets/slider/types.ts";
 import { resolveFillColorClamped } from "./fill.ts";
 import { paintInlineValueLabel } from "./label.ts";
-import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
 import { paintSliderHandle } from "./slider-handle.ts";
-import { propsOf } from "../types.ts";
-import type { CircularSliderProps } from "../widgets/slider/types.ts";
 
 export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
   const props = propsOf<CircularSliderProps>(node.widget);
@@ -26,9 +26,7 @@ export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
   const startAngle = props.startAngle ?? -Math.PI / 2;
   const sweep = props.sweep ?? Math.PI * 2;
   const dirSign =
-    props.direction === CircularProgressDirection.CounterClockwise
-      ? -1
-      : 1;
+    props.direction === CircularProgressDirection.CounterClockwise ? -1 : 1;
 
   const cx = node.screenX + node.width / 2;
   const cy = node.screenY + node.height / 2;

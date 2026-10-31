@@ -1,6 +1,6 @@
 /** Pointer-to-type classification: branded handles vs caller memory. */
-import type { CTypeDecl } from '../clang/types';
-import { PRIMITIVES } from './kinds';
+import type { CTypeDecl } from "../clang/types";
+import { PRIMITIVES } from "./kinds";
 
 /**
  * Complete 2D data structs that SDL both returns AND accepts as
@@ -9,14 +9,14 @@ import { PRIMITIVES } from './kinds';
  * otherwise over-brand them).
  */
 const DATA_STRUCTS = new Set([
-  'SDL_Rect',
-  'SDL_FRect',
-  'SDL_Point',
-  'SDL_FPoint',
-  'SDL_Color',
-  'SDL_FColor',
-  'SDL_Vertex',
-  'SDL_Event',
+  "SDL_Rect",
+  "SDL_FRect",
+  "SDL_Point",
+  "SDL_FPoint",
+  "SDL_Color",
+  "SDL_FColor",
+  "SDL_Vertex",
+  "SDL_Event",
 ]);
 
 /**
@@ -44,20 +44,16 @@ export function classifyPointerTs(
   }
   if (t.isFunctionPointer) return null;
 
-  if (t.name === 'void') {
+  if (t.name === "void") {
     // C void* accepts any memory — buffers and opaque pointers alike.
-    return 'AnyPointer | null';
+    return "AnyPointer | null";
   }
   const isData =
     (completeRecords.has(t.name) && !returnedPointees.has(t.name)) ||
     DATA_STRUCTS.has(t.name);
-  if (
-    PRIMITIVES[t.name] !== undefined ||
-    enumNames.has(t.name) ||
-    isData
-  ) {
+  if (PRIMITIVES[t.name] !== undefined || enumNames.has(t.name) || isData) {
     // Memory the caller constructs: TypedArray / DataView / ArrayBuffer.
-    return 'ArrayBufferView | ArrayBuffer | null';
+    return "ArrayBufferView | ArrayBuffer | null";
   }
   handleNames.add(t.name);
   return `${t.name} | null`;

@@ -1,12 +1,8 @@
 /** Two-pass enum-constant collection and alias resolution. */
-import type {
-  CEnumDecl,
-  CHeaderDecl,
-  CTypedefDecl,
-} from '../clang/types';
-import { DeclarationKind } from '../clang/types';
-import { pascalCase, stripPrefix } from './names';
-import type { FfiEnum, FfiFilterOptions } from './interfaces';
+import type { CEnumDecl, CHeaderDecl, CTypedefDecl } from "../clang/types";
+import { DeclarationKind } from "../clang/types";
+import type { FfiEnum, FfiFilterOptions } from "./interfaces";
+import { pascalCase, stripPrefix } from "./names";
 
 /**
  * Two-pass enum-constant resolution: aliases of other constants
@@ -21,8 +17,9 @@ export function collectEnums(
   const enums: FfiEnum[] = [];
   const unresolved: string[] = [];
   const known = new Map<string, number>();
-  let pendingAnonymous: { constants: { name: string; value: number }[] } | null =
-    null;
+  let pendingAnonymous: {
+    constants: { name: string; value: number }[];
+  } | null = null;
 
   for (const decl of header.declarations) {
     if (decl.kind === DeclarationKind.ENUM) {
@@ -62,7 +59,7 @@ export function collectEnums(
 
     if (decl.kind === DeclarationKind.TYPEDEF) {
       const t = decl as CTypedefDecl;
-      if (t.tag === 'enum' && pendingAnonymous) {
+      if (t.tag === "enum" && pendingAnonymous) {
         enums.push({
           cName: t.name,
           tsName: pascalCase(stripPrefix(t.name, opts.namePrefix)),

@@ -1,11 +1,11 @@
 /** Size/spacing resolution — ported from flying-pan's styles/utility. */
+import { SizeUnit } from "./enums.ts";
 import type {
   ResolvedSpacing,
   SizeInput,
   Spacing,
   SpacingInput,
 } from "./style.ts";
-import { SizeUnit } from "./enums.ts";
 
 export const ROOT_FONT_SIZE = 16;
 

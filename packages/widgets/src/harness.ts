@@ -9,15 +9,15 @@
  * and what phase 5's devtools can replay.
  */
 import {
-  layoutFlex,
   type LayoutContext,
+  layoutFlex,
   type LayoutNode,
   type Size,
 } from "@tsgui/layout";
-import { Reconciler } from "./reconciler.ts";
-import { StateStore } from "./state.ts";
 import type { InteractionStates, Painter, TextPainter } from "./paint.ts";
 import { paintTree } from "./paint.ts";
+import { Reconciler } from "./reconciler.ts";
+import { StateStore } from "./state.ts";
 import type { ReconcilableWidget } from "./types.ts";
 
 /** Recorded draw-call discriminators. */
@@ -34,7 +34,14 @@ export type PaintOpKind = (typeof PaintOpKind)[keyof typeof PaintOpKind];
 
 /** One recorded draw call. Colors are packed u32s — see `parseColor`. */
 export type PaintOp =
-  | { op: PaintOpKind; x: number; y: number; w: number; h: number; color: number }
+  | {
+      op: PaintOpKind;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+      color: number;
+    }
   | {
       op: PaintOpKind;
       x: number;

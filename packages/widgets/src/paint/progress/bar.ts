@@ -1,19 +1,15 @@
 /** ProgressBar painter — buffer, main fill (continuous or stepped), label. */
 import {
+  type LayoutNode,
+  ProgressBarOrientation,
   ProgressDirection,
   ProgressType,
-  ProgressBarOrientation,
-  type LayoutNode,
 } from "@tsgui/layout";
 import type { PaintContext } from "../../paint.ts";
 import { propsOf } from "../../types.ts";
 import type { ProgressBarProps } from "../../widgets/progress/types.ts";
-import {
-  fillRatio,
-  paintContinuousFill,
-  paintSteppedFill,
-} from "../fill.ts";
 import { resolveFillColorClamped } from "../color-stops.ts";
+import { fillRatio, paintContinuousFill, paintSteppedFill } from "../fill.ts";
 import { paintInlineValueLabel } from "../label.ts";
 
 /**
@@ -48,7 +44,11 @@ export function paintProgressBar(ctx: PaintContext, node: LayoutNode): void {
   const steps = props.steps ?? 0;
   const fillStyle = props.fillStyle ?? {};
 
-  const bufRatio = fillRatio({ value: props.buffer, min: props.min, max: props.max });
+  const bufRatio = fillRatio({
+    value: props.buffer,
+    min: props.min,
+    max: props.max,
+  });
 
   if (bufRatio > 0) {
     const bufferStyle = {
@@ -113,7 +113,11 @@ export function paintProgressBar(ctx: PaintContext, node: LayoutNode): void {
       ratio,
       fillStyle,
       colorOverride: props.colorStops
-        ? resolveFillColorClamped({ ratio, fillStyle, colorStops: props.colorStops })
+        ? resolveFillColorClamped({
+            ratio,
+            fillStyle,
+            colorStops: props.colorStops,
+          })
         : undefined,
     });
   }

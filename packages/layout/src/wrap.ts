@@ -1,7 +1,7 @@
 /** Single-line and wrap line layout — ported from flying-pan's layout/wrap. */
-import type { LayoutFlexFn, LayoutLineOptions } from "./types.ts";
-import { calculateMainContentSize, wrapMeasurements } from "./measurement.ts";
 import { positionFlowChildren } from "./flow.ts";
+import { calculateMainContentSize, wrapMeasurements } from "./measurement.ts";
+import type { LayoutFlexFn, LayoutLineOptions } from "./types.ts";
 import { updateChildMeasurements } from "./utility.ts";
 
 export function layoutSingleLine(

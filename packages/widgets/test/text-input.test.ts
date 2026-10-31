@@ -4,33 +4,29 @@
  * and fires onChange, arrows/shift select, backspace/delete respect the
  * selection, clipboard seam, and the painter draws text/selection/caret.
  */
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
-import {
-  layoutFlex,
-  type LayoutContext,
-  type LayoutNode,
-} from "@tsgui/layout";
 import {
   editingStateOf,
   FocusDispatcher,
+  type KeyboardInputEvent,
+  KeyboardInputKind,
   KeyCode,
   KeyModifiers,
-  KeyboardInputKind,
   MouseButton,
+  type PaintOp,
+  PaintOpKind,
   parseColor,
   PointerDispatcher,
+  type PointerInputEvent,
   PointerInputKind,
+  type ReconcilableWidget,
   Reconciler,
   renderHeadless,
   StateStore,
-  textInputClipboard,
   TextInput,
+  textInputClipboard,
   View,
-  PaintOpKind,
-  type PaintOp,
-  type KeyboardInputEvent,
-  type PointerInputEvent,
-  type ReconcilableWidget,
 } from "../src/index.ts";
 import { Palette } from "../src/index.ts";
 
@@ -92,24 +88,30 @@ function setup(widget: ReconcilableWidget): Harness {
       focusDispatch(events, []);
     },
     type(text) {
-      focusDispatch([], [
-        {
-          kind: KeyboardInputKind.Char,
-          key: 0,
-          text,
-          modifiers: KeyModifiers.None,
-        } as KeyboardInputEvent,
-      ]);
+      focusDispatch(
+        [],
+        [
+          {
+            kind: KeyboardInputKind.Char,
+            key: 0,
+            text,
+            modifiers: KeyModifiers.None,
+          } as KeyboardInputEvent,
+        ]
+      );
     },
     key(key, modifiers = KeyModifiers.None, repeat = false) {
-      focusDispatch([], [
-        {
-          kind: KeyboardInputKind.KeyDown,
-          key,
-          modifiers,
-          repeat,
-        } as KeyboardInputEvent,
-      ]);
+      focusDispatch(
+        [],
+        [
+          {
+            kind: KeyboardInputKind.KeyDown,
+            key,
+            modifiers,
+            repeat,
+          } as KeyboardInputEvent,
+        ]
+      );
     },
     render(next) {
       root = layoutFlex({
@@ -151,8 +153,19 @@ describe("TextInput editing", () => {
   test("click focuses; typed chars land at the caret and fire onChange", () => {
     const changes: string[] = [];
     let value = "";
-    const h = setup(field(value, (next) => { changes.push(next); value = next; }));
-    const render = (): void => h.render(field(value, (next) => { changes.push(next); value = next; }));
+    const h = setup(
+      field(value, (next) => {
+        changes.push(next);
+        value = next;
+      })
+    );
+    const render = (): void =>
+      h.render(
+        field(value, (next) => {
+          changes.push(next);
+          value = next;
+        })
+      );
 
     h.click(100, 12);
     h.type("h");
@@ -175,8 +188,19 @@ describe("TextInput editing", () => {
   test("backspace deletes behind the caret; arrows move it", () => {
     const changes: string[] = [];
     let value = "abc";
-    const h = setup(field(value, (next) => { changes.push(next); value = next; }));
-    const render = (): void => h.render(field(value, (next) => { changes.push(next); value = next; }));
+    const h = setup(
+      field(value, (next) => {
+        changes.push(next);
+        value = next;
+      })
+    );
+    const render = (): void =>
+      h.render(
+        field(value, (next) => {
+          changes.push(next);
+          value = next;
+        })
+      );
 
     h.click(200, 12); // past the end → caret at 3
     h.key(KeyCode.Backspace);
@@ -192,8 +216,17 @@ describe("TextInput editing", () => {
 
   test("shift+arrows build a selection; typing replaces it", () => {
     let value = "hello";
-    const h = setup(field(value, (next) => { value = next; }));
-    const render = (): void => h.render(field(value, (next) => { value = next; }));
+    const h = setup(
+      field(value, (next) => {
+        value = next;
+      })
+    );
+    const render = (): void =>
+      h.render(
+        field(value, (next) => {
+          value = next;
+        })
+      );
 
     h.click(8, 12); // caret 0
     h.key(KeyCode.Right, KeyModifiers.Shift);
@@ -218,8 +251,17 @@ describe("TextInput editing", () => {
   test("clipboard seam: cut and paste through the modifier path", () => {
     const clipboard: string[] = [];
     let value = "hello";
-    const h = setup(field(value, (next) => { value = next; }));
-    const render = (): void => h.render(field(value, (next) => { value = next; }));
+    const h = setup(
+      field(value, (next) => {
+        value = next;
+      })
+    );
+    const render = (): void =>
+      h.render(
+        field(value, (next) => {
+          value = next;
+        })
+      );
     textInputClipboard.get = () => clipboard[clipboard.length - 1] ?? "";
     textInputClipboard.set = (text: string) => clipboard.push(text);
 
@@ -240,8 +282,6 @@ describe("TextInput editing", () => {
     h.key(KeyCode.V, KeyModifiers.Control);
     expect(h.state().value).toBe("ppylo");
   });
-
-
 });
 
 describe("TextInput paint", () => {
@@ -257,10 +297,13 @@ describe("TextInput paint", () => {
 
     type TextOp = PaintOp & { text: string; tint: number };
     const textOps = (ops: PaintOp[]): string[] =>
-      ops.filter(
-        (op): op is TextOp =>
-          op.op === PaintOpKind.Text && typeof (op as TextOp).text === "string"
-      ).map((op) => op.text);
+      ops
+        .filter(
+          (op): op is TextOp =>
+            op.op === PaintOpKind.Text &&
+            typeof (op as TextOp).text === "string"
+        )
+        .map((op) => op.text);
     expect(textOps(empty.ops)).toEqual(["type here"]);
     expect(textOps(filled.ops)).toEqual(["hi"]);
   });
@@ -286,12 +329,20 @@ describe("TextInput paint", () => {
       }
     );
 
-    type Fill = PaintOp & { color: number; x: number; y: number; w: number; h: number };
+    type Fill = PaintOp & {
+      color: number;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    };
     type TextOp = PaintOp & { text: string; tint: number };
     const fills = frame.ops.filter(
       (op): op is Fill => op.op === PaintOpKind.Rect
     );
-    const texts = frame.ops.filter((op): op is TextOp => op.op === PaintOpKind.Text);
+    const texts = frame.ops.filter(
+      (op): op is TextOp => op.op === PaintOpKind.Text
+    );
 
     // Selection highlight: "ell" = 24px wide at the 8px monospace mock.
     const selection = fills.filter(
@@ -335,7 +386,9 @@ describe("TextInput paint", () => {
     // The painter must draw "h" with the caret after it — not the
     // placeholder with a caret clamped to 0.
     type TextOp = PaintOp & { text: string };
-    const texts = stale.ops.filter((op): op is TextOp => op.op === PaintOpKind.Text);
+    const texts = stale.ops.filter(
+      (op): op is TextOp => op.op === PaintOpKind.Text
+    );
     expect(texts.map((op) => op.text)).toEqual(["h"]);
     const caret = stale.ops.filter(
       (op): op is PaintOp & { w: number; x: number } =>
@@ -362,4 +415,3 @@ describe("TextInput paint", () => {
     expect(caret.length).toBe(0);
   });
 });
-

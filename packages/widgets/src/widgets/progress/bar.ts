@@ -1,12 +1,12 @@
 /** ProgressBar — linear, horizontal/vertical, forward/backward, stepped. */
 import {
   PointerEvents,
-  ProgressDirection,
   ProgressBarOrientation,
+  ProgressDirection,
   WidgetType,
 } from "@tsgui/layout";
-import { Palette } from "../../design.ts";
 import { createWidget } from "../../create-widget.ts";
+import { Palette } from "../../design.ts";
 import type { ReconcilableWidget } from "../../types.ts";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { ProgressBarProps } from "./types.ts";

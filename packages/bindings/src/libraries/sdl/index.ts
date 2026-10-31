@@ -1,11 +1,11 @@
 /** SDL3 bindings. Pointer values are opaque and backend-specific. */
 import { runtime } from "../../runtime.ts";
+import { asSdlSymbols, type SdlFunctions } from "./generated/functions.ts";
+import type { SdlSymbols } from "./generated/types.ts";
 
 export * from "./generated/constants.ts";
 export type { SdlSymbols } from "./generated/types.ts";
 export type { SdlFunctions } from "./generated/functions.ts";
-import type { SdlSymbols } from "./generated/types.ts";
-import { asSdlSymbols, type SdlFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")

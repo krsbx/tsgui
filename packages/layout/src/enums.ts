@@ -33,7 +33,8 @@ export const BackgroundType = {
   Linear: "linear",
 } as const;
 
-export type BackgroundType = (typeof BackgroundType)[keyof typeof BackgroundType];
+export type BackgroundType =
+  (typeof BackgroundType)[keyof typeof BackgroundType];
 
 export const Position = {
   Relative: "relative",
@@ -146,7 +147,8 @@ export const ListOrientation = {
   Vertical: "vertical",
 } as const;
 
-export type ListOrientation = (typeof ListOrientation)[keyof typeof ListOrientation];
+export type ListOrientation =
+  (typeof ListOrientation)[keyof typeof ListOrientation];
 
 export const Overflow = {
   Auto: "auto",

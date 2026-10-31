@@ -3,11 +3,7 @@
  * modules own their defaults and pseudo-states; this helper owns the
  * boilerplate — type, props, handlers, key, children — once.
  */
-import type {
-  ViewStyle,
-  WidgetDescriptor,
-  WidgetProps,
-} from "@tsgui/layout";
+import type { ViewStyle, WidgetDescriptor, WidgetProps } from "@tsgui/layout";
 import type {
   InteractionProps,
   Key,

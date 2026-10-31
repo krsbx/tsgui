@@ -5,7 +5,12 @@
  * a window + GPU).
  */
 import { FlexAlign, FlexJustify } from "./enums.ts";
-import type { Coordinate2D, ResolvedSpacing, Size, WidgetDescriptor } from "./style.ts";
+import type {
+  Coordinate2D,
+  ResolvedSpacing,
+  Size,
+  WidgetDescriptor,
+} from "./style.ts";
 
 export interface LayoutNode extends Coordinate2D, Size {
   stableId: number;
@@ -99,8 +104,7 @@ export interface UpdateChildMeasurementsResult {
   totalMainSize: number;
 }
 
-export interface CalculateMainContentSizeOptions
-  extends UpdateChildMeasurementsResult {
+export interface CalculateMainContentSizeOptions extends UpdateChildMeasurementsResult {
   measurements: ChildMeasurements[];
   padding: ResolvedSpacing;
   style: WidgetDescriptor["style"];

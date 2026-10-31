@@ -8,5 +8,9 @@ const CANDIDATES: Record<string, string[]> = {
 };
 
 export function resolveLibrary(): string {
-  return resolveDylib("SDL3", "TSGUI_SDL3_PATH", CANDIDATES[process.platform] ?? []);
+  return resolveDylib(
+    "SDL3",
+    "TSGUI_SDL3_PATH",
+    CANDIDATES[process.platform] ?? []
+  );
 }

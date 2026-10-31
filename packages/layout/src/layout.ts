@@ -3,11 +3,11 @@
  * Ported from flying-pan's layout/layout with the renderer context
  * replaced by the minimal injected LayoutContext.
  */
-import { FlexDirection, FlexWrap, Overflow } from "./enums.ts";
-import { resolveSize, resolveSpacing } from "./style-resolve.ts";
 import { positionAbsolute } from "./absolute.ts";
+import { FlexDirection, FlexWrap, Overflow } from "./enums.ts";
 import { measureChildsComponent } from "./measurement.ts";
 import { widgetLevelLayoutFlex } from "./processor/list.ts";
+import { resolveSize, resolveSpacing } from "./style-resolve.ts";
 import type { LayoutFlexFn, LayoutNode } from "./types.ts";
 import { layoutSingleLine, layoutWrap } from "./wrap.ts";
 
@@ -26,7 +26,8 @@ export const layoutFlex: LayoutFlexFn = function (options) {
   const height = resolveSize(style.height, availableHeight);
 
   let contentWidth = (width || availableWidth) - padding.left - padding.right;
-  let contentHeight = (height || availableHeight) - padding.top - padding.bottom;
+  let contentHeight =
+    (height || availableHeight) - padding.top - padding.bottom;
 
   const gap = resolveSize(style.gap, contentWidth);
 

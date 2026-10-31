@@ -1,5 +1,5 @@
 /** Texture creation/destruction over the SDL3 properties API. */
-import { SdlDefines, sdl } from "@tsgui/bindings";
+import { sdl, SdlDefines } from "@tsgui/bindings";
 import type { TextureFromPixelsOptions, TextureHandle } from "./types.ts";
 
 // Prop names are string #defines — invisible to the codegen's numeric
@@ -22,14 +22,26 @@ export function createTextureFromPixels({
 }: TextureFromPixelsOptions): TextureHandle {
   const props = sdl.SDL_CreateProperties();
 
-  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_FORMAT, value: format });
+  sdl.SDL_SetNumberProperty({
+    props,
+    name: PROP_TEXTURE_CREATE_FORMAT,
+    value: format,
+  });
   sdl.SDL_SetNumberProperty({
     props,
     name: PROP_TEXTURE_CREATE_ACCESS,
     value: 0 /* static */,
   });
-  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_WIDTH, value: width });
-  sdl.SDL_SetNumberProperty({ props, name: PROP_TEXTURE_CREATE_HEIGHT, value: height });
+  sdl.SDL_SetNumberProperty({
+    props,
+    name: PROP_TEXTURE_CREATE_WIDTH,
+    value: width,
+  });
+  sdl.SDL_SetNumberProperty({
+    props,
+    name: PROP_TEXTURE_CREATE_HEIGHT,
+    value: height,
+  });
 
   const texture = sdl.SDL_CreateTextureWithProperties({ renderer, props });
   sdl.SDL_DestroyProperties({ props });
@@ -38,11 +50,16 @@ export function createTextureFromPixels({
     throw new Error(`createTextureFromPixels: ${sdl.SDL_GetError()}`);
   }
 
-  if (!sdl.SDL_UpdateTexture({ texture, rect: null, pixels, pitch: width * 4 })) {
+  if (
+    !sdl.SDL_UpdateTexture({ texture, rect: null, pixels, pitch: width * 4 })
+  ) {
     throw new Error(`SDL_UpdateTexture: ${sdl.SDL_GetError()}`);
   }
 
-  sdl.SDL_SetTextureBlendMode({ texture, blendMode: SdlDefines.SDL_BLENDMODE_BLEND });
+  sdl.SDL_SetTextureBlendMode({
+    texture,
+    blendMode: SdlDefines.SDL_BLENDMODE_BLEND,
+  });
 
   return texture;
 }

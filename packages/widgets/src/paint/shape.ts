@@ -5,8 +5,8 @@
  */
 import type { Rect } from "@tsgui/gpu";
 import type { ViewStyle } from "@tsgui/layout";
-import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 import type { Painter } from "../paint.ts";
+import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 
 /**
  * One shape for both corner paths — square `fillRect` when no radius,
@@ -64,4 +64,3 @@ export function paintBackground(
     colorWithOpacity(parseColor(style.backgroundColor), style.opacity ?? 1)
   );
 }
-

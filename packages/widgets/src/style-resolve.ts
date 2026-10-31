@@ -41,16 +41,26 @@ export function parseColor(css: string): number {
   const b = Number.parseInt(hex.slice(4, 6), 16);
   const a = Number.parseInt(hex.slice(6, 8), 16);
 
-  return (((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0;
+  return (
+    (((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0
+  );
 }
 
 /** Scale the alpha channel of a packed color (0–1 factor). */
 export function colorWithOpacity(color: number, opacity: number): number {
-  const a = Math.round(((color >>> 24) & 255) * Math.max(0, Math.min(1, opacity)));
+  const a = Math.round(
+    ((color >>> 24) & 255) * Math.max(0, Math.min(1, opacity))
+  );
   return ((a << 24) | (color & 0x00ffffff)) >>> 0;
 }
 
-const MASK = { hovered: 1, focused: 2, pressed: 4, checked: 8, disabled: 16 } as const;
+const MASK = {
+  hovered: 1,
+  focused: 2,
+  pressed: 4,
+  checked: 8,
+  disabled: 16,
+} as const;
 
 const styleCache = new WeakMap<ViewStyle, Map<number, ViewStyle>>();
 

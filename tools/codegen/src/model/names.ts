@@ -11,6 +11,6 @@ export function pascalCase(s: string): string {
 
 /** Strip the target's symbol prefix from a declaration name ("SDL_Foo" → "Foo"). */
 export function stripPrefix(name: string, prefix: string): string {
-  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return name.replace(new RegExp(`^${escaped}`), '');
+  const escaped = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return name.replace(new RegExp(`^${escaped}`), "");
 }

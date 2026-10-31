@@ -5,26 +5,26 @@
  * `generateTarget(spec, true)` is the CI byte-stability check;
  * `generateTarget(spec, false)` writes the files.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { ClangNodeParser } from './clang/parser';
-import { buildFfiTables } from './model';
-import { pascalCase } from './model';
-import { scanNumericDefines } from './defines';
-import { dumpAst } from './ast-dump';
-import { includeDir, type TargetSpec } from './targets';
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { dumpAst } from "./ast-dump";
+import { ClangNodeParser } from "./clang/parser";
+import { scanNumericDefines } from "./defines";
 import {
   generateDefs,
   generateFfiConstants,
   generateFunctions,
   generateTypes,
   summarizeUnsafe,
-} from './gen/index.ts';
+} from "./gen/index.ts";
+import { buildFfiTables } from "./model";
+import { pascalCase } from "./model";
+import { includeDir, type TargetSpec } from "./targets";
 
 const bindingsSrcDir = join(
   import.meta.dir,
-  '../../..',
-  'packages/bindings/src'
+  "../../..",
+  "packages/bindings/src"
 );
 
 export async function generateTarget(
@@ -45,7 +45,7 @@ export async function generateTarget(
     ? scanNumericDefines(base, spec.definesSubdir, spec.prefix)
     : { defines: [], skipped: 0 };
 
-  const outDir = join(bindingsSrcDir, 'libraries', spec.name, 'generated');
+  const outDir = join(bindingsSrcDir, "libraries", spec.name, "generated");
   const constants = generateFfiConstants(
     tables,
     spec.origin,
@@ -57,10 +57,10 @@ export async function generateTarget(
   const functions = generateFunctions(tables, pascalCase(spec.name));
 
   const outputs: [string, string][] = [
-    [join(outDir, 'constants.ts'), constants],
-    [join(outDir, 'defs.ts'), defs],
-    [join(outDir, 'types.ts'), types],
-    [join(outDir, 'functions.ts'), functions],
+    [join(outDir, "constants.ts"), constants],
+    [join(outDir, "defs.ts"), defs],
+    [join(outDir, "types.ts"), types],
+    [join(outDir, "functions.ts"), functions],
   ];
 
   if (check) {
@@ -85,7 +85,7 @@ export async function generateTarget(
 
   console.log(
     `codegen[${spec.name}]: ${tables.functions.length} functions, ${tables.enums.length} enums, ${defines.length} defines` +
-      (skipped > 0 ? ` (${skipped} non-numeric defines skipped)` : '') +
+      (skipped > 0 ? ` (${skipped} non-numeric defines skipped)` : "") +
       summarizeUnsafe(tables)
   );
 }

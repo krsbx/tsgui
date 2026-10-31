@@ -29,9 +29,7 @@ const window = initOk
     })
   : null;
 
-type ReadbackSurface = NonNullable<
-  ReturnType<typeof sdl.SDL_RenderReadPixels>
->;
+type ReadbackSurface = NonNullable<ReturnType<typeof sdl.SDL_RenderReadPixels>>;
 
 function readPixel(
   surface: ReadbackSurface,
@@ -54,8 +52,7 @@ function readback(gpu: GpuRenderer): ReadbackSurface {
   gpu.flush();
   const rect = new Int32Array([0, 0, 64, 64]);
   const surface = sdl.SDL_RenderReadPixels({ renderer: gpu.renderer, rect });
-  if (!surface)
-    throw new Error(`SDL_RenderReadPixels: ${sdl.SDL_GetError()}`);
+  if (!surface) throw new Error(`SDL_RenderReadPixels: ${sdl.SDL_GetError()}`);
   return surface;
 }
 

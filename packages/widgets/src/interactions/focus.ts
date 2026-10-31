@@ -8,26 +8,29 @@
  * Key and char events route to the focused widget; Enter / Space
  * synthesize a click on activable widgets (fresh press only).
  */
-import { WidgetType, type LayoutNode } from "@tsgui/layout";
-import { hitTest } from "./hit-test.ts";
-import {
-  KeyboardInputKind,
-  PointerInputKind,
-  type KeyboardInputEvent,
-  type PointerInputEvent,
-} from "./types.ts";
+import { type LayoutNode, WidgetType } from "@tsgui/layout";
 import {
   KeyCode,
-  MouseButton,
   type KeyModifiers,
+  MouseButton,
   type ReconcilableWidget,
 } from "../types.ts";
+import { hitTest } from "./hit-test.ts";
+import {
+  type KeyboardInputEvent,
+  KeyboardInputKind,
+  type PointerInputEvent,
+  PointerInputKind,
+} from "./types.ts";
 
 /** Blur/focus payloads are built inline; the handlers define the shape. */
 type Widget = ReconcilableWidget;
 
 function blurOf(node: LayoutNode, relatedStableId: number | null): void {
-  (node.widget as Widget).onBlur?.({ stableId: node.stableId, relatedStableId });
+  (node.widget as Widget).onBlur?.({
+    stableId: node.stableId,
+    relatedStableId,
+  });
 }
 
 /** Widgets that synthesize onClick from Enter / Space while focused. */
@@ -73,7 +76,10 @@ export class FocusDispatcher {
 
     // 3. Tab cycling (intercepted — never forwarded).
     for (const event of keyboardEvents) {
-      if (event.kind === KeyboardInputKind.KeyDown && event.key === KeyCode.Tab) {
+      if (
+        event.kind === KeyboardInputKind.KeyDown &&
+        event.key === KeyCode.Tab
+      ) {
         this.cycleTab(event.modifiers, focusableNodes, layoutIndex);
         break;
       }
@@ -81,7 +87,10 @@ export class FocusDispatcher {
 
     // 4. Click-to-focus on the left-button down edge.
     for (const event of pointerEvents) {
-      if (event.kind === PointerInputKind.Down && event.button === MouseButton.Left) {
+      if (
+        event.kind === PointerInputKind.Down &&
+        event.button === MouseButton.Left
+      ) {
         this.handleClick(event.x, event.y, root, layoutIndex);
         break;
       }
@@ -163,7 +172,8 @@ export class FocusDispatcher {
     if (currentIndex === -1) {
       nextIndex = shift ? focusableNodes.length - 1 : 0;
     } else if (shift) {
-      nextIndex = (currentIndex - 1 + focusableNodes.length) % focusableNodes.length;
+      nextIndex =
+        (currentIndex - 1 + focusableNodes.length) % focusableNodes.length;
     } else {
       nextIndex = (currentIndex + 1) % focusableNodes.length;
     }
@@ -194,12 +204,17 @@ export class FocusDispatcher {
     }
   }
 
-  private moveFocus(node: LayoutNode, layoutIndex: Map<number, LayoutNode>): void {
+  private moveFocus(
+    node: LayoutNode,
+    layoutIndex: Map<number, LayoutNode>
+  ): void {
     if (this.focusedId === node.stableId) return;
 
     const relatedStableId = this.focusedId;
     const oldNode =
-      relatedStableId !== null ? (layoutIndex.get(relatedStableId) ?? null) : null;
+      relatedStableId !== null
+        ? (layoutIndex.get(relatedStableId) ?? null)
+        : null;
 
     this.focusedId = node.stableId;
 
@@ -215,7 +230,11 @@ export class FocusDispatcher {
     const widget = node.widget as ReconcilableWidget;
 
     if (event.kind === KeyboardInputKind.Char) {
-      widget.onChar?.({ text: event.text ?? "", stableId: node.stableId, node });
+      widget.onChar?.({
+        text: event.text ?? "",
+        stableId: node.stableId,
+        node,
+      });
       return;
     }
 
@@ -274,7 +293,11 @@ export class FocusDispatcher {
     return null;
   }
 
-  private findPath(node: LayoutNode, target: LayoutNode, path: LayoutNode[]): boolean {
+  private findPath(
+    node: LayoutNode,
+    target: LayoutNode,
+    path: LayoutNode[]
+  ): boolean {
     path.push(node);
 
     if (node === target) return true;

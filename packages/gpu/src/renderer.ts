@@ -1,5 +1,5 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
-import { SdlDefines, sdl } from "@tsgui/bindings";
+import { sdl, SdlDefines } from "@tsgui/bindings";
 import type {
   ArcOptions,
   Rect,
@@ -48,8 +48,16 @@ export class GpuRenderer {
     // Prefer the GPU backend; fall back to SDL's default choice. Tests pin
     // `driver` (e.g. "software") for deterministic pixel readback.
     const props = sdl.SDL_CreateProperties();
-    sdl.SDL_SetStringProperty({ props, name: PROP_RENDERER_CREATE_NAME, value: options.driver ?? "gpu" });
-    sdl.SDL_SetPointerProperty({ props, name: PROP_RENDERER_CREATE_WINDOW, value: window });
+    sdl.SDL_SetStringProperty({
+      props,
+      name: PROP_RENDERER_CREATE_NAME,
+      value: options.driver ?? "gpu",
+    });
+    sdl.SDL_SetPointerProperty({
+      props,
+      name: PROP_RENDERER_CREATE_WINDOW,
+      value: window,
+    });
     const renderer = sdl.SDL_CreateRendererWithProperties({ props });
     sdl.SDL_DestroyProperties({ props });
 
@@ -85,7 +93,13 @@ export class GpuRenderer {
     this.indexCount = 0;
     this.batchTexture = null;
     const c = this.clearColor;
-    sdl.SDL_SetRenderDrawColor({ renderer: this.renderer, r: c.r, g: c.g, b: c.b, a: c.a });
+    sdl.SDL_SetRenderDrawColor({
+      renderer: this.renderer,
+      r: c.r,
+      g: c.g,
+      b: c.b,
+      a: c.a,
+    });
     if (!sdl.SDL_RenderClear({ renderer: this.renderer })) {
       throw new Error(`SDL_RenderClear: ${sdl.SDL_GetError()}`);
     }
@@ -98,10 +112,17 @@ export class GpuRenderer {
       this.clipData[1] = top.y;
       this.clipData[2] = top.w;
       this.clipData[3] = top.h;
-      if (!sdl.SDL_SetRenderClipRect({ renderer: this.renderer, rect: this.clipData })) {
+      if (
+        !sdl.SDL_SetRenderClipRect({
+          renderer: this.renderer,
+          rect: this.clipData,
+        })
+      ) {
         throw new Error(`SDL_SetRenderClipRect: ${sdl.SDL_GetError()}`);
       }
-    } else if (!sdl.SDL_SetRenderClipRect({ renderer: this.renderer, rect: null })) {
+    } else if (
+      !sdl.SDL_SetRenderClipRect({ renderer: this.renderer, rect: null })
+    ) {
       throw new Error(`SDL_SetRenderClipRect: ${sdl.SDL_GetError()}`);
     }
   }
@@ -195,7 +216,14 @@ export class GpuRenderer {
    * Queue a textured quad (uv 0..1, white tint). Starts a new batch when the
    * texture differs from the open batch's texture.
    */
-  drawTexture({ texture, x, y, w, h, tint = 0xffffffff }: TextureDrawOptions): void {
+  drawTexture({
+    texture,
+    x,
+    y,
+    w,
+    h,
+    tint = 0xffffffff,
+  }: TextureDrawOptions): void {
     // Any texture change — including untextured → textured — starts a batch.
     if (this.batchTexture !== texture) {
       this.flushBatch();
@@ -261,7 +289,14 @@ export class GpuRenderer {
     for (const { cx: ccx, cy: ccy, a0 } of corners) {
       for (let i = 0; i <= segments; i++) {
         const a = a0 + (i / segments) * (Math.PI / 2);
-        this.writeVertex(vi, ccx + r * Math.cos(a), ccy + r * Math.sin(a), color, 0, 0);
+        this.writeVertex(
+          vi,
+          ccx + r * Math.cos(a),
+          ccy + r * Math.sin(a),
+          color,
+          0,
+          0
+        );
         vi += S;
       }
     }
@@ -308,7 +343,14 @@ export class GpuRenderer {
     vi += S;
     for (let i = 0; i <= count; i++) {
       const a = startAngle + (sweep * i) / count;
-      this.writeVertex(vi, cx + radius * Math.cos(a), cy + radius * Math.sin(a), color, 0, 0);
+      this.writeVertex(
+        vi,
+        cx + radius * Math.cos(a),
+        cy + radius * Math.sin(a),
+        color,
+        0,
+        0
+      );
       vi += S;
     }
 
@@ -358,7 +400,14 @@ export class GpuRenderer {
       const sin = Math.sin(a);
       this.writeVertex(vi, cx + radius * cos, cy + radius * sin, color, 0, 0);
       vi += S;
-      this.writeVertex(vi, cx + innerRadius * cos, cy + innerRadius * sin, color, 0, 0);
+      this.writeVertex(
+        vi,
+        cx + innerRadius * cos,
+        cy + innerRadius * sin,
+        color,
+        0,
+        0
+      );
       vi += S;
     }
 
@@ -385,7 +434,11 @@ export class GpuRenderer {
     const ok = sdl.SDL_RenderGeometry({
       renderer: this.renderer,
       texture: this.batchTexture,
-      vertices: new Uint8Array(this.vertexData.buffer, 0, this.vertexCount * BYTES_PER_VERTEX),
+      vertices: new Uint8Array(
+        this.vertexData.buffer,
+        0,
+        this.vertexCount * BYTES_PER_VERTEX
+      ),
       num_vertices: this.vertexCount,
       indices: new Int32Array(this.indexData.buffer, 0, this.indexCount),
       num_indices: this.indexCount,

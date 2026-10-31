@@ -1,8 +1,8 @@
 /** Inline value labels — flying-pan's renderer/paint/text value branch. */
 import { ProgressValueType, type TextStyle } from "@tsgui/layout";
 import { Palette } from "../design.ts";
-import { parseColor } from "../style-resolve.ts";
 import type { Painter, TextPainter } from "../paint.ts";
+import { parseColor } from "../style-resolve.ts";
 
 /** Auto label from a value; `null` when there's nothing to show. */
 export function formatValueLabel(options: {

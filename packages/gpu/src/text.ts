@@ -84,7 +84,10 @@ export class TtfFont {
     if (!surface) {
       throw new Error(`TTF_RenderText_Blended: ${sdl.SDL_GetError()}`);
     }
-    const texture = sdl.SDL_CreateTextureFromSurface({ renderer: this.renderer, surface });
+    const texture = sdl.SDL_CreateTextureFromSurface({
+      renderer: this.renderer,
+      surface,
+    });
     sdl.SDL_DestroySurface({ surface });
     if (!texture) {
       throw new Error(`SDL_CreateTextureFromSurface: ${sdl.SDL_GetError()}`);

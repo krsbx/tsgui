@@ -42,10 +42,14 @@ export function generateFunctions(
   L.push(`}`);
   L.push(``);
   L.push(`/**`);
-  L.push(` * Structural "Like" surface over ${pascalName}Symbols (or an extended`);
+  L.push(
+    ` * Structural "Like" surface over ${pascalName}Symbols (or an extended`
+  );
   L.push(` * symbols type S): every symbol must exist and take no more params`);
   L.push(` * than declared, but argument and return types stay open — so raw`);
-  L.push(` * dlopen symbols from either backend (bun:ffi / node:ffi) fit without`);
+  L.push(
+    ` * dlopen symbols from either backend (bun:ffi / node:ffi) fit without`
+  );
   L.push(` * a cast.`);
   L.push(` */`);
   L.push(
@@ -57,7 +61,9 @@ export function generateFunctions(
   L.push(`};`);
   L.push(``);
   L.push(`/**`);
-  L.push(` * Checked brand: view raw backend symbols as the branded S surface.`);
+  L.push(
+    ` * Checked brand: view raw backend symbols as the branded S surface.`
+  );
   L.push(` * Symbol keys are compile-checked; handle types are trusted.`);
   L.push(` */`);
   L.push(

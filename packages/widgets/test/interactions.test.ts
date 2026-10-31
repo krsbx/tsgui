@@ -256,10 +256,15 @@ describe("controlled checked widgets", () => {
     const clicked = (): void => fire([move(8, 8), down(8, 8), up(8, 8)]);
 
     clicked();
-    render(Checkbox({ checked: value, onCheckedChange: (next) => {
-      changes.push(next);
-      value = next;
-    } }));
+    render(
+      Checkbox({
+        checked: value,
+        onCheckedChange: (next) => {
+          changes.push(next);
+          value = next;
+        },
+      })
+    );
     clicked();
 
     expect(changes).toEqual([true, false]);
@@ -295,10 +300,15 @@ describe("controlled checked widgets", () => {
     const clicked = (): void => fire([move(10, 12), down(10, 12), up(10, 12)]);
 
     clicked();
-    render(Toggle({ checked: value, onCheckedChange: (next) => {
-      changes.push(next);
-      value = next;
-    } }));
+    render(
+      Toggle({
+        checked: value,
+        onCheckedChange: (next) => {
+          changes.push(next);
+          value = next;
+        },
+      })
+    );
     clicked();
 
     expect(changes).toEqual([true, false]);

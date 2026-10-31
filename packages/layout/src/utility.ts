@@ -1,11 +1,11 @@
 /** Main-axis measurement updates — ported from flying-pan's layout/utility. */
 import { crossMargin, mainMargin, mainSize } from "./axis.ts";
 import { distributeFreeSpace, distributeShrinking } from "./calculator.ts";
+import { clamp, resolveConstraint } from "./style-resolve.ts";
 import type {
   UpdateChildMeasurementsOptions,
   UpdateChildMeasurementsResult,
 } from "./types.ts";
-import { clamp, resolveConstraint } from "./style-resolve.ts";
 
 export function updateChildMeasurements(
   options: UpdateChildMeasurementsOptions

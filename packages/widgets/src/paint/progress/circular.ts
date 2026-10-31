@@ -1,16 +1,16 @@
 /** CircularProgress painter — buffer arc, main arc (ring or pie), label. */
 import {
   CircularProgressDirection,
-  ProgressType,
   type LayoutNode,
+  ProgressType,
 } from "@tsgui/layout";
 import { Palette } from "../../design.ts";
-import { colorWithOpacity, parseColor } from "../../style-resolve.ts";
 import type { PaintContext } from "../../paint.ts";
+import { colorWithOpacity, parseColor } from "../../style-resolve.ts";
 import { propsOf } from "../../types.ts";
 import type { CircularProgressProps } from "../../widgets/progress/types.ts";
-import { fillRatio } from "../fill.ts";
 import { resolveFillColorClamped } from "../color-stops.ts";
+import { fillRatio } from "../fill.ts";
 import { paintInlineValueLabel } from "../label.ts";
 
 /** CSS color string + opacity → packed u32 for the arc primitives. */
@@ -41,7 +41,10 @@ function paintIndeterminate(ctx: PaintContext, node: LayoutNode): void {
   });
 }
 
-export function paintCircularProgress(ctx: PaintContext, node: LayoutNode): void {
+export function paintCircularProgress(
+  ctx: PaintContext,
+  node: LayoutNode
+): void {
   const props = propsOf<CircularProgressProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
@@ -62,10 +65,15 @@ export function paintCircularProgress(ctx: PaintContext, node: LayoutNode): void
   const thickness = props.thickness ?? 0.1;
   const innerRadius = radius * (1 - thickness);
 
-  const bufRatio = fillRatio({ value: props.buffer, min: props.min, max: props.max });
+  const bufRatio = fillRatio({
+    value: props.buffer,
+    min: props.min,
+    max: props.max,
+  });
 
   if (bufRatio > 0) {
-    const bufferColor = props.bufferStyle?.backgroundColor ?? fillStyle.backgroundColor;
+    const bufferColor =
+      props.bufferStyle?.backgroundColor ?? fillStyle.backgroundColor;
     const bufferOpacity = props.bufferStyle?.opacity ?? 0.35;
 
     ctx.gpu.fillRing({
@@ -90,7 +98,15 @@ export function paintCircularProgress(ctx: PaintContext, node: LayoutNode): void
     if (thickness >= 1) {
       ctx.gpu.fillArc({ cx, cy, radius, startAngle, endAngle, color });
     } else {
-      ctx.gpu.fillRing({ cx, cy, innerRadius, radius, startAngle, endAngle, color });
+      ctx.gpu.fillRing({
+        cx,
+        cy,
+        innerRadius,
+        radius,
+        startAngle,
+        endAngle,
+        color,
+      });
     }
   };
 

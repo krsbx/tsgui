@@ -1,6 +1,6 @@
 /** Threshold color stops — the stop with the highest `at ≤ ratio` wins. */
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
-import { Palette, type ColorStop } from "../design.ts";
+import { type ColorStop, Palette } from "../design.ts";
 
 export function resolveFillColor(options: {
   ratio: number;
@@ -36,4 +36,3 @@ export function resolveFillColorClamped(options: {
     colorStops: options.colorStops,
   });
 }
-

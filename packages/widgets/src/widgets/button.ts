@@ -4,14 +4,14 @@
  */
 import { WidgetType } from "@tsgui/layout";
 import type { ViewStyle } from "@tsgui/layout";
+import { createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
-  focusStyle,
   focusableWhen,
+  focusStyle,
   Metrics,
   Palette,
 } from "../design.ts";
-import { createWidget } from "../create-widget.ts";
 import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
 export interface ButtonProps extends BaseWidgetProps {

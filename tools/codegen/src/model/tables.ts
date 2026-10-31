@@ -4,27 +4,61 @@ import type {
   CFunctionDecl,
   CHeaderDecl,
   CStructDecl,
-  CTypedefDecl,
   CTypeDecl,
-} from '../clang/types';
-import { DeclarationKind } from '../clang/types';
-import { classifyFfiType, PRIMITIVES, scalarTs } from './kinds';
-import { classifyPointerTs } from './pointers';
-import { collectEnums } from './enums';
+  CTypedefDecl,
+} from "../clang/types";
+import { DeclarationKind } from "../clang/types";
+import { collectEnums } from "./enums";
 import type {
   FfiArg,
   FfiFilterOptions,
   FfiFunction,
   FfiTables,
   UnsafeFunction,
-} from './interfaces';
+} from "./interfaces";
+import { classifyFfiType, PRIMITIVES, scalarTs } from "./kinds";
+import { classifyPointerTs } from "./pointers";
 
 const JS_RESERVED = new Set([
-  'arguments', 'await', 'break', 'case', 'catch', 'class', 'const', 'continue',
-  'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false',
-  'finally', 'for', 'function', 'if', 'import', 'in', 'instanceof', 'let',
-  'new', 'null', 'return', 'super', 'switch', 'this', 'throw', 'true', 'try',
-  'typeof', 'var', 'void', 'while', 'with', 'yield',
+  "arguments",
+  "await",
+  "break",
+  "case",
+  "catch",
+  "class",
+  "const",
+  "continue",
+  "default",
+  "delete",
+  "do",
+  "else",
+  "enum",
+  "export",
+  "extends",
+  "false",
+  "finally",
+  "for",
+  "function",
+  "if",
+  "import",
+  "in",
+  "instanceof",
+  "let",
+  "new",
+  "null",
+  "return",
+  "super",
+  "switch",
+  "this",
+  "throw",
+  "true",
+  "try",
+  "typeof",
+  "var",
+  "void",
+  "while",
+  "with",
+  "yield",
 ]);
 
 function jsSafeName(name: string): string {
@@ -53,7 +87,7 @@ export function buildFfiTables(
   for (const decl of header.declarations) {
     if (decl.kind === DeclarationKind.TYPEDEF) {
       const t = decl as CTypedefDecl;
-      if (t.tag === null && !('params' in t.underlyingType)) {
+      if (t.tag === null && !("params" in t.underlyingType)) {
         aliases.set(t.name, t.underlyingType as CTypeDecl);
       }
     } else if (decl.kind === DeclarationKind.ENUM) {
@@ -81,9 +115,9 @@ export function buildFfiTables(
       t = aliases.get(t.name)!;
     }
     if (
-      t.name !== 'void' &&
+      t.name !== "void" &&
       PRIMITIVES[t.name] === undefined &&
-      t.name !== 'char'
+      t.name !== "char"
     ) {
       returnedPointees.add(t.name);
     }
@@ -96,7 +130,7 @@ export function buildFfiTables(
     if (!fn.name.startsWith(opts.namePrefix)) continue;
 
     if (fn.variadic) {
-      unsafe.push({ name: fn.name, reason: 'variadic' });
+      unsafe.push({ name: fn.name, reason: "variadic" });
       continue;
     }
 
@@ -109,7 +143,7 @@ export function buildFfiTables(
       continue;
     }
     const returnTs =
-      returnKind === 'pointer'
+      returnKind === "pointer"
         ? classifyPointerTs(
             fn.returnType,
             aliases,
@@ -118,7 +152,7 @@ export function buildFfiTables(
             returnedPointees,
             handleTypes
           )
-        : scalarTs(returnKind, 'return');
+        : scalarTs(returnKind, "return");
     if (returnTs === null) {
       unsafe.push({
         name: fn.name,
@@ -140,7 +174,7 @@ export function buildFfiTables(
         break;
       }
       const ts =
-        kind === 'pointer'
+        kind === "pointer"
           ? classifyPointerTs(
               p.type,
               aliases,
@@ -149,7 +183,7 @@ export function buildFfiTables(
               returnedPointees,
               handleTypes
             )
-          : scalarTs(kind, 'param');
+          : scalarTs(kind, "param");
       if (ts === null) {
         unsafe.push({
           name: fn.name,
@@ -171,7 +205,7 @@ export function buildFfiTables(
 
   const { enums, unresolved } = collectEnums(header, opts);
   for (const name of unresolved) {
-    unsafe.push({ name, reason: 'enum constant references an unknown symbol' });
+    unsafe.push({ name, reason: "enum constant references an unknown symbol" });
   }
 
   return { functions, unsafe, enums, handleTypes: [...handleTypes].sort() };

@@ -1,11 +1,11 @@
 /** SDL3_image bindings. Pointer values are opaque and backend-specific. */
 import { runtime } from "../../runtime.ts";
+import { asImageSymbols, type ImageFunctions } from "./generated/functions.ts";
+import type { ImageSymbols } from "./generated/types.ts";
 
 export * from "./generated/constants.ts";
 export type { ImageSymbols } from "./generated/types.ts";
 export type { ImageFunctions } from "./generated/functions.ts";
-import type { ImageSymbols } from "./generated/types.ts";
-import { asImageSymbols, type ImageFunctions } from "./generated/functions.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")

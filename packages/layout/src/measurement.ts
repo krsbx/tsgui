@@ -1,13 +1,20 @@
 /** Child measurement + wrap + justify calculation — ported from flying-pan. */
 import { crossMargin, mainMargin, mainSize } from "./axis.ts";
-import type { Size, WidgetDescriptor } from "./style.ts";
+import {
+  FlexAlign,
+  FlexDirection,
+  FlexJustify,
+  Position,
+  SpacingType,
+} from "./enums.ts";
+import { resolveChildSize } from "./resolver.ts";
 import {
   clamp,
   resolveConstraint,
   resolveSize,
   resolveSpacing,
 } from "./style-resolve.ts";
-import { FlexAlign, FlexDirection, FlexJustify, Position, SpacingType } from "./enums.ts";
+import type { Size, WidgetDescriptor } from "./style.ts";
 import type {
   CalculateMainContentSizeOptions,
   CalculateMainContentSizeResult,
@@ -17,7 +24,6 @@ import type {
   WrapLine,
   WrapMeasurementsOptions,
 } from "./types.ts";
-import { resolveChildSize } from "./resolver.ts";
 import type { LayoutContext } from "./types.ts";
 
 /**
@@ -69,7 +75,10 @@ function intrinsicSize(options: {
       parentWidth: size.width || parentWidth,
       parentHeight: size.height || parentHeight,
     });
-    const margin = resolveSpacing(child.style?.[SpacingType.Margin], parentWidth);
+    const margin = resolveSpacing(
+      child.style?.[SpacingType.Margin],
+      parentWidth
+    );
 
     const h = childSize.height + margin.top + margin.bottom;
     const w = childSize.width + margin.left + margin.right;
@@ -83,8 +92,7 @@ function intrinsicSize(options: {
 
   const gaps = flowCount > 1 ? gap * (flowCount - 1) : 0;
   if (needsHeight) {
-    size.height =
-      (isRow ? maxH : sumH + gaps) + padding.top + padding.bottom;
+    size.height = (isRow ? maxH : sumH + gaps) + padding.top + padding.bottom;
   }
   if (needsWidth) {
     size.width = (isRow ? sumW + gaps : maxW) + padding.left + padding.right;
@@ -105,10 +113,14 @@ export function measureChildsComponent(
   let sumW = 0;
 
   for (const child of options.children) {
-    const margin = resolveSpacing(child.style?.[SpacingType.Margin], parentWidth);
+    const margin = resolveSpacing(
+      child.style?.[SpacingType.Margin],
+      parentWidth
+    );
     const isAbsolute = child.style?.position === Position.Absolute;
     const flexValue = child.style?.flexGrow ?? child.style?.flex ?? 0;
-    const flexShrinkValue = child.style?.flexShrink ?? (child.style?.flex ? 1 : 0);
+    const flexShrinkValue =
+      child.style?.flexShrink ?? (child.style?.flex ? 1 : 0);
 
     const flex = isAbsolute ? 0 : flexValue;
     const flexShrink = isAbsolute ? 0 : flexShrinkValue;
@@ -164,7 +176,8 @@ export function wrapMeasurements(options: WrapMeasurementsOptions): WrapLine[] {
   let currentMain = 0;
 
   for (const m of options.measurements) {
-    const spaceRequired = mainSize(m, options.isRow) + mainMargin(m, options.isRow);
+    const spaceRequired =
+      mainSize(m, options.isRow) + mainMargin(m, options.isRow);
     const gapRequired = currentLine.length > 0 ? options.gap : 0;
 
     if (

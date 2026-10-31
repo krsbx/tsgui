@@ -1,6 +1,6 @@
 /** Meter painter — HTML-`<meter>` low/high/optimum zones as palette colors. */
 import type { LayoutNode } from "@tsgui/layout";
-import { ProgressDirection, ProgressBarOrientation } from "@tsgui/layout";
+import { ProgressBarOrientation, ProgressDirection } from "@tsgui/layout";
 import { MeterZone, Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
 import { propsOf } from "../types.ts";

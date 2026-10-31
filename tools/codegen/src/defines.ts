@@ -7,8 +7,8 @@
  * only macros whose value parses as a plain integer, an SDL_UINT64_C(…)
  * wrapper, or a simple shift of one.
  */
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface DefineConstant {
   name: string;
@@ -16,7 +16,10 @@ export interface DefineConstant {
 }
 
 function parseValue(raw: string): number | null {
-  let v = raw.trim().replace(/\/\*.*?\*\//g, '').trim();
+  let v = raw
+    .trim()
+    .replace(/\/\*.*?\*\//g, "")
+    .trim();
   // SDL_UINT64_C(0x20) / SDL_UINT64_C(20) wrappers
   const wrapped = v.match(/^SDL_U?INT(?:64|32)_C\((.+)\)$/);
   if (wrapped) v = wrapped[1]!.trim();
@@ -24,12 +27,12 @@ function parseValue(raw: string): number | null {
   // Simple shifts: (0x1 << 4) or 0x1 << 4
   const shift = v.match(/^(.+?)\s*(?:<<)\s*(\d+)$/);
   if (shift) {
-    const base = parseInt(shift[1]!.replace(/[()]/g, '').trim());
+    const base = parseInt(shift[1]!.replace(/[()]/g, "").trim());
     if (Number.isNaN(base)) return null;
     return base << parseInt(shift[2]!, 10);
   }
 
-  const n = parseInt(v.replace(/[()]/g, '').trim());
+  const n = parseInt(v.replace(/[()]/g, "").trim());
   return Number.isNaN(n) ? null : n;
 }
 
@@ -44,8 +47,8 @@ export function scanNumericDefines(
 
   const seen = new Set<string>();
   for (const file of readdirSync(dir)) {
-    if (!file.endsWith('.h')) continue;
-    const src = readFileSync(join(dir, file), 'utf8');
+    if (!file.endsWith(".h")) continue;
+    const src = readFileSync(join(dir, file), "utf8");
     const re = /^\s*#define\s+([A-Za-z_][A-Za-z0-9_]*)\s+(.+)$/gm;
     let m: RegExpExecArray | null;
     while ((m = re.exec(src)) !== null) {

@@ -4,8 +4,8 @@ import {
   PointerEvents,
   WidgetType,
 } from "@tsgui/layout";
-import { Palette } from "../../design.ts";
 import { createWidget } from "../../create-widget.ts";
+import { Palette } from "../../design.ts";
 import type { ReconcilableWidget } from "../../types.ts";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { CircularProgressProps } from "./types.ts";
@@ -16,7 +16,9 @@ const DEFAULT_SIZE = 48;
 const DEFAULT_THICKNESS = 0.1;
 const DEFAULT_START_ANGLE = -Math.PI / 2;
 
-export function CircularProgress(props: CircularProgressProps): ReconcilableWidget {
+export function CircularProgress(
+  props: CircularProgressProps
+): ReconcilableWidget {
   const { style, key, ...handlers } = props;
 
   const size = props.size ?? DEFAULT_SIZE;

@@ -7,10 +7,10 @@
  */
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
 import { valueToRatio } from "@tsgui/layout";
-import { Palette, type ColorStop } from "../design.ts";
+import { type ColorStop, Palette } from "../design.ts";
 import type { Painter } from "../paint.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
+import { paintBackground, paintBorder } from "./shape.ts";
 
 export interface ContinuousFillOptions {
   gpu: Painter;
@@ -47,7 +47,12 @@ export function paintContinuousFill(options: ContinuousFillOptions): void {
   const fillY = isHorizontal ? y : isForward ? y : y + h - fillH;
 
   const radius = fillStyle.borderRadius;
-  paintBorder(gpu, { x: fillX, y: fillY, w: fillW, h: fillH }, fillStyle, radius);
+  paintBorder(
+    gpu,
+    { x: fillX, y: fillY, w: fillW, h: fillH },
+    fillStyle,
+    radius
+  );
   const bg = colorOverride ?? fillStyle.backgroundColor ?? Palette.accent;
   paintBackground(
     gpu,
@@ -103,7 +108,9 @@ export function paintSteppedFill(options: SteppedFillOptions): void {
 
   for (let i = 0; i < steps; i++) {
     // Forward: low indices fill first. Backward: high indices fill first.
-    const isFilled = isForward ? i < filledSegments : i >= steps - filledSegments;
+    const isFilled = isForward
+      ? i < filledSegments
+      : i >= steps - filledSegments;
     if (!isFilled) continue; // track background shows through
 
     const positionAlong = i * (segmentLong + stepGap);
@@ -124,14 +131,32 @@ export function paintSteppedFill(options: SteppedFillOptions): void {
         }
       : fillStyle;
 
-    paintBorder(gpu, { x: segX, y: segY, w: segW, h: segH }, segmentStyle, radius);
-    paintBackground(gpu, { x: segX, y: segY, w: segW, h: segH }, segmentStyle, radius);
+    paintBorder(
+      gpu,
+      { x: segX, y: segY, w: segW, h: segH },
+      segmentStyle,
+      radius
+    );
+    paintBackground(
+      gpu,
+      { x: segX, y: segY, w: segW, h: segH },
+      segmentStyle,
+      radius
+    );
   }
 }
 
 /** Convenience for callers that need the raw ratio of a (value,min,max). */
-export function fillRatio(props: { value?: number; min?: number; max?: number }): number {
-  return valueToRatio({ value: props.value ?? 0, min: props.min ?? 0, max: props.max ?? 1 });
+export function fillRatio(props: {
+  value?: number;
+  min?: number;
+  max?: number;
+}): number {
+  return valueToRatio({
+    value: props.value ?? 0,
+    min: props.min ?? 0,
+    max: props.max ?? 1,
+  });
 }
 
 // Re-exports kept so existing importers of paint/fill keep one surface.

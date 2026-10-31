@@ -1,9 +1,9 @@
 /** Progress contracts — ported from flying-pan's widget/progress/types. */
 import type {
   CircularProgressDirection,
+  ProgressBarOrientation,
   ProgressDirection,
   ProgressType,
-  ProgressBarOrientation,
   ProgressValueType,
   TextStyle,
   ViewStyle,

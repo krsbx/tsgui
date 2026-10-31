@@ -6,8 +6,15 @@
  */
 import { clamp } from "@tsgui/layout";
 import { PointerEvents, WidgetType } from "@tsgui/layout";
-import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
+import {
+  disabledStyle,
+  focusableWhen,
+  focusStyle,
+  Metrics,
+  Palette,
+} from "../design.ts";
+import type { ReconcilableWidget } from "../types.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {
   DEFAULT_CIRCULAR_SIZE,
@@ -19,7 +26,6 @@ import {
   sliderValue,
 } from "./slider/geometry.ts";
 import type { CircularSliderProps } from "./slider/types.ts";
-import type { ReconcilableWidget } from "../types.ts";
 
 export type { CircularSliderProps };
 

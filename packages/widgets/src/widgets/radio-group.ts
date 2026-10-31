@@ -7,18 +7,18 @@
 import {
   FlexAlign,
   FlexDirection,
-  WidgetType,
   type ViewStyle,
+  WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import { Label } from "./label.ts";
-import type { RadioProps } from "./radio.ts";
 import type { BaseWidgetProps } from "../types.ts";
 import {
-  propsOf,
   type PointerPayload,
+  propsOf,
   type ReconcilableWidget,
 } from "../types.ts";
+import { Label } from "./label.ts";
+import type { RadioProps } from "./radio.ts";
 
 export interface RadioGroupProps extends BaseWidgetProps {
   /** Controlled selected value. */

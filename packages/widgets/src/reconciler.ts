@@ -4,12 +4,8 @@
  * the `window` parameter dropped; hooks receive a plain payload.
  */
 import type { WidgetDescriptor } from "@tsgui/layout";
-import type {
-  Key,
-  ReconcilableWidget,
-  ReconciledNode,
-} from "./types.ts";
 import type { StateStore } from "./state.ts";
+import type { Key, ReconcilableWidget, ReconciledNode } from "./types.ts";
 
 export class Reconciler {
   private prevTree: ReconciledNode | null = null;
@@ -129,7 +125,10 @@ export class Reconciler {
       if (key !== undefined) {
         consumedKeys.add(key);
         children.push(
-          this.reconcileNode({ prev: prevKeyed.get(key) ?? null, next: nextChild })
+          this.reconcileNode({
+            prev: prevKeyed.get(key) ?? null,
+            next: nextChild,
+          })
         );
       } else {
         const prevNode = prevUnkeyed[unkeyedCursor] ?? null;

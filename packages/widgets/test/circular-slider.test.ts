@@ -3,19 +3,19 @@
  * real dispatcher: track-press jumps to the angle's value, handle-dot
  * press drags, hover never mutates.
  */
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
-import { layoutFlex, type LayoutContext, type LayoutNode } from "@tsgui/layout";
 import {
   CircularSlider,
   MouseButton,
-  parseColor,
+  type PaintOp,
   PaintOpKind,
+  parseColor,
   PointerDispatcher,
   PointerInputKind,
   Reconciler,
   renderHeadless,
   StateStore,
-  type PaintOp,
 } from "../src/index.ts";
 import { Palette } from "../src/index.ts";
 
@@ -55,7 +55,11 @@ function setup(widget: Parameters<typeof renderHeadless>[0]): Harness {
         kind === PointerInputKind.Down || kind === PointerInputKind.Up
           ? MouseButton.Left
           : undefined;
-      dispatcher.dispatch({ events: [{ kind, x, y, button }], root, layoutIndex });
+      dispatcher.dispatch({
+        events: [{ kind, x, y, button }],
+        root,
+        layoutIndex,
+      });
     },
     render(next) {
       root = layoutFlex({
@@ -111,7 +115,8 @@ describe("CircularSlider paint", () => {
     // 25% clockwise from the top = right side; mid radius ≈ 22.2.
     const dots = frame.ops.filter(
       (op): op is PaintOp & { w: number; x: number; y: number } =>
-        op.op === PaintOpKind.RoundedRect && (op as PaintOp & { w: number }).w === 16
+        op.op === PaintOpKind.RoundedRect &&
+        (op as PaintOp & { w: number }).w === 16
     );
     expect(dots.length).toBe(1);
     const expectedCenter = 24 + Math.cos(-Math.PI / 2 + Math.PI / 2) * 22.2;

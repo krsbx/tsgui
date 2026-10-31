@@ -2,11 +2,11 @@ import { describe, expect, test } from "bun:test";
 import {
   FlexDirection,
   FlexJustify,
-  layoutFlex,
-  WidgetType,
   type LayoutContext,
+  layoutFlex,
   type LayoutNode,
   type WidgetDescriptor,
+  WidgetType,
 } from "../src/index.ts";
 
 function makeContext() {
@@ -28,11 +28,17 @@ function makeContext() {
   return Object.assign(ctx, { idCounter });
 }
 
-function view(style: WidgetDescriptor["style"], children?: WidgetDescriptor[]): WidgetDescriptor {
+function view(
+  style: WidgetDescriptor["style"],
+  children?: WidgetDescriptor[]
+): WidgetDescriptor {
   return { type: WidgetType.View, props: {}, style, children };
 }
 
-function label(text: string, style: WidgetDescriptor["style"] = {}): WidgetDescriptor {
+function label(
+  text: string,
+  style: WidgetDescriptor["style"] = {}
+): WidgetDescriptor {
   return { type: WidgetType.Label, props: { text }, style };
 }
 
@@ -44,7 +50,14 @@ describe("layoutFlex (headless)", () => {
       [view({ width: 60, height: 40 }), view({ width: 80, height: 50 })]
     );
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 200, availableHeight: 100, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 200,
+      availableHeight: 100,
+      ctx,
+    });
 
     // child x/y = parent position + relative offset (flying-pan semantics)
     expect(root.width).toBe(200);
@@ -58,12 +71,19 @@ describe("layoutFlex (headless)", () => {
 
   test("column with content-fit height", () => {
     const ctx = makeContext();
-    const tree = view(
-      { width: 300, flexDirection: "column" },
-      [view({ width: 100, height: 40 }), view({ width: 100, height: 60 })]
-    );
+    const tree = view({ width: 300, flexDirection: "column" }, [
+      view({ width: 100, height: 40 }),
+      view({ width: 100, height: 60 }),
+    ]);
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 300, availableHeight: 600, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 300,
+      availableHeight: 600,
+      ctx,
+    });
 
     expect(root.height).toBe(100); // 40 + 60 content-fit
     expect(root.children[1]!.y).toBe(40);
@@ -81,7 +101,14 @@ describe("layoutFlex (headless)", () => {
       [view({ width: 100, height: 50 })]
     );
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 300, availableHeight: 100, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 300,
+      availableHeight: 100,
+      ctx,
+    });
 
     expect(root.children[0]!.x).toBe(100); // (300-100)/2
   });
@@ -93,7 +120,14 @@ describe("layoutFlex (headless)", () => {
       [view({ height: 50, flex: 1 }), view({ width: 100, height: 50 })]
     );
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 300, availableHeight: 100, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 300,
+      availableHeight: 100,
+      ctx,
+    });
 
     expect(root.children[0]!.width).toBe(200); // 300 - 100
     expect(root.children[1]!.x).toBe(200);
@@ -103,7 +137,14 @@ describe("layoutFlex (headless)", () => {
     const ctx = makeContext();
     const tree = view({ flexDirection: "column" }, [label("hello")]);
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 500, availableHeight: 500, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 500,
+      availableHeight: 500,
+      ctx,
+    });
 
     // stub: 5 chars × 10px
     expect(root.children[0]!.width).toBe(50);
@@ -113,7 +154,12 @@ describe("layoutFlex (headless)", () => {
   test("wrap breaks into lines", () => {
     const ctx = makeContext();
     const tree = view(
-      { width: 250, height: 400, flexWrap: "wrap", flexDirection: FlexDirection.Row },
+      {
+        width: 250,
+        height: 400,
+        flexWrap: "wrap",
+        flexDirection: FlexDirection.Row,
+      },
       [
         view({ width: 100, height: 50 }),
         view({ width: 100, height: 50 }),
@@ -121,7 +167,14 @@ describe("layoutFlex (headless)", () => {
       ]
     );
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 250, availableHeight: 400, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 250,
+      availableHeight: 400,
+      ctx,
+    });
 
     expect(root.children[0]!.x).toBe(0);
     expect(root.children[0]!.y).toBe(0);
@@ -132,19 +185,29 @@ describe("layoutFlex (headless)", () => {
 
   test("absolute child positions against padding box", () => {
     const ctx = makeContext();
-    const tree = view(
-      { width: 200, height: 200 },
-      [
-        view({ width: 50, height: 50 }),
-        {
-          type: WidgetType.View,
-          props: {},
-          style: { position: "absolute", left: 30, top: 40, width: 60, height: 60 },
+    const tree = view({ width: 200, height: 200 }, [
+      view({ width: 50, height: 50 }),
+      {
+        type: WidgetType.View,
+        props: {},
+        style: {
+          position: "absolute",
+          left: 30,
+          top: 40,
+          width: 60,
+          height: 60,
         },
-      ]
-    );
+      },
+    ]);
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 200, availableHeight: 200, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 200,
+      availableHeight: 200,
+      ctx,
+    });
 
     expect(root.children).toHaveLength(2);
     const abs = root.children[1]!;
@@ -164,7 +227,14 @@ describe("layoutFlex (headless)", () => {
       },
     ]);
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 200, availableHeight: 100, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 200,
+      availableHeight: 100,
+      ctx,
+    });
     const list = root.children[0]!;
 
     // scrollPos 0: firstVisible = max(0, 0-2) = 0, lastVisible = ceil(100/20)+2 = 7
@@ -183,21 +253,37 @@ describe("layoutFlex (headless)", () => {
     // must occupy the group's content height so the next sibling lands
     // BELOW it, not overlapping (the radio-group-over-slider bug).
     const tree = view(
-      { width: 400, height: 400, flexDirection: FlexDirection.Column, gap: 16, padding: 24 },
+      {
+        width: 400,
+        height: 400,
+        flexDirection: FlexDirection.Column,
+        gap: 16,
+        padding: 24,
+      },
       [
-        view({ flexDirection: FlexDirection.Row, gap: 24, alignItems: "center" }, [
-          view({ width: 16, height: 16 }),
-          view({ flexDirection: FlexDirection.Column, gap: 8 }, [
-            view({ width: 16, height: 18 }),
-            view({ width: 16, height: 18 }),
-            view({ width: 16, height: 18 }),
-          ]),
-        ]),
+        view(
+          { flexDirection: FlexDirection.Row, gap: 24, alignItems: "center" },
+          [
+            view({ width: 16, height: 16 }),
+            view({ flexDirection: FlexDirection.Column, gap: 8 }, [
+              view({ width: 16, height: 18 }),
+              view({ width: 16, height: 18 }),
+              view({ width: 16, height: 18 }),
+            ]),
+          ]
+        ),
         view({ width: 100, height: 24, backgroundColor: "#333" }),
       ]
     );
 
-    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 400, availableHeight: 400, ctx });
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 400,
+      availableHeight: 400,
+      ctx,
+    });
     const row = root.children[0]!;
     const sibling = root.children[1]!;
 

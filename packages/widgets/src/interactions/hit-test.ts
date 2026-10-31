@@ -7,7 +7,7 @@
  * drawn. Children are tested first, last sibling deepest — the visual
  * top wins.
  */
-import { PointerEvents, type LayoutNode } from "@tsgui/layout";
+import { type LayoutNode, PointerEvents } from "@tsgui/layout";
 
 export interface HitTestOptions {
   node: LayoutNode;

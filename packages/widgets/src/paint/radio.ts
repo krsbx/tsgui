@@ -2,9 +2,9 @@
 import type { LayoutNode } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
 import { propsOf } from "../types.ts";
 import type { RadioProps } from "../widgets/radio.ts";
+import { paintBackground, paintBorder } from "./shape.ts";
 
 const DOT_INSET = 0.5;
 
@@ -16,7 +16,8 @@ export function paintRadio(
   if (!checked) return;
 
   const props = propsOf<RadioProps>(node.widget);
-  const dotSize = Math.min(node.width, node.height) * (props.dotSize ?? DOT_INSET);
+  const dotSize =
+    Math.min(node.width, node.height) * (props.dotSize ?? DOT_INSET);
   const dotX = node.screenX + (node.width - dotSize) / 2;
   const dotY = node.screenY + (node.height - dotSize) / 2;
   const dotStyle = props.dotStyle ?? {};

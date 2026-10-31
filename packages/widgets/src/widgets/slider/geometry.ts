@@ -59,8 +59,18 @@ export function pointerToAngleValue(
     step?: number;
   }
 ): number {
-  const { pointerX, pointerY, cx, cy, startAngle, sweep, direction, min, max, step } =
-    options;
+  const {
+    pointerX,
+    pointerY,
+    cx,
+    cy,
+    startAngle,
+    sweep,
+    direction,
+    min,
+    max,
+    step,
+  } = options;
 
   const raw = Math.atan2(pointerY - cy, pointerX - cx);
   let rel = direction * (raw - startAngle);

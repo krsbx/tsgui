@@ -5,8 +5,8 @@
  */
 import type { Rect } from "@tsgui/gpu";
 import type { ViewStyle } from "@tsgui/layout";
-import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 import type { Painter } from "../paint.ts";
+import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 
 /**
  * Stacked rounded-rect layers approximate the Gaussian falloff with the

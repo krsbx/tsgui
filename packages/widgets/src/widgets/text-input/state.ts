@@ -6,9 +6,9 @@
  * inject fakes.
  */
 import type { TextInputState } from "./core.ts";
+import { makeTextInputState } from "./core.ts";
 
 export type { TextInputState };
-import { makeTextInputState } from "./core.ts";
 
 const editingStates = new Map<number, TextInputState>();
 
@@ -41,7 +41,10 @@ export function editingStateOf(
   return state;
 }
 
-export function writeEditingState(stableId: number, state: TextInputState): void {
+export function writeEditingState(
+  stableId: number,
+  state: TextInputState
+): void {
   editingStates.set(stableId, state);
 }
 
@@ -69,7 +72,6 @@ export function peekEditingState(
   props?: { value?: string }
 ): TextInputState {
   return (
-    editingStates.get(stableId) ??
-    makeTextInputState({ value: props?.value })
+    editingStates.get(stableId) ?? makeTextInputState({ value: props?.value })
   );
 }

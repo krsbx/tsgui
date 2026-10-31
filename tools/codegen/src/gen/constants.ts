@@ -1,12 +1,12 @@
 /** Generator for the per-library constants file (enums + numeric defines). */
-import type { FfiTables } from '../model';
-import { banner } from './shared';
+import type { FfiTables } from "../model";
+import { banner } from "./shared";
 
 export function generateFfiConstants(
   tables: FfiTables,
   origin: string,
   defines: { name: string; value: number }[] = [],
-  definesExportName = 'Defines'
+  definesExportName = "Defines"
 ): string {
   const L = banner(origin);
   L.push(`/** Enum constants from ${origin}. */`);
@@ -28,5 +28,5 @@ export function generateFfiConstants(
     L.push(`} as const;`);
     L.push(``);
   }
-  return L.join('\n');
+  return L.join("\n");
 }

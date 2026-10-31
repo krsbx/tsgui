@@ -9,9 +9,9 @@
  * against these parsed types — do not resurrect the old hand-classified
  * object-bridge model (see docs/FFI.md historical notes).
  */
-export { buildFfiTables } from './tables.ts';
-export { camelize, pascalCase } from './names.ts';
-export type { FfiType } from './kinds.ts';
+export { buildFfiTables } from "./tables.ts";
+export { camelize, pascalCase } from "./names.ts";
+export type { FfiType } from "./kinds.ts";
 export type {
   FfiArg,
   FfiEnum,
@@ -20,4 +20,4 @@ export type {
   FfiReturn,
   FfiTables,
   UnsafeFunction,
-} from './interfaces.ts';
+} from "./interfaces.ts";

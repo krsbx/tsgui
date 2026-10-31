@@ -18,17 +18,17 @@ import type { Size } from "@tsgui/layout";
 import { type LayoutNode, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
-import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
-import { paintTextInput } from "./paint/text-input.ts";
+import { paintMeter } from "./paint/meter.ts";
 import {
   paintCircularProgress,
   paintProgressBar,
 } from "./paint/progress/index.ts";
-import { paintBackground, paintBorder } from "./paint/shape.ts";
-import { paintShadow } from "./paint/shadow.ts";
-import { paintMeter } from "./paint/meter.ts";
 import { paintRadio } from "./paint/radio.ts";
+import { paintShadow } from "./paint/shadow.ts";
+import { paintBackground, paintBorder } from "./paint/shape.ts";
+import { paintSliderBar } from "./paint/slider-bar.ts";
+import { paintTextInput } from "./paint/text-input.ts";
 import { paintToggle } from "./paint/toggle.ts";
 import type { InteractionStates } from "./style-resolve.ts";
 import { parseColor, resolveStyle } from "./style-resolve.ts";

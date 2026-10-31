@@ -3,29 +3,31 @@
  * dispatcher: track-press jumps, handle-press drags, hover never mutates,
  * step snapping, and the disabled no-op.
  */
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
 import {
   MouseButton,
-  parseColor,
+  type PaintOp,
   PaintOpKind,
   Palette,
+  parseColor,
   PointerDispatcher,
   PointerInputKind,
   Reconciler,
   renderHeadless,
   SliderBar,
   StateStore,
-  type PaintOp,
 } from "../src/index.ts";
-import { layoutFlex, type LayoutContext, type LayoutNode } from "@tsgui/layout";
 
 interface Harness {
-  fire(events: {
-    kind: PointerInputKind;
-    x: number;
-    y: number;
-    button?: MouseButton;
-  }[]): void;
+  fire(
+    events: {
+      kind: PointerInputKind;
+      x: number;
+      y: number;
+      button?: MouseButton;
+    }[]
+  ): void;
   render(widget: Parameters<typeof renderHeadless>[0]): void;
 }
 
@@ -85,7 +87,12 @@ const ev = (
 describe("SliderBar paint", () => {
   test("track → fill → handle at the value's ratio", () => {
     const frame = renderHeadless(
-      SliderBar({ value: 50, min: 0, max: 100, style: { width: 200, height: 24 } }),
+      SliderBar({
+        value: 50,
+        min: 0,
+        max: 100,
+        style: { width: 200, height: 24 },
+      }),
       { width: 400, height: 300 }
     );
 
@@ -112,7 +119,12 @@ describe("SliderBar paint", () => {
       h: 4,
       color: parseColor(Palette.surfaceActive),
     });
-    expect(fills[1]).toMatchObject({ x: 0, w: 100, h: 4, color: parseColor(Palette.accent) });
+    expect(fills[1]).toMatchObject({
+      x: 0,
+      w: 100,
+      h: 4,
+      color: parseColor(Palette.accent),
+    });
     // Handle: border ring first, then the surface fill inside it.
     expect(fills[2]).toMatchObject({
       x: 91.5,
@@ -121,7 +133,13 @@ describe("SliderBar paint", () => {
       h: 17,
       color: parseColor(Palette.border),
     });
-    expect(fills[3]).toMatchObject({ x: 92, y: 4, w: 16, h: 16, color: parseColor(Palette.surface) });
+    expect(fills[3]).toMatchObject({
+      x: 92,
+      y: 4,
+      w: 16,
+      h: 16,
+      color: parseColor(Palette.surface),
+    });
   });
 
   test("marks render as ticks at their value positions", () => {
@@ -141,7 +159,10 @@ describe("SliderBar paint", () => {
         op.op === PaintOpKind.Rect && (op as PaintOp & { w: number }).w === 3
     );
     expect(ticks.length).toBe(2);
-    expect(ticks[0]).toMatchObject({ x: -1.5, color: parseColor(Palette.border) });
+    expect(ticks[0]).toMatchObject({
+      x: -1.5,
+      color: parseColor(Palette.border),
+    });
     expect(ticks[1]).toMatchObject({ x: 198.5 });
   });
 });
@@ -185,7 +206,7 @@ describe("SliderBar drag", () => {
     // Rebuild like the app loop, then drag FROM the handle (no jump): press
     // at the handle, move left — values step down from the current one.
     harness.render(make());
-    const handleX = 8 + ((value / 100) * (200 - 16));
+    const handleX = 8 + (value / 100) * (200 - 16);
     const valueBeforeDrag = value;
     harness.fire([ev(PointerInputKind.Down, handleX, 12)]);
     const atHandle = changes.length;

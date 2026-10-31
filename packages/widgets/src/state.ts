@@ -37,7 +37,8 @@ export class StateStore {
       return existing as T;
     }
 
-    const created = typeof initial === "function" ? (initial as () => T)() : initial;
+    const created =
+      typeof initial === "function" ? (initial as () => T)() : initial;
     this.store.set(stableId, created);
 
     return created;
@@ -55,7 +56,8 @@ export class StateStore {
       return existing as T;
     }
 
-    const created = typeof initial === "function" ? (initial as () => T)() : initial;
+    const created =
+      typeof initial === "function" ? (initial as () => T)() : initial;
     this.namedStore.set(name, created);
 
     return created;

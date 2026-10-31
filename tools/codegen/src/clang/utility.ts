@@ -2,8 +2,8 @@
  * Clang AST JSON parsing helpers.
  * Ported from flying-pan (src/ffi/parser/utility.ts).
  */
-import type { CFunctionParam, ClangNode, CTypeDecl } from './types';
-import { CDeclarationKind } from './types';
+import type { CFunctionParam, ClangNode, CTypeDecl } from "./types";
+import { CDeclarationKind } from "./types";
 
 export function parseCTypeDeclFromString(qualType: string): CTypeDecl {
   let name = qualType.trim();
@@ -15,16 +15,16 @@ export function parseCTypeDeclFromString(qualType: string): CTypeDecl {
     arraySize = parseInt(arrayMatch[2]!, 10);
   }
 
-  const isConst = name.includes('const ');
-  name = name.replace(/\bconst\b/g, '').trim();
+  const isConst = name.includes("const ");
+  name = name.replace(/\bconst\b/g, "").trim();
 
   // Desugared enum/struct/union types carry the C tag keyword
   // ("enum SDL_PixelFormat") — strip it so the bare name resolves against
   // the model's enum set.
-  name = name.replace(/^(enum|struct|union)\s+/, '').trim();
+  name = name.replace(/^(enum|struct|union)\s+/, "").trim();
 
   let pointerDepth = 0;
-  while (name.endsWith('*')) {
+  while (name.endsWith("*")) {
     pointerDepth++;
     name = name.slice(0, -1).trim();
   }
@@ -41,8 +41,8 @@ export function parseCTypeDeclFromString(qualType: string): CTypeDecl {
 function findTopLevelParent(s: string): number {
   let depth = 0;
   for (let i = s.length - 1; i >= 0; i--) {
-    if (s[i] === ')') depth++;
-    else if (s[i] === '(') {
+    if (s[i] === ")") depth++;
+    else if (s[i] === "(") {
       depth--;
       if (depth === 0) return i;
     }
@@ -64,7 +64,7 @@ export function parseParams(inner: ClangNode[]): CFunctionParam[] {
 
   return params.map((node, i) => {
     const desugared = node.type?.desugaredQualType;
-    const qual = node.type?.qualType ?? '';
+    const qual = node.type?.qualType ?? "";
 
     return {
       type: parseCTypeDeclFromString(desugared ?? qual),
@@ -76,14 +76,14 @@ export function parseParams(inner: ClangNode[]): CFunctionParam[] {
 export function splitTopLevelCommas(s: string): string[] {
   const parts: string[] = [];
   let depth = 0;
-  let current = '';
+  let current = "";
 
   for (const ch of s) {
-    if (ch === '(') depth++;
-    else if (ch === ')') depth--;
-    else if (ch === ',' && depth === 0) {
+    if (ch === "(") depth++;
+    else if (ch === ")") depth--;
+    else if (ch === "," && depth === 0) {
       parts.push(current);
-      current = '';
+      current = "";
       continue;
     }
     current += ch;
@@ -115,7 +115,7 @@ export function extractDoc(inner: ClangNode[] | null): string | null {
     if (child.kind !== CDeclarationKind.PARAGRAPH_COMMENT) continue;
     const texts: string[] = [];
     collectText(child, texts);
-    const doc = texts.join(' ').trim();
+    const doc = texts.join(" ").trim();
     if (doc) return doc;
   }
   return null;
@@ -140,8 +140,8 @@ export function parseFunctionPointerParams(qualType: string) {
   const paramTypes = splitTopLevelCommas(paramsMatch[1]!);
   for (const pt of paramTypes) {
     const trimmed = pt.trim();
-    if (trimmed === 'void') continue;
-    params.push({ type: parseCTypeDeclFromString(trimmed), name: '' });
+    if (trimmed === "void") continue;
+    params.push({ type: parseCTypeDeclFromString(trimmed), name: "" });
   }
   return params;
 }

@@ -28,7 +28,11 @@ export {
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
-export { TextInput, type TextInputProps, type TextInputStyle } from "./widgets/text-input/index.ts";
+export {
+  TextInput,
+  type TextInputProps,
+  type TextInputStyle,
+} from "./widgets/text-input/index.ts";
 export {
   editingStateOf,
   textInputClipboard,
@@ -64,7 +68,10 @@ export {
   type PointerInputEvent,
   PointerInputKind,
 } from "./interactions/types.ts";
-export { FocusDispatcher, type FocusDispatchOptions } from "./interactions/focus.ts";
+export {
+  FocusDispatcher,
+  type FocusDispatchOptions,
+} from "./interactions/focus.ts";
 
 // Paint bridge
 export {
@@ -96,11 +103,7 @@ export {
   paintContinuousFill,
   paintSteppedFill,
 } from "./paint/fill.ts";
-export {
-  fillShape,
-  paintBackground,
-  paintBorder,
-} from "./paint/shape.ts";
+export { fillShape, paintBackground, paintBorder } from "./paint/shape.ts";
 export {
   resolveFillColor,
   resolveFillColorClamped,

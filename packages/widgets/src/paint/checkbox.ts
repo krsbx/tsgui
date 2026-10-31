@@ -2,9 +2,9 @@
 import type { LayoutNode } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
 import { propsOf } from "../types.ts";
 import type { CheckboxProps } from "../widgets/checkbox.ts";
+import { paintBackground, paintBorder } from "./shape.ts";
 
 const TICK_INSET = 0.5;
 

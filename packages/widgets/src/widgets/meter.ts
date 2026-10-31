@@ -1,15 +1,15 @@
 /** Meter — HTML-`<meter>` zone semantics over the shared fill painter. */
 import {
   PointerEvents,
-  ProgressDirection,
   ProgressBarOrientation,
+  ProgressDirection,
   ProgressValueType,
-  WidgetType,
   type TextStyle,
   type ViewStyle,
+  WidgetType,
 } from "@tsgui/layout";
-import { Palette } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
+import { Palette } from "../design.ts";
 import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
 export interface MeterProps extends BaseWidgetProps {

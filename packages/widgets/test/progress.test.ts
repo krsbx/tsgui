@@ -2,10 +2,11 @@
  * Progress + meter semantics through the headless harness — fill geometry,
  * direction, steps, color stops, zones, and the arc primitives' ops.
  */
-import { describe, expect, test } from "bun:test";
 import { valueToRatio } from "@tsgui/layout";
+import { describe, expect, test } from "bun:test";
 import {
   CircularProgress,
+  type ColorStop,
   formatValueLabel,
   Meter,
   MeterZone,
@@ -14,7 +15,6 @@ import {
   renderHeadless,
   resolveFillColorClamped,
   resolveMeterColor,
-  type ColorStop,
 } from "../src/index.ts";
 import { Palette } from "../src/index.ts";
 
@@ -33,9 +33,15 @@ describe("value + color helpers", () => {
   });
 
   test("formatValueLabel: explicit label wins, percent computed from range", () => {
-    expect(formatValueLabel({ format: "percent", value: 0.25, min: 0, max: 1 })).toBe("25%");
-    expect(formatValueLabel({ format: "value", value: 7, min: 0, max: 10 })).toBe("7/10");
-    expect(formatValueLabel({ format: "percent", value: undefined })).toBeNull();
+    expect(
+      formatValueLabel({ format: "percent", value: 0.25, min: 0, max: 1 })
+    ).toBe("25%");
+    expect(
+      formatValueLabel({ format: "value", value: 7, min: 0, max: 10 })
+    ).toBe("7/10");
+    expect(
+      formatValueLabel({ format: "percent", value: undefined })
+    ).toBeNull();
   });
 
   test("color stops: highest stop at or below the ratio wins", () => {
@@ -44,29 +50,54 @@ describe("value + color helpers", () => {
       { at: 0.5, color: "#eab308" },
       { at: 0.75, color: "#22c55e" },
     ];
-    expect(resolveFillColorClamped({ ratio: 0.8, colorStops: stops })).toBe("#22c55e");
-    expect(resolveFillColorClamped({ ratio: 0.5, colorStops: stops })).toBe("#eab308");
-    expect(resolveFillColorClamped({ ratio: 0.2, colorStops: stops })).toBe("#ef4444");
-    expect(resolveFillColorClamped({ ratio: 1.4, colorStops: stops })).toBe("#22c55e");
+    expect(resolveFillColorClamped({ ratio: 0.8, colorStops: stops })).toBe(
+      "#22c55e"
+    );
+    expect(resolveFillColorClamped({ ratio: 0.5, colorStops: stops })).toBe(
+      "#eab308"
+    );
+    expect(resolveFillColorClamped({ ratio: 0.2, colorStops: stops })).toBe(
+      "#ef4444"
+    );
+    expect(resolveFillColorClamped({ ratio: 1.4, colorStops: stops })).toBe(
+      "#22c55e"
+    );
   });
 
   test("meter zones follow the optimum's position", () => {
     // Optimum in the low zone: low is good.
-    expect(resolveMeterColor({ value: 5, low: 30, high: 60, optimum: 10 })).toBe(MeterZone.Success);
-    expect(resolveMeterColor({ value: 45, low: 30, high: 60, optimum: 10 })).toBe(MeterZone.Warning);
-    expect(resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 10 })).toBe(MeterZone.Error);
+    expect(
+      resolveMeterColor({ value: 5, low: 30, high: 60, optimum: 10 })
+    ).toBe(MeterZone.Success);
+    expect(
+      resolveMeterColor({ value: 45, low: 30, high: 60, optimum: 10 })
+    ).toBe(MeterZone.Warning);
+    expect(
+      resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 10 })
+    ).toBe(MeterZone.Error);
     // Optimum mid: medium is good.
-    expect(resolveMeterColor({ value: 45, low: 30, high: 60, optimum: 45 })).toBe(MeterZone.Success);
-    expect(resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 45 })).toBe(MeterZone.Warning);
+    expect(
+      resolveMeterColor({ value: 45, low: 30, high: 60, optimum: 45 })
+    ).toBe(MeterZone.Success);
+    expect(
+      resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 45 })
+    ).toBe(MeterZone.Warning);
     // Optimum high: high is good.
-    expect(resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 90 })).toBe(MeterZone.Success);
+    expect(
+      resolveMeterColor({ value: 90, low: 30, high: 60, optimum: 90 })
+    ).toBe(MeterZone.Success);
   });
 });
 
 describe("ProgressBar ops", () => {
   test("determinate fill is a ratio-sized sub-rect of the track", () => {
     const frame = renderHeadless(
-      ProgressBar({ value: 25, min: 0, max: 100, style: { width: 100, height: 4 } }),
+      ProgressBar({
+        value: 25,
+        min: 0,
+        max: 100,
+        style: { width: 100, height: 4 },
+      }),
       { width: 200, height: 50 }
     );
 
@@ -93,7 +124,13 @@ describe("ProgressBar ops", () => {
 
   test("buffer renders behind the main fill at reduced opacity", () => {
     const frame = renderHeadless(
-      ProgressBar({ value: 25, buffer: 50, min: 0, max: 100, style: { width: 100, height: 4 } }),
+      ProgressBar({
+        value: 25,
+        buffer: 50,
+        min: 0,
+        max: 100,
+        style: { width: 100, height: 4 },
+      }),
       { width: 200, height: 50 }
     );
 
@@ -140,16 +177,21 @@ describe("ProgressBar ops", () => {
       { width: 200, height: 50 }
     );
 
-    expect(rectOps(frame.ops)[1]).toMatchObject({ color: parseColor("#22c55e") });
+    expect(rectOps(frame.ops)[1]).toMatchObject({
+      color: parseColor("#22c55e"),
+    });
   });
 });
 
 describe("CircularProgress ops", () => {
   test("determinate ring sweeps clockwise from the top", () => {
-    const frame = renderHeadless(CircularProgress({ value: 50, min: 0, max: 100 }), {
-      width: 100,
-      height: 100,
-    });
+    const frame = renderHeadless(
+      CircularProgress({ value: 50, min: 0, max: 100 }),
+      {
+        width: 100,
+        height: 100,
+      }
+    );
 
     const ring = frame.ops.find((op) => op.op === "ring") as {
       cx: number;
@@ -180,7 +222,12 @@ describe("CircularProgress ops", () => {
 
   test("counter-clockwise sweeps negatively", () => {
     const frame = renderHeadless(
-      CircularProgress({ value: 25, min: 0, max: 100, direction: "counterclockwise" }),
+      CircularProgress({
+        value: 25,
+        min: 0,
+        max: 100,
+        direction: "counterclockwise",
+      }),
       { width: 100, height: 100 }
     );
 
@@ -200,6 +247,8 @@ describe("Meter ops", () => {
     );
 
     // Defaults: low 33.3, high 66.7, optimum mid → 90 is in the high zone.
-    expect(rectOps(frame.ops)[1]).toMatchObject({ color: parseColor(Palette.warning) });
+    expect(rectOps(frame.ops)[1]).toMatchObject({
+      color: parseColor(Palette.warning),
+    });
   });
 });

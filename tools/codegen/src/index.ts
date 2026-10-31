@@ -7,14 +7,14 @@
  *
  * Targets live in targets.ts; the pipeline lives in generate.ts.
  */
-import { generateTarget } from './generate';
-import { TARGETS } from './targets';
+import { generateTarget } from "./generate";
+import { TARGETS } from "./targets";
 
 async function main() {
-  const check = process.argv.includes('--check');
+  const check = process.argv.includes("--check");
   const targetName = process.argv[2];
 
-  if (targetName === 'all') {
+  if (targetName === "all") {
     for (const spec of Object.values(TARGETS)) {
       await generateTarget(spec, check);
     }
@@ -23,7 +23,9 @@ async function main() {
 
   const spec = targetName ? TARGETS[targetName] : undefined;
   if (!spec) {
-    console.error(`usage: codegen <${Object.keys(TARGETS).join('|')}|all> [--check]`);
+    console.error(
+      `usage: codegen <${Object.keys(TARGETS).join("|")}|all> [--check]`
+    );
     process.exit(1);
   }
   await generateTarget(spec, check);

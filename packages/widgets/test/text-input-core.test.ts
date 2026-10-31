@@ -21,7 +21,9 @@ const state = (over: Partial<ReturnType<typeof makeTextInputState>> = {}) => ({
 describe("text editing core", () => {
   test("insertText replaces the selection or inserts at the caret", () => {
     expect(insertText(state(), " XY").value).toBe("hello XY");
-    expect(insertText(state({ caret: 0, anchor: 0 }), "A").value).toBe("Ahello");
+    expect(insertText(state({ caret: 0, anchor: 0 }), "A").value).toBe(
+      "Ahello"
+    );
     // Selection "ell" (1..4) replaced by "IP".
     const sel = state({ caret: 4, anchor: 1 });
     const next = insertText(sel, "IP");
@@ -51,16 +53,23 @@ describe("text editing core", () => {
   });
 
   test("moveCaret: clamp, shift extends from the anchor", () => {
-    expect(moveCaret(state({ caret: 1, anchor: 1 }), "left", false)).toMatchObject({
+    expect(
+      moveCaret(state({ caret: 1, anchor: 1 }), "left", false)
+    ).toMatchObject({
       caret: 0,
       anchor: 0,
     });
     // Already at 0 — stays.
-    expect(moveCaret(state({ caret: 0, anchor: 0 }), "left", false).caret).toBe(0);
+    expect(moveCaret(state({ caret: 0, anchor: 0 }), "left", false).caret).toBe(
+      0
+    );
     // Shift extends: anchor stays at 3 while caret moves.
     const extended = moveCaret(state({ caret: 3, anchor: 3 }), "right", true);
     expect(extended).toMatchObject({ caret: 4, anchor: 3 });
-    expect(moveCaret(state(), "home", false)).toMatchObject({ caret: 0, anchor: 0 });
+    expect(moveCaret(state(), "home", false)).toMatchObject({
+      caret: 0,
+      anchor: 0,
+    });
     expect(moveCaret(state(), "end", true)).toMatchObject({
       caret: 5,
       anchor: 5,
@@ -88,8 +97,14 @@ describe("text editing core", () => {
   });
 
   test("scroll keeps the caret inside the viewport, minimal movement", () => {
-    expect(recomputeScrollX({ caretX: 50, currentScrollX: 0, visibleWidth: 100 })).toBe(0);
-    expect(recomputeScrollX({ caretX: 20, currentScrollX: 50, visibleWidth: 100 })).toBe(20);
-    expect(recomputeScrollX({ caretX: 200, currentScrollX: 0, visibleWidth: 100 })).toBe(100);
+    expect(
+      recomputeScrollX({ caretX: 50, currentScrollX: 0, visibleWidth: 100 })
+    ).toBe(0);
+    expect(
+      recomputeScrollX({ caretX: 20, currentScrollX: 50, visibleWidth: 100 })
+    ).toBe(20);
+    expect(
+      recomputeScrollX({ caretX: 200, currentScrollX: 0, visibleWidth: 100 })
+    ).toBe(100);
   });
 });

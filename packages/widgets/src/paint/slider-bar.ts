@@ -1,21 +1,18 @@
 /** SliderBar painter — track, fill, marks, handle; ported from flying-pan. */
 import {
+  type LayoutNode,
   ProgressBarOrientation,
   ProgressValueType,
   valueToRatio,
-  type LayoutNode,
 } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground } from "./shape.ts";
+import { propsOf } from "../types.ts";
+import { HANDLE_SIZE, TRACK_THICKNESS } from "../widgets/slider/geometry.ts";
+import type { SliderBarProps } from "../widgets/slider/types.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintInlineValueLabel } from "./label.ts";
-import {
-  HANDLE_SIZE,
-  TRACK_THICKNESS,
-} from "../widgets/slider/geometry.ts";
-import { propsOf } from "../types.ts";
-import type { SliderBarProps } from "../widgets/slider/types.ts";
+import { paintBackground } from "./shape.ts";
 import { paintSliderHandle } from "./slider-handle.ts";
 import { paintSliderMarks } from "./slider-marks.ts";
 
@@ -31,8 +28,12 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
   const filledStyle = { ...props.filledStyle } as Record<string, unknown>;
   const handleStyle = { ...props.handleStyle } as Record<string, unknown>;
 
-  const trackX = isVertical ? node.screenX + (node.width - TRACK_THICKNESS) / 2 : node.screenX;
-  const trackY = isVertical ? node.screenY : node.screenY + (node.height - TRACK_THICKNESS) / 2;
+  const trackX = isVertical
+    ? node.screenX + (node.width - TRACK_THICKNESS) / 2
+    : node.screenX;
+  const trackY = isVertical
+    ? node.screenY
+    : node.screenY + (node.height - TRACK_THICKNESS) / 2;
   const trackW = isVertical ? TRACK_THICKNESS : node.width;
   const trackH = isVertical ? node.height : TRACK_THICKNESS;
 
@@ -58,9 +59,14 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
   // Filled portion — from track start to the handle's center.
   const filledX = isVertical ? trackX : node.screenX;
   const filledY = isVertical ? handleY + HANDLE_SIZE / 2 : trackY;
-  const filledW = isVertical ? TRACK_THICKNESS : handleX - node.screenX + HANDLE_SIZE / 2;
-  const filledH = isVertical ? node.screenY + node.height - filledY : TRACK_THICKNESS;
-  const filledRadius = (filledStyle.borderRadius as number | undefined) ?? TRACK_THICKNESS / 2;
+  const filledW = isVertical
+    ? TRACK_THICKNESS
+    : handleX - node.screenX + HANDLE_SIZE / 2;
+  const filledH = isVertical
+    ? node.screenY + node.height - filledY
+    : TRACK_THICKNESS;
+  const filledRadius =
+    (filledStyle.borderRadius as number | undefined) ?? TRACK_THICKNESS / 2;
 
   paintBackground(
     ctx.gpu,

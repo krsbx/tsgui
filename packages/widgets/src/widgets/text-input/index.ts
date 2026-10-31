@@ -6,9 +6,17 @@
  * convention. The uncontrolled StateStore variant lands with the state
  * milestone.
  */
-import { WidgetType, type ViewStyle } from "@tsgui/layout";
-import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../../design.ts";
+import { type ViewStyle, WidgetType } from "@tsgui/layout";
 import { createWidget } from "../../create-widget.ts";
+import {
+  disabledStyle,
+  focusableWhen,
+  focusStyle,
+  Metrics,
+  Palette,
+} from "../../design.ts";
+import type { BaseWidgetProps } from "../../types.ts";
+import { KeyCode, KeyModifiers, type ReconcilableWidget } from "../../types.ts";
 import {
   backspace,
   CaretDirection,
@@ -29,12 +37,6 @@ import {
 } from "./state.ts";
 
 export type { TextInputState };
-import type { BaseWidgetProps } from "../../types.ts";
-import {
-  KeyCode,
-  KeyModifiers,
-  type ReconcilableWidget,
-} from "../../types.ts";
 
 /** Text-field paint hints layered on ViewStyle. */
 export interface TextInputStyle extends ViewStyle {
@@ -144,7 +146,10 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     key,
     handlers: {
       ...handlers,
-      onUnmount: (payload: { widget: ReconcilableWidget; stableId: number }) => {
+      onUnmount: (payload: {
+        widget: ReconcilableWidget;
+        stableId: number;
+      }) => {
         deleteEditingState(payload.stableId);
         onUnmount?.(payload);
       },
@@ -163,7 +168,10 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
         if (disabled) return;
 
         const state = stateOf(payload);
-        const range = { start: Math.min(state.caret, state.anchor), end: Math.max(state.caret, state.anchor) };
+        const range = {
+          start: Math.min(state.caret, state.anchor),
+          end: Math.max(state.caret, state.anchor),
+        };
         const hasSelection = state.caret !== state.anchor;
         const editModifier = isEditModifier(payload.modifiers);
         const shift = (payload.modifiers & KeyModifiers.Shift) !== 0;
@@ -180,19 +188,40 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
             return;
           }
           case KeyCode.Left:
-            applyEdit(payload, payload.node, moveCaret(state, CaretDirection.Left, shift), false);
+            applyEdit(
+              payload,
+              payload.node,
+              moveCaret(state, CaretDirection.Left, shift),
+              false
+            );
             return;
           case KeyCode.Right:
-            applyEdit(payload, payload.node, moveCaret(state, CaretDirection.Right, shift), false);
+            applyEdit(
+              payload,
+              payload.node,
+              moveCaret(state, CaretDirection.Right, shift),
+              false
+            );
             return;
           case KeyCode.Home:
-            applyEdit(payload, payload.node, moveCaret(state, CaretDirection.Home, shift), false);
+            applyEdit(
+              payload,
+              payload.node,
+              moveCaret(state, CaretDirection.Home, shift),
+              false
+            );
             return;
           case KeyCode.End:
-            applyEdit(payload, payload.node, moveCaret(state, CaretDirection.End, shift), false);
+            applyEdit(
+              payload,
+              payload.node,
+              moveCaret(state, CaretDirection.End, shift),
+              false
+            );
             return;
           case KeyCode.A:
-            if (editModifier) applyEdit(payload, payload.node, selectAll(state), false);
+            if (editModifier)
+              applyEdit(payload, payload.node, selectAll(state), false);
             return;
           case KeyCode.X:
             if (editModifier && hasSelection) {
@@ -222,7 +251,11 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
         const state = stateOf(payload);
         const caret = xToCaret({
           value: value ?? state.value,
-          relX: payload.x - payload.node.screenX - Metrics.defaultPadding + state.scrollX,
+          relX:
+            payload.x -
+            payload.node.screenX -
+            Metrics.defaultPadding +
+            state.scrollX,
           measure: (text) => text.length * 8,
         });
         const next = { ...state, caret, anchor: caret };
@@ -237,7 +270,11 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
         const state = stateOf(payload);
         const caret = xToCaret({
           value: value ?? state.value,
-          relX: payload.x - payload.node.screenX - Metrics.defaultPadding + state.scrollX,
+          relX:
+            payload.x -
+            payload.node.screenX -
+            Metrics.defaultPadding +
+            state.scrollX,
           measure: (text) => text.length * 8,
         });
         writeEditingState(payload.stableId, { ...state, caret });

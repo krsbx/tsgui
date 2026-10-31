@@ -1,5 +1,5 @@
 /** Shared data shapes of the FFI model. */
-import type { FfiType } from './kinds';
+import type { FfiType } from "./kinds";
 
 export interface FfiArg {
   name: string;

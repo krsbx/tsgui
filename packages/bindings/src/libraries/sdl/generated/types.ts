@@ -8,7 +8,9 @@ export type Pointer = bigint & { readonly pointer: true };
 
 export type SDL_AssertData = Pointer & { readonly handle: "SDL_AssertData" };
 export type SDL_AsyncIO = Pointer & { readonly handle: "SDL_AsyncIO" };
-export type SDL_AsyncIOQueue = Pointer & { readonly handle: "SDL_AsyncIOQueue" };
+export type SDL_AsyncIOQueue = Pointer & {
+  readonly handle: "SDL_AsyncIOQueue";
+};
 export type SDL_AudioStream = Pointer & { readonly handle: "SDL_AudioStream" };
 export type SDL_Camera = Pointer & { readonly handle: "SDL_Camera" };
 export type SDL_CameraSpec = Pointer & { readonly handle: "SDL_CameraSpec" };
@@ -18,37 +20,61 @@ export type SDL_DisplayMode = Pointer & { readonly handle: "SDL_DisplayMode" };
 export type SDL_Environment = Pointer & { readonly handle: "SDL_Environment" };
 export type SDL_EventFilter = Pointer & { readonly handle: "SDL_EventFilter" };
 export type SDL_Finger = Pointer & { readonly handle: "SDL_Finger" };
-export type SDL_GLContextState = Pointer & { readonly handle: "SDL_GLContextState" };
+export type SDL_GLContextState = Pointer & {
+  readonly handle: "SDL_GLContextState";
+};
 export type SDL_GPUBuffer = Pointer & { readonly handle: "SDL_GPUBuffer" };
-export type SDL_GPUCommandBuffer = Pointer & { readonly handle: "SDL_GPUCommandBuffer" };
-export type SDL_GPUComputePass = Pointer & { readonly handle: "SDL_GPUComputePass" };
-export type SDL_GPUComputePipeline = Pointer & { readonly handle: "SDL_GPUComputePipeline" };
+export type SDL_GPUCommandBuffer = Pointer & {
+  readonly handle: "SDL_GPUCommandBuffer";
+};
+export type SDL_GPUComputePass = Pointer & {
+  readonly handle: "SDL_GPUComputePass";
+};
+export type SDL_GPUComputePipeline = Pointer & {
+  readonly handle: "SDL_GPUComputePipeline";
+};
 export type SDL_GPUCopyPass = Pointer & { readonly handle: "SDL_GPUCopyPass" };
 export type SDL_GPUDevice = Pointer & { readonly handle: "SDL_GPUDevice" };
 export type SDL_GPUFence = Pointer & { readonly handle: "SDL_GPUFence" };
-export type SDL_GPUGraphicsPipeline = Pointer & { readonly handle: "SDL_GPUGraphicsPipeline" };
-export type SDL_GPURenderPass = Pointer & { readonly handle: "SDL_GPURenderPass" };
-export type SDL_GPURenderState = Pointer & { readonly handle: "SDL_GPURenderState" };
+export type SDL_GPUGraphicsPipeline = Pointer & {
+  readonly handle: "SDL_GPUGraphicsPipeline";
+};
+export type SDL_GPURenderPass = Pointer & {
+  readonly handle: "SDL_GPURenderPass";
+};
+export type SDL_GPURenderState = Pointer & {
+  readonly handle: "SDL_GPURenderState";
+};
 export type SDL_GPUSampler = Pointer & { readonly handle: "SDL_GPUSampler" };
 export type SDL_GPUShader = Pointer & { readonly handle: "SDL_GPUShader" };
 export type SDL_GPUTexture = Pointer & { readonly handle: "SDL_GPUTexture" };
-export type SDL_GPUTransferBuffer = Pointer & { readonly handle: "SDL_GPUTransferBuffer" };
+export type SDL_GPUTransferBuffer = Pointer & {
+  readonly handle: "SDL_GPUTransferBuffer";
+};
 export type SDL_Gamepad = Pointer & { readonly handle: "SDL_Gamepad" };
-export type SDL_GamepadBinding = Pointer & { readonly handle: "SDL_GamepadBinding" };
+export type SDL_GamepadBinding = Pointer & {
+  readonly handle: "SDL_GamepadBinding";
+};
 export type SDL_Haptic = Pointer & { readonly handle: "SDL_Haptic" };
 export type SDL_IOStream = Pointer & { readonly handle: "SDL_IOStream" };
 export type SDL_Joystick = Pointer & { readonly handle: "SDL_Joystick" };
 export type SDL_Locale = Pointer & { readonly handle: "SDL_Locale" };
-export type SDL_LogOutputFunction = Pointer & { readonly handle: "SDL_LogOutputFunction" };
+export type SDL_LogOutputFunction = Pointer & {
+  readonly handle: "SDL_LogOutputFunction";
+};
 export type SDL_Mutex = Pointer & { readonly handle: "SDL_Mutex" };
 export type SDL_Palette = Pointer & { readonly handle: "SDL_Palette" };
-export type SDL_PixelFormatDetails = Pointer & { readonly handle: "SDL_PixelFormatDetails" };
+export type SDL_PixelFormatDetails = Pointer & {
+  readonly handle: "SDL_PixelFormatDetails";
+};
 export type SDL_Process = Pointer & { readonly handle: "SDL_Process" };
 export type SDL_RWLock = Pointer & { readonly handle: "SDL_RWLock" };
 export type SDL_Renderer = Pointer & { readonly handle: "SDL_Renderer" };
 export type SDL_Semaphore = Pointer & { readonly handle: "SDL_Semaphore" };
 export type SDL_Sensor = Pointer & { readonly handle: "SDL_Sensor" };
-export type SDL_SharedObject = Pointer & { readonly handle: "SDL_SharedObject" };
+export type SDL_SharedObject = Pointer & {
+  readonly handle: "SDL_SharedObject";
+};
 export type SDL_Storage = Pointer & { readonly handle: "SDL_Storage" };
 export type SDL_Surface = Pointer & { readonly handle: "SDL_Surface" };
 export type SDL_Texture = Pointer & { readonly handle: "SDL_Texture" };
@@ -60,10 +86,16 @@ export type SDL_Window = Pointer & { readonly handle: "SDL_Window" };
 export type SDL_calloc_func = Pointer & { readonly handle: "SDL_calloc_func" };
 export type SDL_free_func = Pointer & { readonly handle: "SDL_free_func" };
 export type SDL_hid_device = Pointer & { readonly handle: "SDL_hid_device" };
-export type SDL_hid_device_info = Pointer & { readonly handle: "SDL_hid_device_info" };
-export type SDL_iconv_data_t = Pointer & { readonly handle: "SDL_iconv_data_t" };
+export type SDL_hid_device_info = Pointer & {
+  readonly handle: "SDL_hid_device_info";
+};
+export type SDL_iconv_data_t = Pointer & {
+  readonly handle: "SDL_iconv_data_t";
+};
 export type SDL_malloc_func = Pointer & { readonly handle: "SDL_malloc_func" };
-export type SDL_realloc_func = Pointer & { readonly handle: "SDL_realloc_func" };
+export type SDL_realloc_func = Pointer & {
+  readonly handle: "SDL_realloc_func";
+};
 
 export type AnyPointer = Pointer | ArrayBufferView | ArrayBuffer;
 
@@ -73,21 +105,51 @@ export interface SdlSymbols {
   SDL_calloc(nmemb: number | bigint, size: number | bigint): AnyPointer | null;
   SDL_realloc(mem: AnyPointer | null, size: number | bigint): AnyPointer | null;
   SDL_free(mem: AnyPointer | null): void;
-  SDL_GetOriginalMemoryFunctions(malloc_func: SDL_malloc_func | null, calloc_func: SDL_calloc_func | null, realloc_func: SDL_realloc_func | null, free_func: SDL_free_func | null): void;
-  SDL_GetMemoryFunctions(malloc_func: SDL_malloc_func | null, calloc_func: SDL_calloc_func | null, realloc_func: SDL_realloc_func | null, free_func: SDL_free_func | null): void;
-  SDL_aligned_alloc(alignment: number | bigint, size: number | bigint): AnyPointer | null;
+  SDL_GetOriginalMemoryFunctions(
+    malloc_func: SDL_malloc_func | null,
+    calloc_func: SDL_calloc_func | null,
+    realloc_func: SDL_realloc_func | null,
+    free_func: SDL_free_func | null
+  ): void;
+  SDL_GetMemoryFunctions(
+    malloc_func: SDL_malloc_func | null,
+    calloc_func: SDL_calloc_func | null,
+    realloc_func: SDL_realloc_func | null,
+    free_func: SDL_free_func | null
+  ): void;
+  SDL_aligned_alloc(
+    alignment: number | bigint,
+    size: number | bigint
+  ): AnyPointer | null;
   SDL_aligned_free(mem: AnyPointer | null): void;
   SDL_GetNumAllocations(): number;
   SDL_GetEnvironment(): SDL_Environment | null;
   SDL_CreateEnvironment(populated: boolean): SDL_Environment | null;
-  SDL_GetEnvironmentVariable(env: SDL_Environment | null, name: string | null): string;
-  SDL_GetEnvironmentVariables(env: SDL_Environment | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_SetEnvironmentVariable(env: SDL_Environment | null, name: string | null, value: string | null, overwrite: boolean): boolean;
-  SDL_UnsetEnvironmentVariable(env: SDL_Environment | null, name: string | null): boolean;
+  SDL_GetEnvironmentVariable(
+    env: SDL_Environment | null,
+    name: string | null
+  ): string;
+  SDL_GetEnvironmentVariables(
+    env: SDL_Environment | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_SetEnvironmentVariable(
+    env: SDL_Environment | null,
+    name: string | null,
+    value: string | null,
+    overwrite: boolean
+  ): boolean;
+  SDL_UnsetEnvironmentVariable(
+    env: SDL_Environment | null,
+    name: string | null
+  ): boolean;
   SDL_DestroyEnvironment(env: SDL_Environment | null): void;
   SDL_getenv(name: string | null): string;
   SDL_getenv_unsafe(name: string | null): string;
-  SDL_setenv_unsafe(name: string | null, value: string | null, overwrite: number): number;
+  SDL_setenv_unsafe(
+    name: string | null,
+    value: string | null,
+    overwrite: number
+  ): number;
   SDL_unsetenv_unsafe(name: string | null): number;
   SDL_abs(x: number): number;
   SDL_isalpha(x: number): number;
@@ -106,19 +168,47 @@ export interface SdlSymbols {
   SDL_tolower(x: number): number;
   SDL_crc16(crc: number, data: AnyPointer | null, len: number | bigint): number;
   SDL_crc32(crc: number, data: AnyPointer | null, len: number | bigint): number;
-  SDL_murmur3_32(data: AnyPointer | null, len: number | bigint, seed: number): number;
-  SDL_memcpy(dst: AnyPointer | null, src: AnyPointer | null, len: number | bigint): AnyPointer | null;
-  SDL_memmove(dst: AnyPointer | null, src: AnyPointer | null, len: number | bigint): AnyPointer | null;
-  SDL_memset(dst: AnyPointer | null, c: number, len: number | bigint): AnyPointer | null;
-  SDL_memset4(dst: AnyPointer | null, val: number, dwords: number | bigint): AnyPointer | null;
-  SDL_memcmp(s1: AnyPointer | null, s2: AnyPointer | null, len: number | bigint): number;
+  SDL_murmur3_32(
+    data: AnyPointer | null,
+    len: number | bigint,
+    seed: number
+  ): number;
+  SDL_memcpy(
+    dst: AnyPointer | null,
+    src: AnyPointer | null,
+    len: number | bigint
+  ): AnyPointer | null;
+  SDL_memmove(
+    dst: AnyPointer | null,
+    src: AnyPointer | null,
+    len: number | bigint
+  ): AnyPointer | null;
+  SDL_memset(
+    dst: AnyPointer | null,
+    c: number,
+    len: number | bigint
+  ): AnyPointer | null;
+  SDL_memset4(
+    dst: AnyPointer | null,
+    val: number,
+    dwords: number | bigint
+  ): AnyPointer | null;
+  SDL_memcmp(
+    s1: AnyPointer | null,
+    s2: AnyPointer | null,
+    len: number | bigint
+  ): number;
   SDL_wcslen(wstr: number): bigint;
   SDL_wcsnlen(wstr: number, maxlen: number | bigint): bigint;
   SDL_wcslcpy(dst: number, src: number, maxlen: number | bigint): bigint;
   SDL_wcslcat(dst: number, src: number, maxlen: number | bigint): bigint;
   SDL_wcsdup(wstr: number): number;
   SDL_wcsstr(haystack: number, needle: number): number;
-  SDL_wcsnstr(haystack: number, needle: number, maxlen: number | bigint): number;
+  SDL_wcsnstr(
+    haystack: number,
+    needle: number,
+    maxlen: number | bigint
+  ): number;
   SDL_wcscmp(str1: number, str2: number): number;
   SDL_wcsncmp(str1: number, str2: number, maxlen: number | bigint): number;
   SDL_wcscasecmp(str1: number, str2: number): number;
@@ -126,47 +216,163 @@ export interface SdlSymbols {
   SDL_wcstol(str: number, endp: number, base: number): bigint;
   SDL_strlen(str: string | null): bigint;
   SDL_strnlen(str: string | null, maxlen: number | bigint): bigint;
-  SDL_strlcpy(dst: ArrayBufferView | ArrayBuffer | null, src: string | null, maxlen: number | bigint): bigint;
-  SDL_utf8strlcpy(dst: ArrayBufferView | ArrayBuffer | null, src: string | null, dst_bytes: number | bigint): bigint;
-  SDL_strlcat(dst: ArrayBufferView | ArrayBuffer | null, src: string | null, maxlen: number | bigint): bigint;
+  SDL_strlcpy(
+    dst: ArrayBufferView | ArrayBuffer | null,
+    src: string | null,
+    maxlen: number | bigint
+  ): bigint;
+  SDL_utf8strlcpy(
+    dst: ArrayBufferView | ArrayBuffer | null,
+    src: string | null,
+    dst_bytes: number | bigint
+  ): bigint;
+  SDL_strlcat(
+    dst: ArrayBufferView | ArrayBuffer | null,
+    src: string | null,
+    maxlen: number | bigint
+  ): bigint;
   SDL_strdup(str: string | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strndup(str: string | null, maxlen: number | bigint): ArrayBufferView | ArrayBuffer | null;
-  SDL_strrev(str: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strupr(str: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strlwr(str: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strchr(str: string | null, c: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_strrchr(str: string | null, c: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_strstr(haystack: string | null, needle: string | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strnstr(haystack: string | null, needle: string | null, maxlen: number | bigint): ArrayBufferView | ArrayBuffer | null;
-  SDL_strcasestr(haystack: string | null, needle: string | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_strtok_r(str: ArrayBufferView | ArrayBuffer | null, delim: string | null, saveptr: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_strndup(
+    str: string | null,
+    maxlen: number | bigint
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strrev(
+    str: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strupr(
+    str: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strlwr(
+    str: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strchr(
+    str: string | null,
+    c: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strrchr(
+    str: string | null,
+    c: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strstr(
+    haystack: string | null,
+    needle: string | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strnstr(
+    haystack: string | null,
+    needle: string | null,
+    maxlen: number | bigint
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strcasestr(
+    haystack: string | null,
+    needle: string | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_strtok_r(
+    str: ArrayBufferView | ArrayBuffer | null,
+    delim: string | null,
+    saveptr: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_utf8strlen(str: string | null): bigint;
   SDL_utf8strnlen(str: string | null, bytes: number | bigint): bigint;
-  SDL_itoa(value: number, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_uitoa(value: number, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_ltoa(value: number | bigint, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_ultoa(value: number | bigint, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_lltoa(value: number | bigint, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
-  SDL_ulltoa(value: number | bigint, str: ArrayBufferView | ArrayBuffer | null, radix: number): ArrayBufferView | ArrayBuffer | null;
+  SDL_itoa(
+    value: number,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_uitoa(
+    value: number,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_ltoa(
+    value: number | bigint,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_ultoa(
+    value: number | bigint,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_lltoa(
+    value: number | bigint,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_ulltoa(
+    value: number | bigint,
+    str: ArrayBufferView | ArrayBuffer | null,
+    radix: number
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_atoi(str: string | null): number;
   SDL_atof(str: string | null): number;
-  SDL_strtol(str: string | null, endp: ArrayBufferView | ArrayBuffer | null, base: number): bigint;
-  SDL_strtoul(str: string | null, endp: ArrayBufferView | ArrayBuffer | null, base: number): bigint;
-  SDL_strtoll(str: string | null, endp: ArrayBufferView | ArrayBuffer | null, base: number): bigint;
-  SDL_strtoull(str: string | null, endp: ArrayBufferView | ArrayBuffer | null, base: number): bigint;
-  SDL_strtod(str: string | null, endp: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_strtol(
+    str: string | null,
+    endp: ArrayBufferView | ArrayBuffer | null,
+    base: number
+  ): bigint;
+  SDL_strtoul(
+    str: string | null,
+    endp: ArrayBufferView | ArrayBuffer | null,
+    base: number
+  ): bigint;
+  SDL_strtoll(
+    str: string | null,
+    endp: ArrayBufferView | ArrayBuffer | null,
+    base: number
+  ): bigint;
+  SDL_strtoull(
+    str: string | null,
+    endp: ArrayBufferView | ArrayBuffer | null,
+    base: number
+  ): bigint;
+  SDL_strtod(
+    str: string | null,
+    endp: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_strcmp(str1: string | null, str2: string | null): number;
-  SDL_strncmp(str1: string | null, str2: string | null, maxlen: number | bigint): number;
+  SDL_strncmp(
+    str1: string | null,
+    str2: string | null,
+    maxlen: number | bigint
+  ): number;
   SDL_strcasecmp(str1: string | null, str2: string | null): number;
-  SDL_strncasecmp(str1: string | null, str2: string | null, maxlen: number | bigint): number;
-  SDL_strpbrk(str: string | null, breakset: string | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_strncasecmp(
+    str1: string | null,
+    str2: string | null,
+    maxlen: number | bigint
+  ): number;
+  SDL_strpbrk(
+    str: string | null,
+    breakset: string | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_StepUTF8(pstr: string | null, pslen: number | bigint): number;
   SDL_StepBackUTF8(start: string | null, pstr: string | null): number;
-  SDL_UCS4ToUTF8(codepoint: number, dst: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_vsscanf(text: string | null, fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_vsnprintf(text: ArrayBufferView | ArrayBuffer | null, maxlen: number | bigint, fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_vswprintf(text: number, maxlen: number | bigint, fmt: number, ap: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_vasprintf(strp: ArrayBufferView | ArrayBuffer | null, fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_UCS4ToUTF8(
+    codepoint: number,
+    dst: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_vsscanf(
+    text: string | null,
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_vsnprintf(
+    text: ArrayBufferView | ArrayBuffer | null,
+    maxlen: number | bigint,
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_vswprintf(
+    text: number,
+    maxlen: number | bigint,
+    fmt: number,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_vasprintf(
+    strp: ArrayBufferView | ArrayBuffer | null,
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_srand(seed: number | bigint): void;
   SDL_rand(n: number): number;
   SDL_randf(): number;
@@ -223,39 +429,106 @@ export interface SdlSymbols {
   SDL_tan(x: number): number;
   SDL_tanf(x: number): number;
   SDL_iconv_close(cd: SDL_iconv_data_t | null): number;
-  SDL_iconv(cd: SDL_iconv_data_t | null, inbuf: string | null, inbytesleft: number | bigint, outbuf: ArrayBufferView | ArrayBuffer | null, outbytesleft: number | bigint): bigint;
-  SDL_iconv_string(tocode: string | null, fromcode: string | null, inbuf: string | null, inbytesleft: number | bigint): ArrayBufferView | ArrayBuffer | null;
-  SDL_ReportAssertion(data: SDL_AssertData | null, func: string | null, file: string | null, line: number): number;
+  SDL_iconv(
+    cd: SDL_iconv_data_t | null,
+    inbuf: string | null,
+    inbytesleft: number | bigint,
+    outbuf: ArrayBufferView | ArrayBuffer | null,
+    outbytesleft: number | bigint
+  ): bigint;
+  SDL_iconv_string(
+    tocode: string | null,
+    fromcode: string | null,
+    inbuf: string | null,
+    inbytesleft: number | bigint
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_ReportAssertion(
+    data: SDL_AssertData | null,
+    func: string | null,
+    file: string | null,
+    line: number
+  ): number;
   SDL_GetAssertionReport(): SDL_AssertData | null;
   SDL_ResetAssertionReport(): void;
-  SDL_AsyncIOFromFile(file: string | null, mode: string | null): SDL_AsyncIO | null;
+  SDL_AsyncIOFromFile(
+    file: string | null,
+    mode: string | null
+  ): SDL_AsyncIO | null;
   SDL_GetAsyncIOSize(asyncio: SDL_AsyncIO | null): bigint;
-  SDL_ReadAsyncIO(asyncio: SDL_AsyncIO | null, ptr: AnyPointer | null, offset: number | bigint, size: number | bigint, queue: SDL_AsyncIOQueue | null, userdata: AnyPointer | null): boolean;
-  SDL_WriteAsyncIO(asyncio: SDL_AsyncIO | null, ptr: AnyPointer | null, offset: number | bigint, size: number | bigint, queue: SDL_AsyncIOQueue | null, userdata: AnyPointer | null): boolean;
-  SDL_CloseAsyncIO(asyncio: SDL_AsyncIO | null, flush: boolean, queue: SDL_AsyncIOQueue | null, userdata: AnyPointer | null): boolean;
+  SDL_ReadAsyncIO(
+    asyncio: SDL_AsyncIO | null,
+    ptr: AnyPointer | null,
+    offset: number | bigint,
+    size: number | bigint,
+    queue: SDL_AsyncIOQueue | null,
+    userdata: AnyPointer | null
+  ): boolean;
+  SDL_WriteAsyncIO(
+    asyncio: SDL_AsyncIO | null,
+    ptr: AnyPointer | null,
+    offset: number | bigint,
+    size: number | bigint,
+    queue: SDL_AsyncIOQueue | null,
+    userdata: AnyPointer | null
+  ): boolean;
+  SDL_CloseAsyncIO(
+    asyncio: SDL_AsyncIO | null,
+    flush: boolean,
+    queue: SDL_AsyncIOQueue | null,
+    userdata: AnyPointer | null
+  ): boolean;
   SDL_CreateAsyncIOQueue(): SDL_AsyncIOQueue | null;
   SDL_DestroyAsyncIOQueue(queue: SDL_AsyncIOQueue | null): void;
-  SDL_GetAsyncIOResult(queue: SDL_AsyncIOQueue | null, outcome: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_WaitAsyncIOResult(queue: SDL_AsyncIOQueue | null, outcome: ArrayBufferView | ArrayBuffer | null, timeoutMS: number): boolean;
+  SDL_GetAsyncIOResult(
+    queue: SDL_AsyncIOQueue | null,
+    outcome: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_WaitAsyncIOResult(
+    queue: SDL_AsyncIOQueue | null,
+    outcome: ArrayBufferView | ArrayBuffer | null,
+    timeoutMS: number
+  ): boolean;
   SDL_SignalAsyncIOQueue(queue: SDL_AsyncIOQueue | null): void;
-  SDL_LoadFileAsync(file: string | null, queue: SDL_AsyncIOQueue | null, userdata: AnyPointer | null): boolean;
+  SDL_LoadFileAsync(
+    file: string | null,
+    queue: SDL_AsyncIOQueue | null,
+    userdata: AnyPointer | null
+  ): boolean;
   SDL_TryLockSpinlock(lock: number): boolean;
   SDL_LockSpinlock(lock: number): void;
   SDL_UnlockSpinlock(lock: number): void;
   SDL_MemoryBarrierReleaseFunction(): void;
   SDL_MemoryBarrierAcquireFunction(): void;
-  SDL_CompareAndSwapAtomicInt(a: ArrayBufferView | ArrayBuffer | null, oldval: number, newval: number): boolean;
+  SDL_CompareAndSwapAtomicInt(
+    a: ArrayBufferView | ArrayBuffer | null,
+    oldval: number,
+    newval: number
+  ): boolean;
   SDL_SetAtomicInt(a: ArrayBufferView | ArrayBuffer | null, v: number): number;
   SDL_GetAtomicInt(a: ArrayBufferView | ArrayBuffer | null): number;
   SDL_AddAtomicInt(a: ArrayBufferView | ArrayBuffer | null, v: number): number;
-  SDL_CompareAndSwapAtomicU32(a: ArrayBufferView | ArrayBuffer | null, oldval: number, newval: number): boolean;
+  SDL_CompareAndSwapAtomicU32(
+    a: ArrayBufferView | ArrayBuffer | null,
+    oldval: number,
+    newval: number
+  ): boolean;
   SDL_SetAtomicU32(a: ArrayBufferView | ArrayBuffer | null, v: number): number;
   SDL_GetAtomicU32(a: ArrayBufferView | ArrayBuffer | null): number;
   SDL_AddAtomicU32(a: ArrayBufferView | ArrayBuffer | null, v: number): number;
-  SDL_CompareAndSwapAtomicPointer(a: AnyPointer | null, oldval: AnyPointer | null, newval: AnyPointer | null): boolean;
-  SDL_SetAtomicPointer(a: AnyPointer | null, v: AnyPointer | null): AnyPointer | null;
+  SDL_CompareAndSwapAtomicPointer(
+    a: AnyPointer | null,
+    oldval: AnyPointer | null,
+    newval: AnyPointer | null
+  ): boolean;
+  SDL_SetAtomicPointer(
+    a: AnyPointer | null,
+    v: AnyPointer | null
+  ): AnyPointer | null;
   SDL_GetAtomicPointer(a: AnyPointer | null): AnyPointer | null;
-  SDL_SetErrorV(fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetErrorV(
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_OutOfMemory(): boolean;
   SDL_GetError(): string;
   SDL_ClearError(): boolean;
@@ -264,25 +537,68 @@ export interface SdlSymbols {
   SDL_CopyProperties(src: number, dst: number): boolean;
   SDL_LockProperties(props: number): boolean;
   SDL_UnlockProperties(props: number): void;
-  SDL_SetPointerProperty(props: number, name: string | null, value: AnyPointer | null): boolean;
-  SDL_SetStringProperty(props: number, name: string | null, value: string | null): boolean;
-  SDL_SetNumberProperty(props: number, name: string | null, value: number | bigint): boolean;
-  SDL_SetFloatProperty(props: number, name: string | null, value: number): boolean;
-  SDL_SetBooleanProperty(props: number, name: string | null, value: boolean): boolean;
+  SDL_SetPointerProperty(
+    props: number,
+    name: string | null,
+    value: AnyPointer | null
+  ): boolean;
+  SDL_SetStringProperty(
+    props: number,
+    name: string | null,
+    value: string | null
+  ): boolean;
+  SDL_SetNumberProperty(
+    props: number,
+    name: string | null,
+    value: number | bigint
+  ): boolean;
+  SDL_SetFloatProperty(
+    props: number,
+    name: string | null,
+    value: number
+  ): boolean;
+  SDL_SetBooleanProperty(
+    props: number,
+    name: string | null,
+    value: boolean
+  ): boolean;
   SDL_HasProperty(props: number, name: string | null): boolean;
   SDL_GetPropertyType(props: number, name: string | null): number;
-  SDL_GetPointerProperty(props: number, name: string | null, default_value: AnyPointer | null): AnyPointer | null;
-  SDL_GetStringProperty(props: number, name: string | null, default_value: string | null): string;
-  SDL_GetNumberProperty(props: number, name: string | null, default_value: number | bigint): bigint;
-  SDL_GetFloatProperty(props: number, name: string | null, default_value: number): number;
-  SDL_GetBooleanProperty(props: number, name: string | null, default_value: boolean): boolean;
+  SDL_GetPointerProperty(
+    props: number,
+    name: string | null,
+    default_value: AnyPointer | null
+  ): AnyPointer | null;
+  SDL_GetStringProperty(
+    props: number,
+    name: string | null,
+    default_value: string | null
+  ): string;
+  SDL_GetNumberProperty(
+    props: number,
+    name: string | null,
+    default_value: number | bigint
+  ): bigint;
+  SDL_GetFloatProperty(
+    props: number,
+    name: string | null,
+    default_value: number
+  ): number;
+  SDL_GetBooleanProperty(
+    props: number,
+    name: string | null,
+    default_value: boolean
+  ): boolean;
   SDL_ClearProperty(props: number, name: string | null): boolean;
   SDL_DestroyProperties(props: number): void;
   SDL_GetThreadName(thread: SDL_Thread | null): string;
   SDL_GetCurrentThreadID(): bigint;
   SDL_GetThreadID(thread: SDL_Thread | null): bigint;
   SDL_SetCurrentThreadPriority(priority: number): boolean;
-  SDL_WaitThread(thread: SDL_Thread | null, status: ArrayBufferView | ArrayBuffer | null): void;
+  SDL_WaitThread(
+    thread: SDL_Thread | null,
+    status: ArrayBufferView | ArrayBuffer | null
+  ): void;
   SDL_GetThreadState(thread: SDL_Thread | null): number;
   SDL_DetachThread(thread: SDL_Thread | null): void;
   SDL_CleanupTLS(): void;
@@ -302,7 +618,10 @@ export interface SdlSymbols {
   SDL_DestroySemaphore(sem: SDL_Semaphore | null): void;
   SDL_WaitSemaphore(sem: SDL_Semaphore | null): void;
   SDL_TryWaitSemaphore(sem: SDL_Semaphore | null): boolean;
-  SDL_WaitSemaphoreTimeout(sem: SDL_Semaphore | null, timeoutMS: number): boolean;
+  SDL_WaitSemaphoreTimeout(
+    sem: SDL_Semaphore | null,
+    timeoutMS: number
+  ): boolean;
   SDL_SignalSemaphore(sem: SDL_Semaphore | null): void;
   SDL_GetSemaphoreValue(sem: SDL_Semaphore | null): number;
   SDL_CreateCondition(): SDL_Condition | null;
@@ -310,29 +629,77 @@ export interface SdlSymbols {
   SDL_SignalCondition(cond: SDL_Condition | null): void;
   SDL_BroadcastCondition(cond: SDL_Condition | null): void;
   SDL_WaitCondition(cond: SDL_Condition | null, mutex: SDL_Mutex | null): void;
-  SDL_WaitConditionTimeout(cond: SDL_Condition | null, mutex: SDL_Mutex | null, timeoutMS: number): boolean;
+  SDL_WaitConditionTimeout(
+    cond: SDL_Condition | null,
+    mutex: SDL_Mutex | null,
+    timeoutMS: number
+  ): boolean;
   SDL_ShouldInit(state: ArrayBufferView | ArrayBuffer | null): boolean;
   SDL_ShouldQuit(state: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetInitialized(state: ArrayBufferView | ArrayBuffer | null, initialized: boolean): void;
+  SDL_SetInitialized(
+    state: ArrayBufferView | ArrayBuffer | null,
+    initialized: boolean
+  ): void;
   SDL_IOFromFile(file: string | null, mode: string | null): SDL_IOStream | null;
-  SDL_IOFromMem(mem: AnyPointer | null, size: number | bigint): SDL_IOStream | null;
-  SDL_IOFromConstMem(mem: AnyPointer | null, size: number | bigint): SDL_IOStream | null;
+  SDL_IOFromMem(
+    mem: AnyPointer | null,
+    size: number | bigint
+  ): SDL_IOStream | null;
+  SDL_IOFromConstMem(
+    mem: AnyPointer | null,
+    size: number | bigint
+  ): SDL_IOStream | null;
   SDL_IOFromDynamicMem(): SDL_IOStream | null;
-  SDL_OpenIO(iface: ArrayBufferView | ArrayBuffer | null, userdata: AnyPointer | null): SDL_IOStream | null;
+  SDL_OpenIO(
+    iface: ArrayBufferView | ArrayBuffer | null,
+    userdata: AnyPointer | null
+  ): SDL_IOStream | null;
   SDL_CloseIO(context: SDL_IOStream | null): boolean;
   SDL_GetIOProperties(context: SDL_IOStream | null): number;
   SDL_GetIOStatus(context: SDL_IOStream | null): number;
   SDL_GetIOSize(context: SDL_IOStream | null): bigint;
-  SDL_SeekIO(context: SDL_IOStream | null, offset: number | bigint, whence: number): bigint;
+  SDL_SeekIO(
+    context: SDL_IOStream | null,
+    offset: number | bigint,
+    whence: number
+  ): bigint;
   SDL_TellIO(context: SDL_IOStream | null): bigint;
-  SDL_ReadIO(context: SDL_IOStream | null, ptr: AnyPointer | null, size: number | bigint): bigint;
-  SDL_WriteIO(context: SDL_IOStream | null, ptr: AnyPointer | null, size: number | bigint): bigint;
-  SDL_IOvprintf(context: SDL_IOStream | null, fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): bigint;
+  SDL_ReadIO(
+    context: SDL_IOStream | null,
+    ptr: AnyPointer | null,
+    size: number | bigint
+  ): bigint;
+  SDL_WriteIO(
+    context: SDL_IOStream | null,
+    ptr: AnyPointer | null,
+    size: number | bigint
+  ): bigint;
+  SDL_IOvprintf(
+    context: SDL_IOStream | null,
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): bigint;
   SDL_FlushIO(context: SDL_IOStream | null): boolean;
-  SDL_LoadFile_IO(src: SDL_IOStream | null, datasize: number | bigint, closeio: boolean): AnyPointer | null;
-  SDL_LoadFile(file: string | null, datasize: number | bigint): AnyPointer | null;
-  SDL_SaveFile_IO(src: SDL_IOStream | null, data: AnyPointer | null, datasize: number | bigint, closeio: boolean): boolean;
-  SDL_SaveFile(file: string | null, data: AnyPointer | null, datasize: number | bigint): boolean;
+  SDL_LoadFile_IO(
+    src: SDL_IOStream | null,
+    datasize: number | bigint,
+    closeio: boolean
+  ): AnyPointer | null;
+  SDL_LoadFile(
+    file: string | null,
+    datasize: number | bigint
+  ): AnyPointer | null;
+  SDL_SaveFile_IO(
+    src: SDL_IOStream | null,
+    data: AnyPointer | null,
+    datasize: number | bigint,
+    closeio: boolean
+  ): boolean;
+  SDL_SaveFile(
+    file: string | null,
+    data: AnyPointer | null,
+    datasize: number | bigint
+  ): boolean;
   SDL_ReadU8(src: SDL_IOStream | null, value: number): boolean;
   SDL_ReadS8(src: SDL_IOStream | null, value: number): boolean;
   SDL_ReadU16LE(src: SDL_IOStream | null, value: number): boolean;
@@ -364,12 +731,26 @@ export interface SdlSymbols {
   SDL_GetNumAudioDrivers(): number;
   SDL_GetAudioDriver(index: number): string;
   SDL_GetCurrentAudioDriver(): string;
-  SDL_GetAudioPlaybackDevices(count: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_GetAudioRecordingDevices(count: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetAudioPlaybackDevices(
+    count: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_GetAudioRecordingDevices(
+    count: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_GetAudioDeviceName(devid: number): string;
-  SDL_GetAudioDeviceFormat(devid: number, spec: ArrayBufferView | ArrayBuffer | null, sample_frames: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetAudioDeviceChannelMap(devid: number, count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_OpenAudioDevice(devid: number, spec: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetAudioDeviceFormat(
+    devid: number,
+    spec: ArrayBufferView | ArrayBuffer | null,
+    sample_frames: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetAudioDeviceChannelMap(
+    devid: number,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_OpenAudioDevice(
+    devid: number,
+    spec: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_IsAudioDevicePhysical(devid: number): boolean;
   SDL_IsAudioDevicePlayback(devid: number): boolean;
   SDL_PauseAudioDevice(devid: number): boolean;
@@ -378,26 +759,74 @@ export interface SdlSymbols {
   SDL_GetAudioDeviceGain(devid: number): number;
   SDL_SetAudioDeviceGain(devid: number, gain: number): boolean;
   SDL_CloseAudioDevice(devid: number): void;
-  SDL_BindAudioStreams(devid: number, streams: SDL_AudioStream | null, num_streams: number): boolean;
+  SDL_BindAudioStreams(
+    devid: number,
+    streams: SDL_AudioStream | null,
+    num_streams: number
+  ): boolean;
   SDL_BindAudioStream(devid: number, stream: SDL_AudioStream | null): boolean;
-  SDL_UnbindAudioStreams(streams: SDL_AudioStream | null, num_streams: number): void;
+  SDL_UnbindAudioStreams(
+    streams: SDL_AudioStream | null,
+    num_streams: number
+  ): void;
   SDL_UnbindAudioStream(stream: SDL_AudioStream | null): void;
   SDL_GetAudioStreamDevice(stream: SDL_AudioStream | null): number;
-  SDL_CreateAudioStream(src_spec: ArrayBufferView | ArrayBuffer | null, dst_spec: ArrayBufferView | ArrayBuffer | null): SDL_AudioStream | null;
+  SDL_CreateAudioStream(
+    src_spec: ArrayBufferView | ArrayBuffer | null,
+    dst_spec: ArrayBufferView | ArrayBuffer | null
+  ): SDL_AudioStream | null;
   SDL_GetAudioStreamProperties(stream: SDL_AudioStream | null): number;
-  SDL_GetAudioStreamFormat(stream: SDL_AudioStream | null, src_spec: ArrayBufferView | ArrayBuffer | null, dst_spec: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetAudioStreamFormat(stream: SDL_AudioStream | null, src_spec: ArrayBufferView | ArrayBuffer | null, dst_spec: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetAudioStreamFormat(
+    stream: SDL_AudioStream | null,
+    src_spec: ArrayBufferView | ArrayBuffer | null,
+    dst_spec: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetAudioStreamFormat(
+    stream: SDL_AudioStream | null,
+    src_spec: ArrayBufferView | ArrayBuffer | null,
+    dst_spec: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetAudioStreamFrequencyRatio(stream: SDL_AudioStream | null): number;
-  SDL_SetAudioStreamFrequencyRatio(stream: SDL_AudioStream | null, ratio: number): boolean;
+  SDL_SetAudioStreamFrequencyRatio(
+    stream: SDL_AudioStream | null,
+    ratio: number
+  ): boolean;
   SDL_GetAudioStreamGain(stream: SDL_AudioStream | null): number;
   SDL_SetAudioStreamGain(stream: SDL_AudioStream | null, gain: number): boolean;
-  SDL_GetAudioStreamInputChannelMap(stream: SDL_AudioStream | null, count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_GetAudioStreamOutputChannelMap(stream: SDL_AudioStream | null, count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_SetAudioStreamInputChannelMap(stream: SDL_AudioStream | null, chmap: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_SetAudioStreamOutputChannelMap(stream: SDL_AudioStream | null, chmap: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_PutAudioStreamData(stream: SDL_AudioStream | null, buf: AnyPointer | null, len: number): boolean;
-  SDL_PutAudioStreamPlanarData(stream: SDL_AudioStream | null, channel_buffers: AnyPointer | null, num_channels: number, num_samples: number): boolean;
-  SDL_GetAudioStreamData(stream: SDL_AudioStream | null, buf: AnyPointer | null, len: number): number;
+  SDL_GetAudioStreamInputChannelMap(
+    stream: SDL_AudioStream | null,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetAudioStreamOutputChannelMap(
+    stream: SDL_AudioStream | null,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_SetAudioStreamInputChannelMap(
+    stream: SDL_AudioStream | null,
+    chmap: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_SetAudioStreamOutputChannelMap(
+    stream: SDL_AudioStream | null,
+    chmap: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_PutAudioStreamData(
+    stream: SDL_AudioStream | null,
+    buf: AnyPointer | null,
+    len: number
+  ): boolean;
+  SDL_PutAudioStreamPlanarData(
+    stream: SDL_AudioStream | null,
+    channel_buffers: AnyPointer | null,
+    num_channels: number,
+    num_samples: number
+  ): boolean;
+  SDL_GetAudioStreamData(
+    stream: SDL_AudioStream | null,
+    buf: AnyPointer | null,
+    len: number
+  ): number;
   SDL_GetAudioStreamAvailable(stream: SDL_AudioStream | null): number;
   SDL_GetAudioStreamQueued(stream: SDL_AudioStream | null): number;
   SDL_FlushAudioStream(stream: SDL_AudioStream | null): boolean;
@@ -408,113 +837,475 @@ export interface SdlSymbols {
   SDL_LockAudioStream(stream: SDL_AudioStream | null): boolean;
   SDL_UnlockAudioStream(stream: SDL_AudioStream | null): boolean;
   SDL_DestroyAudioStream(stream: SDL_AudioStream | null): void;
-  SDL_LoadWAV_IO(src: SDL_IOStream | null, closeio: boolean, spec: ArrayBufferView | ArrayBuffer | null, audio_buf: number, audio_len: number): boolean;
-  SDL_LoadWAV(path: string | null, spec: ArrayBufferView | ArrayBuffer | null, audio_buf: number, audio_len: number): boolean;
-  SDL_MixAudio(dst: number, src: number, format: number, len: number, volume: number): boolean;
-  SDL_ConvertAudioSamples(src_spec: ArrayBufferView | ArrayBuffer | null, src_data: number, src_len: number, dst_spec: ArrayBufferView | ArrayBuffer | null, dst_data: number, dst_len: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_LoadWAV_IO(
+    src: SDL_IOStream | null,
+    closeio: boolean,
+    spec: ArrayBufferView | ArrayBuffer | null,
+    audio_buf: number,
+    audio_len: number
+  ): boolean;
+  SDL_LoadWAV(
+    path: string | null,
+    spec: ArrayBufferView | ArrayBuffer | null,
+    audio_buf: number,
+    audio_len: number
+  ): boolean;
+  SDL_MixAudio(
+    dst: number,
+    src: number,
+    format: number,
+    len: number,
+    volume: number
+  ): boolean;
+  SDL_ConvertAudioSamples(
+    src_spec: ArrayBufferView | ArrayBuffer | null,
+    src_data: number,
+    src_len: number,
+    dst_spec: ArrayBufferView | ArrayBuffer | null,
+    dst_data: number,
+    dst_len: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetAudioFormatName(format: number): string;
   SDL_GetSilenceValueForFormat(format: number): number;
-  SDL_ComposeCustomBlendMode(srcColorFactor: number, dstColorFactor: number, colorOperation: number, srcAlphaFactor: number, dstAlphaFactor: number, alphaOperation: number): number;
+  SDL_ComposeCustomBlendMode(
+    srcColorFactor: number,
+    dstColorFactor: number,
+    colorOperation: number,
+    srcAlphaFactor: number,
+    dstAlphaFactor: number,
+    alphaOperation: number
+  ): number;
   SDL_GetPixelFormatName(format: number): string;
-  SDL_GetMasksForPixelFormat(format: number, bpp: ArrayBufferView | ArrayBuffer | null, Rmask: number, Gmask: number, Bmask: number, Amask: number): boolean;
-  SDL_GetPixelFormatForMasks(bpp: number, Rmask: number, Gmask: number, Bmask: number, Amask: number): number;
+  SDL_GetMasksForPixelFormat(
+    format: number,
+    bpp: ArrayBufferView | ArrayBuffer | null,
+    Rmask: number,
+    Gmask: number,
+    Bmask: number,
+    Amask: number
+  ): boolean;
+  SDL_GetPixelFormatForMasks(
+    bpp: number,
+    Rmask: number,
+    Gmask: number,
+    Bmask: number,
+    Amask: number
+  ): number;
   SDL_GetPixelFormatDetails(format: number): SDL_PixelFormatDetails | null;
   SDL_CreatePalette(ncolors: number): SDL_Palette | null;
-  SDL_SetPaletteColors(palette: SDL_Palette | null, colors: ArrayBufferView | ArrayBuffer | null, firstcolor: number, ncolors: number): boolean;
+  SDL_SetPaletteColors(
+    palette: SDL_Palette | null,
+    colors: ArrayBufferView | ArrayBuffer | null,
+    firstcolor: number,
+    ncolors: number
+  ): boolean;
   SDL_DestroyPalette(palette: SDL_Palette | null): void;
-  SDL_MapRGB(format: SDL_PixelFormatDetails | null, palette: SDL_Palette | null, r: number, g: number, b: number): number;
-  SDL_MapRGBA(format: SDL_PixelFormatDetails | null, palette: SDL_Palette | null, r: number, g: number, b: number, a: number): number;
-  SDL_GetRGB(pixelvalue: number, format: SDL_PixelFormatDetails | null, palette: SDL_Palette | null, r: number, g: number, b: number): void;
-  SDL_GetRGBA(pixelvalue: number, format: SDL_PixelFormatDetails | null, palette: SDL_Palette | null, r: number, g: number, b: number, a: number): void;
-  SDL_HasRectIntersection(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectIntersection(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectUnion(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectEnclosingPoints(points: ArrayBufferView | ArrayBuffer | null, count: number, clip: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectAndLineIntersection(rect: ArrayBufferView | ArrayBuffer | null, X1: ArrayBufferView | ArrayBuffer | null, Y1: ArrayBufferView | ArrayBuffer | null, X2: ArrayBufferView | ArrayBuffer | null, Y2: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_HasRectIntersectionFloat(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectIntersectionFloat(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectUnionFloat(A: ArrayBufferView | ArrayBuffer | null, B: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectEnclosingPointsFloat(points: ArrayBufferView | ArrayBuffer | null, count: number, clip: ArrayBufferView | ArrayBuffer | null, result: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRectAndLineIntersectionFloat(rect: ArrayBufferView | ArrayBuffer | null, X1: ArrayBufferView | ArrayBuffer | null, Y1: ArrayBufferView | ArrayBuffer | null, X2: ArrayBufferView | ArrayBuffer | null, Y2: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_CreateSurface(width: number, height: number, format: number): SDL_Surface | null;
-  SDL_CreateSurfaceFrom(width: number, height: number, format: number, pixels: AnyPointer | null, pitch: number): SDL_Surface | null;
+  SDL_MapRGB(
+    format: SDL_PixelFormatDetails | null,
+    palette: SDL_Palette | null,
+    r: number,
+    g: number,
+    b: number
+  ): number;
+  SDL_MapRGBA(
+    format: SDL_PixelFormatDetails | null,
+    palette: SDL_Palette | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): number;
+  SDL_GetRGB(
+    pixelvalue: number,
+    format: SDL_PixelFormatDetails | null,
+    palette: SDL_Palette | null,
+    r: number,
+    g: number,
+    b: number
+  ): void;
+  SDL_GetRGBA(
+    pixelvalue: number,
+    format: SDL_PixelFormatDetails | null,
+    palette: SDL_Palette | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): void;
+  SDL_HasRectIntersection(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectIntersection(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectUnion(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectEnclosingPoints(
+    points: ArrayBufferView | ArrayBuffer | null,
+    count: number,
+    clip: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectAndLineIntersection(
+    rect: ArrayBufferView | ArrayBuffer | null,
+    X1: ArrayBufferView | ArrayBuffer | null,
+    Y1: ArrayBufferView | ArrayBuffer | null,
+    X2: ArrayBufferView | ArrayBuffer | null,
+    Y2: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_HasRectIntersectionFloat(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectIntersectionFloat(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectUnionFloat(
+    A: ArrayBufferView | ArrayBuffer | null,
+    B: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectEnclosingPointsFloat(
+    points: ArrayBufferView | ArrayBuffer | null,
+    count: number,
+    clip: ArrayBufferView | ArrayBuffer | null,
+    result: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRectAndLineIntersectionFloat(
+    rect: ArrayBufferView | ArrayBuffer | null,
+    X1: ArrayBufferView | ArrayBuffer | null,
+    Y1: ArrayBufferView | ArrayBuffer | null,
+    X2: ArrayBufferView | ArrayBuffer | null,
+    Y2: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_CreateSurface(
+    width: number,
+    height: number,
+    format: number
+  ): SDL_Surface | null;
+  SDL_CreateSurfaceFrom(
+    width: number,
+    height: number,
+    format: number,
+    pixels: AnyPointer | null,
+    pitch: number
+  ): SDL_Surface | null;
   SDL_DestroySurface(surface: SDL_Surface | null): void;
   SDL_GetSurfaceProperties(surface: SDL_Surface | null): number;
-  SDL_SetSurfaceColorspace(surface: SDL_Surface | null, colorspace: number): boolean;
+  SDL_SetSurfaceColorspace(
+    surface: SDL_Surface | null,
+    colorspace: number
+  ): boolean;
   SDL_GetSurfaceColorspace(surface: SDL_Surface | null): number;
   SDL_CreateSurfacePalette(surface: SDL_Surface | null): SDL_Palette | null;
-  SDL_SetSurfacePalette(surface: SDL_Surface | null, palette: SDL_Palette | null): boolean;
+  SDL_SetSurfacePalette(
+    surface: SDL_Surface | null,
+    palette: SDL_Palette | null
+  ): boolean;
   SDL_GetSurfacePalette(surface: SDL_Surface | null): SDL_Palette | null;
-  SDL_AddSurfaceAlternateImage(surface: SDL_Surface | null, image: SDL_Surface | null): boolean;
+  SDL_AddSurfaceAlternateImage(
+    surface: SDL_Surface | null,
+    image: SDL_Surface | null
+  ): boolean;
   SDL_SurfaceHasAlternateImages(surface: SDL_Surface | null): boolean;
-  SDL_GetSurfaceImages(surface: SDL_Surface | null, count: ArrayBufferView | ArrayBuffer | null): SDL_Surface | null;
+  SDL_GetSurfaceImages(
+    surface: SDL_Surface | null,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Surface | null;
   SDL_RemoveSurfaceAlternateImages(surface: SDL_Surface | null): void;
   SDL_LockSurface(surface: SDL_Surface | null): boolean;
   SDL_UnlockSurface(surface: SDL_Surface | null): void;
-  SDL_LoadSurface_IO(src: SDL_IOStream | null, closeio: boolean): SDL_Surface | null;
+  SDL_LoadSurface_IO(
+    src: SDL_IOStream | null,
+    closeio: boolean
+  ): SDL_Surface | null;
   SDL_LoadSurface(file: string | null): SDL_Surface | null;
-  SDL_LoadBMP_IO(src: SDL_IOStream | null, closeio: boolean): SDL_Surface | null;
+  SDL_LoadBMP_IO(
+    src: SDL_IOStream | null,
+    closeio: boolean
+  ): SDL_Surface | null;
   SDL_LoadBMP(file: string | null): SDL_Surface | null;
-  SDL_SaveBMP_IO(surface: SDL_Surface | null, dst: SDL_IOStream | null, closeio: boolean): boolean;
+  SDL_SaveBMP_IO(
+    surface: SDL_Surface | null,
+    dst: SDL_IOStream | null,
+    closeio: boolean
+  ): boolean;
   SDL_SaveBMP(surface: SDL_Surface | null, file: string | null): boolean;
-  SDL_LoadPNG_IO(src: SDL_IOStream | null, closeio: boolean): SDL_Surface | null;
+  SDL_LoadPNG_IO(
+    src: SDL_IOStream | null,
+    closeio: boolean
+  ): SDL_Surface | null;
   SDL_LoadPNG(file: string | null): SDL_Surface | null;
-  SDL_SavePNG_IO(surface: SDL_Surface | null, dst: SDL_IOStream | null, closeio: boolean): boolean;
+  SDL_SavePNG_IO(
+    surface: SDL_Surface | null,
+    dst: SDL_IOStream | null,
+    closeio: boolean
+  ): boolean;
   SDL_SavePNG(surface: SDL_Surface | null, file: string | null): boolean;
   SDL_SetSurfaceRLE(surface: SDL_Surface | null, enabled: boolean): boolean;
   SDL_SurfaceHasRLE(surface: SDL_Surface | null): boolean;
-  SDL_SetSurfaceColorKey(surface: SDL_Surface | null, enabled: boolean, key: number): boolean;
+  SDL_SetSurfaceColorKey(
+    surface: SDL_Surface | null,
+    enabled: boolean,
+    key: number
+  ): boolean;
   SDL_SurfaceHasColorKey(surface: SDL_Surface | null): boolean;
   SDL_GetSurfaceColorKey(surface: SDL_Surface | null, key: number): boolean;
-  SDL_SetSurfaceColorMod(surface: SDL_Surface | null, r: number, g: number, b: number): boolean;
-  SDL_GetSurfaceColorMod(surface: SDL_Surface | null, r: number, g: number, b: number): boolean;
+  SDL_SetSurfaceColorMod(
+    surface: SDL_Surface | null,
+    r: number,
+    g: number,
+    b: number
+  ): boolean;
+  SDL_GetSurfaceColorMod(
+    surface: SDL_Surface | null,
+    r: number,
+    g: number,
+    b: number
+  ): boolean;
   SDL_SetSurfaceAlphaMod(surface: SDL_Surface | null, alpha: number): boolean;
   SDL_GetSurfaceAlphaMod(surface: SDL_Surface | null, alpha: number): boolean;
-  SDL_SetSurfaceBlendMode(surface: SDL_Surface | null, blendMode: number): boolean;
-  SDL_GetSurfaceBlendMode(surface: SDL_Surface | null, blendMode: number): boolean;
-  SDL_SetSurfaceClipRect(surface: SDL_Surface | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetSurfaceClipRect(surface: SDL_Surface | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetSurfaceBlendMode(
+    surface: SDL_Surface | null,
+    blendMode: number
+  ): boolean;
+  SDL_GetSurfaceBlendMode(
+    surface: SDL_Surface | null,
+    blendMode: number
+  ): boolean;
+  SDL_SetSurfaceClipRect(
+    surface: SDL_Surface | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetSurfaceClipRect(
+    surface: SDL_Surface | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_FlipSurface(surface: SDL_Surface | null, flip: number): boolean;
-  SDL_RotateSurface(surface: SDL_Surface | null, angle: number): SDL_Surface | null;
+  SDL_RotateSurface(
+    surface: SDL_Surface | null,
+    angle: number
+  ): SDL_Surface | null;
   SDL_DuplicateSurface(surface: SDL_Surface | null): SDL_Surface | null;
-  SDL_ScaleSurface(surface: SDL_Surface | null, width: number, height: number, scaleMode: number): SDL_Surface | null;
-  SDL_ConvertSurface(surface: SDL_Surface | null, format: number): SDL_Surface | null;
-  SDL_ConvertSurfaceAndColorspace(surface: SDL_Surface | null, format: number, palette: SDL_Palette | null, colorspace: number, props: number): SDL_Surface | null;
-  SDL_ConvertPixels(width: number, height: number, src_format: number, src: AnyPointer | null, src_pitch: number, dst_format: number, dst: AnyPointer | null, dst_pitch: number): boolean;
-  SDL_ConvertPixelsAndColorspace(width: number, height: number, src_format: number, src_colorspace: number, src_properties: number, src: AnyPointer | null, src_pitch: number, dst_format: number, dst_colorspace: number, dst_properties: number, dst: AnyPointer | null, dst_pitch: number): boolean;
-  SDL_PremultiplyAlpha(width: number, height: number, src_format: number, src: AnyPointer | null, src_pitch: number, dst_format: number, dst: AnyPointer | null, dst_pitch: number, linear: boolean): boolean;
-  SDL_PremultiplySurfaceAlpha(surface: SDL_Surface | null, linear: boolean): boolean;
-  SDL_ClearSurface(surface: SDL_Surface | null, r: number, g: number, b: number, a: number): boolean;
-  SDL_FillSurfaceRect(dst: SDL_Surface | null, rect: ArrayBufferView | ArrayBuffer | null, color: number): boolean;
-  SDL_FillSurfaceRects(dst: SDL_Surface | null, rects: ArrayBufferView | ArrayBuffer | null, count: number, color: number): boolean;
-  SDL_BlitSurface(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_BlitSurfaceUnchecked(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_BlitSurfaceScaled(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null, scaleMode: number): boolean;
-  SDL_BlitSurfaceUncheckedScaled(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null, scaleMode: number): boolean;
-  SDL_StretchSurface(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null, scaleMode: number): boolean;
-  SDL_BlitSurfaceTiled(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_BlitSurfaceTiledWithScale(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, scale: number, scaleMode: number, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_BlitSurface9Grid(src: SDL_Surface | null, srcrect: ArrayBufferView | ArrayBuffer | null, left_width: number, right_width: number, top_height: number, bottom_height: number, scale: number, scaleMode: number, dst: SDL_Surface | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_MapSurfaceRGB(surface: SDL_Surface | null, r: number, g: number, b: number): number;
-  SDL_MapSurfaceRGBA(surface: SDL_Surface | null, r: number, g: number, b: number, a: number): number;
-  SDL_ReadSurfacePixel(surface: SDL_Surface | null, x: number, y: number, r: number, g: number, b: number, a: number): boolean;
-  SDL_ReadSurfacePixelFloat(surface: SDL_Surface | null, x: number, y: number, r: ArrayBufferView | ArrayBuffer | null, g: ArrayBufferView | ArrayBuffer | null, b: ArrayBufferView | ArrayBuffer | null, a: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_WriteSurfacePixel(surface: SDL_Surface | null, x: number, y: number, r: number, g: number, b: number, a: number): boolean;
-  SDL_WriteSurfacePixelFloat(surface: SDL_Surface | null, x: number, y: number, r: number, g: number, b: number, a: number): boolean;
+  SDL_ScaleSurface(
+    surface: SDL_Surface | null,
+    width: number,
+    height: number,
+    scaleMode: number
+  ): SDL_Surface | null;
+  SDL_ConvertSurface(
+    surface: SDL_Surface | null,
+    format: number
+  ): SDL_Surface | null;
+  SDL_ConvertSurfaceAndColorspace(
+    surface: SDL_Surface | null,
+    format: number,
+    palette: SDL_Palette | null,
+    colorspace: number,
+    props: number
+  ): SDL_Surface | null;
+  SDL_ConvertPixels(
+    width: number,
+    height: number,
+    src_format: number,
+    src: AnyPointer | null,
+    src_pitch: number,
+    dst_format: number,
+    dst: AnyPointer | null,
+    dst_pitch: number
+  ): boolean;
+  SDL_ConvertPixelsAndColorspace(
+    width: number,
+    height: number,
+    src_format: number,
+    src_colorspace: number,
+    src_properties: number,
+    src: AnyPointer | null,
+    src_pitch: number,
+    dst_format: number,
+    dst_colorspace: number,
+    dst_properties: number,
+    dst: AnyPointer | null,
+    dst_pitch: number
+  ): boolean;
+  SDL_PremultiplyAlpha(
+    width: number,
+    height: number,
+    src_format: number,
+    src: AnyPointer | null,
+    src_pitch: number,
+    dst_format: number,
+    dst: AnyPointer | null,
+    dst_pitch: number,
+    linear: boolean
+  ): boolean;
+  SDL_PremultiplySurfaceAlpha(
+    surface: SDL_Surface | null,
+    linear: boolean
+  ): boolean;
+  SDL_ClearSurface(
+    surface: SDL_Surface | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_FillSurfaceRect(
+    dst: SDL_Surface | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    color: number
+  ): boolean;
+  SDL_FillSurfaceRects(
+    dst: SDL_Surface | null,
+    rects: ArrayBufferView | ArrayBuffer | null,
+    count: number,
+    color: number
+  ): boolean;
+  SDL_BlitSurface(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_BlitSurfaceUnchecked(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_BlitSurfaceScaled(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null,
+    scaleMode: number
+  ): boolean;
+  SDL_BlitSurfaceUncheckedScaled(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null,
+    scaleMode: number
+  ): boolean;
+  SDL_StretchSurface(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null,
+    scaleMode: number
+  ): boolean;
+  SDL_BlitSurfaceTiled(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_BlitSurfaceTiledWithScale(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    scale: number,
+    scaleMode: number,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_BlitSurface9Grid(
+    src: SDL_Surface | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    left_width: number,
+    right_width: number,
+    top_height: number,
+    bottom_height: number,
+    scale: number,
+    scaleMode: number,
+    dst: SDL_Surface | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_MapSurfaceRGB(
+    surface: SDL_Surface | null,
+    r: number,
+    g: number,
+    b: number
+  ): number;
+  SDL_MapSurfaceRGBA(
+    surface: SDL_Surface | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): number;
+  SDL_ReadSurfacePixel(
+    surface: SDL_Surface | null,
+    x: number,
+    y: number,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_ReadSurfacePixelFloat(
+    surface: SDL_Surface | null,
+    x: number,
+    y: number,
+    r: ArrayBufferView | ArrayBuffer | null,
+    g: ArrayBufferView | ArrayBuffer | null,
+    b: ArrayBufferView | ArrayBuffer | null,
+    a: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_WriteSurfacePixel(
+    surface: SDL_Surface | null,
+    x: number,
+    y: number,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_WriteSurfacePixelFloat(
+    surface: SDL_Surface | null,
+    x: number,
+    y: number,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
   SDL_GetNumCameraDrivers(): number;
   SDL_GetCameraDriver(index: number): string;
   SDL_GetCurrentCameraDriver(): string;
   SDL_GetCameras(count: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_GetCameraSupportedFormats(instance_id: number, count: ArrayBufferView | ArrayBuffer | null): SDL_CameraSpec | null;
+  SDL_GetCameraSupportedFormats(
+    instance_id: number,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_CameraSpec | null;
   SDL_GetCameraName(instance_id: number): string;
   SDL_GetCameraPosition(instance_id: number): number;
-  SDL_OpenCamera(instance_id: number, spec: SDL_CameraSpec | null): SDL_Camera | null;
+  SDL_OpenCamera(
+    instance_id: number,
+    spec: SDL_CameraSpec | null
+  ): SDL_Camera | null;
   SDL_GetCameraPermissionState(camera: SDL_Camera | null): number;
   SDL_GetCameraID(camera: SDL_Camera | null): number;
   SDL_GetCameraProperties(camera: SDL_Camera | null): number;
-  SDL_GetCameraFormat(camera: SDL_Camera | null, spec: SDL_CameraSpec | null): boolean;
-  SDL_AcquireCameraFrame(camera: SDL_Camera | null, timestampNS: number | bigint): SDL_Surface | null;
-  SDL_ReleaseCameraFrame(camera: SDL_Camera | null, frame: SDL_Surface | null): void;
+  SDL_GetCameraFormat(
+    camera: SDL_Camera | null,
+    spec: SDL_CameraSpec | null
+  ): boolean;
+  SDL_AcquireCameraFrame(
+    camera: SDL_Camera | null,
+    timestampNS: number | bigint
+  ): SDL_Surface | null;
+  SDL_ReleaseCameraFrame(
+    camera: SDL_Camera | null,
+    frame: SDL_Surface | null
+  ): void;
   SDL_CloseCamera(camera: SDL_Camera | null): void;
   SDL_SetClipboardText(text: string | null): boolean;
   SDL_GetClipboardText(): ArrayBufferView | ArrayBuffer | null;
@@ -523,9 +1314,14 @@ export interface SdlSymbols {
   SDL_GetPrimarySelectionText(): ArrayBufferView | ArrayBuffer | null;
   SDL_HasPrimarySelectionText(): boolean;
   SDL_ClearClipboardData(): boolean;
-  SDL_GetClipboardData(mime_type: string | null, size: number | bigint): AnyPointer | null;
+  SDL_GetClipboardData(
+    mime_type: string | null,
+    size: number | bigint
+  ): AnyPointer | null;
   SDL_HasClipboardData(mime_type: string | null): boolean;
-  SDL_GetClipboardMimeTypes(num_mime_types: number | bigint): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetClipboardMimeTypes(
+    num_mime_types: number | bigint
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_GetNumLogicalCPUCores(): number;
   SDL_GetCPUCacheLineSize(): number;
   SDL_HasAltiVec(): boolean;
@@ -553,13 +1349,29 @@ export interface SdlSymbols {
   SDL_GetPrimaryDisplay(): number;
   SDL_GetDisplayProperties(displayID: number): number;
   SDL_GetDisplayName(displayID: number): string;
-  SDL_GetDisplayBounds(displayID: number, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetDisplayUsableBounds(displayID: number, rect: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetDisplayBounds(
+    displayID: number,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetDisplayUsableBounds(
+    displayID: number,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetNaturalDisplayOrientation(displayID: number): number;
   SDL_GetCurrentDisplayOrientation(displayID: number): number;
   SDL_GetDisplayContentScale(displayID: number): number;
-  SDL_GetFullscreenDisplayModes(displayID: number, count: ArrayBufferView | ArrayBuffer | null): SDL_DisplayMode | null;
-  SDL_GetClosestFullscreenDisplayMode(displayID: number, w: number, h: number, refresh_rate: number, include_high_density_modes: boolean, closest: SDL_DisplayMode | null): boolean;
+  SDL_GetFullscreenDisplayModes(
+    displayID: number,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_DisplayMode | null;
+  SDL_GetClosestFullscreenDisplayMode(
+    displayID: number,
+    w: number,
+    h: number,
+    refresh_rate: number,
+    include_high_density_modes: boolean,
+    closest: SDL_DisplayMode | null
+  ): boolean;
   SDL_GetDesktopDisplayMode(displayID: number): SDL_DisplayMode | null;
   SDL_GetCurrentDisplayMode(displayID: number): SDL_DisplayMode | null;
   SDL_GetDisplayForPoint(point: ArrayBufferView | ArrayBuffer | null): number;
@@ -567,13 +1379,35 @@ export interface SdlSymbols {
   SDL_GetDisplayForWindow(window: SDL_Window | null): number;
   SDL_GetWindowPixelDensity(window: SDL_Window | null): number;
   SDL_GetWindowDisplayScale(window: SDL_Window | null): number;
-  SDL_SetWindowFullscreenMode(window: SDL_Window | null, mode: SDL_DisplayMode | null): boolean;
-  SDL_GetWindowFullscreenMode(window: SDL_Window | null): SDL_DisplayMode | null;
-  SDL_GetWindowICCProfile(window: SDL_Window | null, size: number | bigint): AnyPointer | null;
+  SDL_SetWindowFullscreenMode(
+    window: SDL_Window | null,
+    mode: SDL_DisplayMode | null
+  ): boolean;
+  SDL_GetWindowFullscreenMode(
+    window: SDL_Window | null
+  ): SDL_DisplayMode | null;
+  SDL_GetWindowICCProfile(
+    window: SDL_Window | null,
+    size: number | bigint
+  ): AnyPointer | null;
   SDL_GetWindowPixelFormat(window: SDL_Window | null): number;
-  SDL_GetWindows(count: ArrayBufferView | ArrayBuffer | null): SDL_Window | null;
-  SDL_CreateWindow(title: string | null, w: number, h: number, flags: number | bigint): SDL_Window | null;
-  SDL_CreatePopupWindow(parent: SDL_Window | null, offset_x: number, offset_y: number, w: number, h: number, flags: number | bigint): SDL_Window | null;
+  SDL_GetWindows(
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Window | null;
+  SDL_CreateWindow(
+    title: string | null,
+    w: number,
+    h: number,
+    flags: number | bigint
+  ): SDL_Window | null;
+  SDL_CreatePopupWindow(
+    parent: SDL_Window | null,
+    offset_x: number,
+    offset_y: number,
+    w: number,
+    h: number,
+    flags: number | bigint
+  ): SDL_Window | null;
   SDL_CreateWindowWithProperties(props: number): SDL_Window | null;
   SDL_GetWindowID(window: SDL_Window | null): number;
   SDL_GetWindowFromID(id: number): SDL_Window | null;
@@ -582,22 +1416,77 @@ export interface SdlSymbols {
   SDL_GetWindowFlags(window: SDL_Window | null): bigint;
   SDL_SetWindowTitle(window: SDL_Window | null, title: string | null): boolean;
   SDL_GetWindowTitle(window: SDL_Window | null): string;
-  SDL_SetWindowIcon(window: SDL_Window | null, icon: SDL_Surface | null): boolean;
-  SDL_SetWindowPosition(window: SDL_Window | null, x: number, y: number): boolean;
-  SDL_GetWindowPosition(window: SDL_Window | null, x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetWindowIcon(
+    window: SDL_Window | null,
+    icon: SDL_Surface | null
+  ): boolean;
+  SDL_SetWindowPosition(
+    window: SDL_Window | null,
+    x: number,
+    y: number
+  ): boolean;
+  SDL_GetWindowPosition(
+    window: SDL_Window | null,
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_SetWindowSize(window: SDL_Window | null, w: number, h: number): boolean;
-  SDL_GetWindowSize(window: SDL_Window | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetWindowSafeArea(window: SDL_Window | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetWindowAspectRatio(window: SDL_Window | null, min_aspect: number, max_aspect: number): boolean;
-  SDL_GetWindowAspectRatio(window: SDL_Window | null, min_aspect: ArrayBufferView | ArrayBuffer | null, max_aspect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetWindowBordersSize(window: SDL_Window | null, top: ArrayBufferView | ArrayBuffer | null, left: ArrayBufferView | ArrayBuffer | null, bottom: ArrayBufferView | ArrayBuffer | null, right: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetWindowSizeInPixels(window: SDL_Window | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetWindowMinimumSize(window: SDL_Window | null, min_w: number, min_h: number): boolean;
-  SDL_GetWindowMinimumSize(window: SDL_Window | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetWindowMaximumSize(window: SDL_Window | null, max_w: number, max_h: number): boolean;
-  SDL_GetWindowMaximumSize(window: SDL_Window | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetWindowSize(
+    window: SDL_Window | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetWindowSafeArea(
+    window: SDL_Window | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetWindowAspectRatio(
+    window: SDL_Window | null,
+    min_aspect: number,
+    max_aspect: number
+  ): boolean;
+  SDL_GetWindowAspectRatio(
+    window: SDL_Window | null,
+    min_aspect: ArrayBufferView | ArrayBuffer | null,
+    max_aspect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetWindowBordersSize(
+    window: SDL_Window | null,
+    top: ArrayBufferView | ArrayBuffer | null,
+    left: ArrayBufferView | ArrayBuffer | null,
+    bottom: ArrayBufferView | ArrayBuffer | null,
+    right: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetWindowSizeInPixels(
+    window: SDL_Window | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetWindowMinimumSize(
+    window: SDL_Window | null,
+    min_w: number,
+    min_h: number
+  ): boolean;
+  SDL_GetWindowMinimumSize(
+    window: SDL_Window | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetWindowMaximumSize(
+    window: SDL_Window | null,
+    max_w: number,
+    max_h: number
+  ): boolean;
+  SDL_GetWindowMaximumSize(
+    window: SDL_Window | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_SetWindowBordered(window: SDL_Window | null, bordered: boolean): boolean;
-  SDL_SetWindowResizable(window: SDL_Window | null, resizable: boolean): boolean;
+  SDL_SetWindowResizable(
+    window: SDL_Window | null,
+    resizable: boolean
+  ): boolean;
   SDL_SetWindowAlwaysOnTop(window: SDL_Window | null, on_top: boolean): boolean;
   SDL_SetWindowFillDocument(window: SDL_Window | null, fill: boolean): boolean;
   SDL_ShowWindow(window: SDL_Window | null): boolean;
@@ -606,29 +1495,60 @@ export interface SdlSymbols {
   SDL_MaximizeWindow(window: SDL_Window | null): boolean;
   SDL_MinimizeWindow(window: SDL_Window | null): boolean;
   SDL_RestoreWindow(window: SDL_Window | null): boolean;
-  SDL_SetWindowFullscreen(window: SDL_Window | null, fullscreen: boolean): boolean;
+  SDL_SetWindowFullscreen(
+    window: SDL_Window | null,
+    fullscreen: boolean
+  ): boolean;
   SDL_SyncWindow(window: SDL_Window | null): boolean;
   SDL_WindowHasSurface(window: SDL_Window | null): boolean;
   SDL_GetWindowSurface(window: SDL_Window | null): SDL_Surface | null;
   SDL_SetWindowSurfaceVSync(window: SDL_Window | null, vsync: number): boolean;
-  SDL_GetWindowSurfaceVSync(window: SDL_Window | null, vsync: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetWindowSurfaceVSync(
+    window: SDL_Window | null,
+    vsync: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_UpdateWindowSurface(window: SDL_Window | null): boolean;
-  SDL_UpdateWindowSurfaceRects(window: SDL_Window | null, rects: ArrayBufferView | ArrayBuffer | null, numrects: number): boolean;
+  SDL_UpdateWindowSurfaceRects(
+    window: SDL_Window | null,
+    rects: ArrayBufferView | ArrayBuffer | null,
+    numrects: number
+  ): boolean;
   SDL_DestroyWindowSurface(window: SDL_Window | null): boolean;
-  SDL_SetWindowKeyboardGrab(window: SDL_Window | null, grabbed: boolean): boolean;
+  SDL_SetWindowKeyboardGrab(
+    window: SDL_Window | null,
+    grabbed: boolean
+  ): boolean;
   SDL_SetWindowMouseGrab(window: SDL_Window | null, grabbed: boolean): boolean;
   SDL_GetWindowKeyboardGrab(window: SDL_Window | null): boolean;
   SDL_GetWindowMouseGrab(window: SDL_Window | null): boolean;
   SDL_GetGrabbedWindow(): SDL_Window | null;
-  SDL_SetWindowMouseRect(window: SDL_Window | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetWindowMouseRect(window: SDL_Window | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_SetWindowMouseRect(
+    window: SDL_Window | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetWindowMouseRect(
+    window: SDL_Window | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_SetWindowOpacity(window: SDL_Window | null, opacity: number): boolean;
   SDL_GetWindowOpacity(window: SDL_Window | null): number;
-  SDL_SetWindowParent(window: SDL_Window | null, parent: SDL_Window | null): boolean;
+  SDL_SetWindowParent(
+    window: SDL_Window | null,
+    parent: SDL_Window | null
+  ): boolean;
   SDL_SetWindowModal(window: SDL_Window | null, modal: boolean): boolean;
-  SDL_SetWindowFocusable(window: SDL_Window | null, focusable: boolean): boolean;
-  SDL_ShowWindowSystemMenu(window: SDL_Window | null, x: number, y: number): boolean;
-  SDL_SetWindowShape(window: SDL_Window | null, shape: SDL_Surface | null): boolean;
+  SDL_SetWindowFocusable(
+    window: SDL_Window | null,
+    focusable: boolean
+  ): boolean;
+  SDL_ShowWindowSystemMenu(
+    window: SDL_Window | null,
+    x: number,
+    y: number
+  ): boolean;
+  SDL_SetWindowShape(
+    window: SDL_Window | null,
+    shape: SDL_Surface | null
+  ): boolean;
   SDL_FlashWindow(window: SDL_Window | null, operation: number): boolean;
   SDL_SetWindowProgressState(window: SDL_Window | null, state: number): boolean;
   SDL_GetWindowProgressState(window: SDL_Window | null): number;
@@ -643,17 +1563,28 @@ export interface SdlSymbols {
   SDL_GL_ExtensionSupported(extension: string | null): boolean;
   SDL_GL_ResetAttributes(): void;
   SDL_GL_SetAttribute(attr: number, value: number): boolean;
-  SDL_GL_GetAttribute(attr: number, value: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GL_MakeCurrent(window: SDL_Window | null, context: SDL_GLContextState | null): boolean;
+  SDL_GL_GetAttribute(
+    attr: number,
+    value: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GL_MakeCurrent(
+    window: SDL_Window | null,
+    context: SDL_GLContextState | null
+  ): boolean;
   SDL_GL_GetCurrentWindow(): SDL_Window | null;
   SDL_EGL_GetCurrentDisplay(): AnyPointer | null;
   SDL_EGL_GetCurrentConfig(): AnyPointer | null;
   SDL_EGL_GetWindowSurface(window: SDL_Window | null): AnyPointer | null;
   SDL_GL_SetSwapInterval(interval: number): boolean;
-  SDL_GL_GetSwapInterval(interval: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GL_GetSwapInterval(
+    interval: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GL_SwapWindow(window: SDL_Window | null): boolean;
   SDL_GL_DestroyContext(context: SDL_GLContextState | null): boolean;
-  SDL_GetPowerInfo(seconds: ArrayBufferView | ArrayBuffer | null, percent: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetPowerInfo(
+    seconds: ArrayBufferView | ArrayBuffer | null,
+    percent: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_GetSensors(count: ArrayBufferView | ArrayBuffer | null): number;
   SDL_GetSensorNameForID(instance_id: number): string;
   SDL_GetSensorTypeForID(instance_id: number): number;
@@ -665,7 +1596,11 @@ export interface SdlSymbols {
   SDL_GetSensorType(sensor: SDL_Sensor | null): number;
   SDL_GetSensorNonPortableType(sensor: SDL_Sensor | null): number;
   SDL_GetSensorID(sensor: SDL_Sensor | null): number;
-  SDL_GetSensorData(sensor: SDL_Sensor | null, data: ArrayBufferView | ArrayBuffer | null, num_values: number): boolean;
+  SDL_GetSensorData(
+    sensor: SDL_Sensor | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    num_values: number
+  ): boolean;
   SDL_CloseSensor(sensor: SDL_Sensor | null): void;
   SDL_UpdateSensors(): void;
   SDL_LockJoysticks(): void;
@@ -685,17 +1620,51 @@ export interface SdlSymbols {
   SDL_AttachVirtualJoystick(desc: ArrayBufferView | ArrayBuffer | null): number;
   SDL_DetachVirtualJoystick(instance_id: number): boolean;
   SDL_IsJoystickVirtual(instance_id: number): boolean;
-  SDL_SetJoystickVirtualAxis(joystick: SDL_Joystick | null, axis: number, value: number): boolean;
-  SDL_SetJoystickVirtualBall(joystick: SDL_Joystick | null, ball: number, xrel: number, yrel: number): boolean;
-  SDL_SetJoystickVirtualButton(joystick: SDL_Joystick | null, button: number, down: boolean): boolean;
-  SDL_SetJoystickVirtualHat(joystick: SDL_Joystick | null, hat: number, value: number): boolean;
-  SDL_SetJoystickVirtualTouchpad(joystick: SDL_Joystick | null, touchpad: number, finger: number, down: boolean, x: number, y: number, pressure: number): boolean;
-  SDL_SendJoystickVirtualSensorData(joystick: SDL_Joystick | null, type: number, sensor_timestamp: number | bigint, data: ArrayBufferView | ArrayBuffer | null, num_values: number): boolean;
+  SDL_SetJoystickVirtualAxis(
+    joystick: SDL_Joystick | null,
+    axis: number,
+    value: number
+  ): boolean;
+  SDL_SetJoystickVirtualBall(
+    joystick: SDL_Joystick | null,
+    ball: number,
+    xrel: number,
+    yrel: number
+  ): boolean;
+  SDL_SetJoystickVirtualButton(
+    joystick: SDL_Joystick | null,
+    button: number,
+    down: boolean
+  ): boolean;
+  SDL_SetJoystickVirtualHat(
+    joystick: SDL_Joystick | null,
+    hat: number,
+    value: number
+  ): boolean;
+  SDL_SetJoystickVirtualTouchpad(
+    joystick: SDL_Joystick | null,
+    touchpad: number,
+    finger: number,
+    down: boolean,
+    x: number,
+    y: number,
+    pressure: number
+  ): boolean;
+  SDL_SendJoystickVirtualSensorData(
+    joystick: SDL_Joystick | null,
+    type: number,
+    sensor_timestamp: number | bigint,
+    data: ArrayBufferView | ArrayBuffer | null,
+    num_values: number
+  ): boolean;
   SDL_GetJoystickProperties(joystick: SDL_Joystick | null): number;
   SDL_GetJoystickName(joystick: SDL_Joystick | null): string;
   SDL_GetJoystickPath(joystick: SDL_Joystick | null): string;
   SDL_GetJoystickPlayerIndex(joystick: SDL_Joystick | null): number;
-  SDL_SetJoystickPlayerIndex(joystick: SDL_Joystick | null, player_index: number): boolean;
+  SDL_SetJoystickPlayerIndex(
+    joystick: SDL_Joystick | null,
+    player_index: number
+  ): boolean;
   SDL_GetJoystickVendor(joystick: SDL_Joystick | null): number;
   SDL_GetJoystickProduct(joystick: SDL_Joystick | null): number;
   SDL_GetJoystickProductVersion(joystick: SDL_Joystick | null): number;
@@ -712,23 +1681,61 @@ export interface SdlSymbols {
   SDL_JoystickEventsEnabled(): boolean;
   SDL_UpdateJoysticks(): void;
   SDL_GetJoystickAxis(joystick: SDL_Joystick | null, axis: number): number;
-  SDL_GetJoystickAxisInitialState(joystick: SDL_Joystick | null, axis: number, state: number): boolean;
-  SDL_GetJoystickBall(joystick: SDL_Joystick | null, ball: number, dx: ArrayBufferView | ArrayBuffer | null, dy: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetJoystickAxisInitialState(
+    joystick: SDL_Joystick | null,
+    axis: number,
+    state: number
+  ): boolean;
+  SDL_GetJoystickBall(
+    joystick: SDL_Joystick | null,
+    ball: number,
+    dx: ArrayBufferView | ArrayBuffer | null,
+    dy: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetJoystickHat(joystick: SDL_Joystick | null, hat: number): number;
   SDL_GetJoystickButton(joystick: SDL_Joystick | null, button: number): boolean;
-  SDL_RumbleJoystick(joystick: SDL_Joystick | null, low_frequency_rumble: number, high_frequency_rumble: number, duration_ms: number): boolean;
-  SDL_RumbleJoystickTriggers(joystick: SDL_Joystick | null, left_rumble: number, right_rumble: number, duration_ms: number): boolean;
-  SDL_SetJoystickLED(joystick: SDL_Joystick | null, red: number, green: number, blue: number): boolean;
-  SDL_SendJoystickEffect(joystick: SDL_Joystick | null, data: AnyPointer | null, size: number): boolean;
+  SDL_RumbleJoystick(
+    joystick: SDL_Joystick | null,
+    low_frequency_rumble: number,
+    high_frequency_rumble: number,
+    duration_ms: number
+  ): boolean;
+  SDL_RumbleJoystickTriggers(
+    joystick: SDL_Joystick | null,
+    left_rumble: number,
+    right_rumble: number,
+    duration_ms: number
+  ): boolean;
+  SDL_SetJoystickLED(
+    joystick: SDL_Joystick | null,
+    red: number,
+    green: number,
+    blue: number
+  ): boolean;
+  SDL_SendJoystickEffect(
+    joystick: SDL_Joystick | null,
+    data: AnyPointer | null,
+    size: number
+  ): boolean;
   SDL_CloseJoystick(joystick: SDL_Joystick | null): void;
   SDL_GetJoystickConnectionState(joystick: SDL_Joystick | null): number;
-  SDL_GetJoystickPowerInfo(joystick: SDL_Joystick | null, percent: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetJoystickPowerInfo(
+    joystick: SDL_Joystick | null,
+    percent: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_AddGamepadMapping(mapping: string | null): number;
-  SDL_AddGamepadMappingsFromIO(src: SDL_IOStream | null, closeio: boolean): number;
+  SDL_AddGamepadMappingsFromIO(
+    src: SDL_IOStream | null,
+    closeio: boolean
+  ): number;
   SDL_AddGamepadMappingsFromFile(file: string | null): number;
   SDL_ReloadGamepadMappings(): boolean;
-  SDL_GetGamepadMappings(count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
-  SDL_GetGamepadMapping(gamepad: SDL_Gamepad | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetGamepadMappings(
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetGamepadMapping(
+    gamepad: SDL_Gamepad | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_SetGamepadMapping(instance_id: number, mapping: string | null): boolean;
   SDL_HasGamepad(): boolean;
   SDL_GetGamepads(count: ArrayBufferView | ArrayBuffer | null): number;
@@ -741,7 +1748,9 @@ export interface SdlSymbols {
   SDL_GetGamepadProductVersionForID(instance_id: number): number;
   SDL_GetGamepadTypeForID(instance_id: number): number;
   SDL_GetRealGamepadTypeForID(instance_id: number): number;
-  SDL_GetGamepadMappingForID(instance_id: number): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetGamepadMappingForID(
+    instance_id: number
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_OpenGamepad(instance_id: number): SDL_Gamepad | null;
   SDL_GetGamepadFromID(instance_id: number): SDL_Gamepad | null;
   SDL_GetGamepadFromPlayerIndex(player_index: number): SDL_Gamepad | null;
@@ -752,7 +1761,10 @@ export interface SdlSymbols {
   SDL_GetGamepadType(gamepad: SDL_Gamepad | null): number;
   SDL_GetRealGamepadType(gamepad: SDL_Gamepad | null): number;
   SDL_GetGamepadPlayerIndex(gamepad: SDL_Gamepad | null): number;
-  SDL_SetGamepadPlayerIndex(gamepad: SDL_Gamepad | null, player_index: number): boolean;
+  SDL_SetGamepadPlayerIndex(
+    gamepad: SDL_Gamepad | null,
+    player_index: number
+  ): boolean;
   SDL_GetGamepadVendor(gamepad: SDL_Gamepad | null): number;
   SDL_GetGamepadProduct(gamepad: SDL_Gamepad | null): number;
   SDL_GetGamepadProductVersion(gamepad: SDL_Gamepad | null): number;
@@ -760,12 +1772,18 @@ export interface SdlSymbols {
   SDL_GetGamepadSerial(gamepad: SDL_Gamepad | null): string;
   SDL_GetGamepadSteamHandle(gamepad: SDL_Gamepad | null): bigint;
   SDL_GetGamepadConnectionState(gamepad: SDL_Gamepad | null): number;
-  SDL_GetGamepadPowerInfo(gamepad: SDL_Gamepad | null, percent: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetGamepadPowerInfo(
+    gamepad: SDL_Gamepad | null,
+    percent: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_GamepadConnected(gamepad: SDL_Gamepad | null): boolean;
   SDL_GetGamepadJoystick(gamepad: SDL_Gamepad | null): SDL_Joystick | null;
   SDL_SetGamepadEventsEnabled(enabled: boolean): void;
   SDL_GamepadEventsEnabled(): boolean;
-  SDL_GetGamepadBindings(gamepad: SDL_Gamepad | null, count: ArrayBufferView | ArrayBuffer | null): SDL_GamepadBinding | null;
+  SDL_GetGamepadBindings(
+    gamepad: SDL_Gamepad | null,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GamepadBinding | null;
   SDL_UpdateGamepads(): void;
   SDL_GetGamepadTypeFromString(str: string | null): number;
   SDL_GetGamepadStringForType(type: number): string;
@@ -778,31 +1796,88 @@ export interface SdlSymbols {
   SDL_GamepadHasButton(gamepad: SDL_Gamepad | null, button: number): boolean;
   SDL_GetGamepadButton(gamepad: SDL_Gamepad | null, button: number): boolean;
   SDL_GetGamepadButtonLabelForType(type: number, button: number): number;
-  SDL_GetGamepadButtonLabel(gamepad: SDL_Gamepad | null, button: number): number;
+  SDL_GetGamepadButtonLabel(
+    gamepad: SDL_Gamepad | null,
+    button: number
+  ): number;
   SDL_GetNumGamepadTouchpads(gamepad: SDL_Gamepad | null): number;
-  SDL_GetNumGamepadTouchpadFingers(gamepad: SDL_Gamepad | null, touchpad: number): number;
-  SDL_GetGamepadTouchpadFinger(gamepad: SDL_Gamepad | null, touchpad: number, finger: number, down: ArrayBufferView | ArrayBuffer | null, x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null, pressure: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetNumGamepadTouchpadFingers(
+    gamepad: SDL_Gamepad | null,
+    touchpad: number
+  ): number;
+  SDL_GetGamepadTouchpadFinger(
+    gamepad: SDL_Gamepad | null,
+    touchpad: number,
+    finger: number,
+    down: ArrayBufferView | ArrayBuffer | null,
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null,
+    pressure: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GamepadHasSensor(gamepad: SDL_Gamepad | null, type: number): boolean;
-  SDL_SetGamepadSensorEnabled(gamepad: SDL_Gamepad | null, type: number, enabled: boolean): boolean;
+  SDL_SetGamepadSensorEnabled(
+    gamepad: SDL_Gamepad | null,
+    type: number,
+    enabled: boolean
+  ): boolean;
   SDL_GamepadSensorEnabled(gamepad: SDL_Gamepad | null, type: number): boolean;
-  SDL_GetGamepadSensorDataRate(gamepad: SDL_Gamepad | null, type: number): number;
-  SDL_GetGamepadSensorData(gamepad: SDL_Gamepad | null, type: number, data: ArrayBufferView | ArrayBuffer | null, num_values: number): boolean;
-  SDL_RumbleGamepad(gamepad: SDL_Gamepad | null, low_frequency_rumble: number, high_frequency_rumble: number, duration_ms: number): boolean;
-  SDL_RumbleGamepadTriggers(gamepad: SDL_Gamepad | null, left_rumble: number, right_rumble: number, duration_ms: number): boolean;
-  SDL_SetGamepadLED(gamepad: SDL_Gamepad | null, red: number, green: number, blue: number): boolean;
-  SDL_SendGamepadEffect(gamepad: SDL_Gamepad | null, data: AnyPointer | null, size: number): boolean;
+  SDL_GetGamepadSensorDataRate(
+    gamepad: SDL_Gamepad | null,
+    type: number
+  ): number;
+  SDL_GetGamepadSensorData(
+    gamepad: SDL_Gamepad | null,
+    type: number,
+    data: ArrayBufferView | ArrayBuffer | null,
+    num_values: number
+  ): boolean;
+  SDL_RumbleGamepad(
+    gamepad: SDL_Gamepad | null,
+    low_frequency_rumble: number,
+    high_frequency_rumble: number,
+    duration_ms: number
+  ): boolean;
+  SDL_RumbleGamepadTriggers(
+    gamepad: SDL_Gamepad | null,
+    left_rumble: number,
+    right_rumble: number,
+    duration_ms: number
+  ): boolean;
+  SDL_SetGamepadLED(
+    gamepad: SDL_Gamepad | null,
+    red: number,
+    green: number,
+    blue: number
+  ): boolean;
+  SDL_SendGamepadEffect(
+    gamepad: SDL_Gamepad | null,
+    data: AnyPointer | null,
+    size: number
+  ): boolean;
   SDL_CloseGamepad(gamepad: SDL_Gamepad | null): void;
-  SDL_GetGamepadAppleSFSymbolsNameForButton(gamepad: SDL_Gamepad | null, button: number): string;
-  SDL_GetGamepadAppleSFSymbolsNameForAxis(gamepad: SDL_Gamepad | null, axis: number): string;
+  SDL_GetGamepadAppleSFSymbolsNameForButton(
+    gamepad: SDL_Gamepad | null,
+    button: number
+  ): string;
+  SDL_GetGamepadAppleSFSymbolsNameForAxis(
+    gamepad: SDL_Gamepad | null,
+    axis: number
+  ): string;
   SDL_HasKeyboard(): boolean;
   SDL_GetKeyboards(count: ArrayBufferView | ArrayBuffer | null): number;
   SDL_GetKeyboardNameForID(instance_id: number): string;
   SDL_GetKeyboardFocus(): SDL_Window | null;
-  SDL_GetKeyboardState(numkeys: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetKeyboardState(
+    numkeys: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_ResetKeyboard(): void;
   SDL_GetModState(): number;
   SDL_SetModState(modstate: number): void;
-  SDL_GetKeyFromScancode(scancode: number, modstate: number, key_event: boolean): number;
+  SDL_GetKeyFromScancode(
+    scancode: number,
+    modstate: number,
+    key_event: boolean
+  ): number;
   SDL_GetScancodeFromKey(key: number, modstate: number): number;
   SDL_SetScancodeName(scancode: number, name: string | null): boolean;
   SDL_GetScancodeName(scancode: number): string;
@@ -810,29 +1885,68 @@ export interface SdlSymbols {
   SDL_GetKeyName(key: number): string;
   SDL_GetKeyFromName(name: string | null): number;
   SDL_StartTextInput(window: SDL_Window | null): boolean;
-  SDL_StartTextInputWithProperties(window: SDL_Window | null, props: number): boolean;
+  SDL_StartTextInputWithProperties(
+    window: SDL_Window | null,
+    props: number
+  ): boolean;
   SDL_TextInputActive(window: SDL_Window | null): boolean;
   SDL_StopTextInput(window: SDL_Window | null): boolean;
   SDL_ClearComposition(window: SDL_Window | null): boolean;
-  SDL_SetTextInputArea(window: SDL_Window | null, rect: ArrayBufferView | ArrayBuffer | null, cursor: number): boolean;
-  SDL_GetTextInputArea(window: SDL_Window | null, rect: ArrayBufferView | ArrayBuffer | null, cursor: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetTextInputArea(
+    window: SDL_Window | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    cursor: number
+  ): boolean;
+  SDL_GetTextInputArea(
+    window: SDL_Window | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    cursor: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_HasScreenKeyboardSupport(): boolean;
   SDL_ScreenKeyboardShown(window: SDL_Window | null): boolean;
   SDL_HasMouse(): boolean;
   SDL_GetMice(count: ArrayBufferView | ArrayBuffer | null): number;
   SDL_GetMouseNameForID(instance_id: number): string;
   SDL_GetMouseFocus(): SDL_Window | null;
-  SDL_GetMouseState(x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_GetGlobalMouseState(x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_GetRelativeMouseState(x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): number;
+  SDL_GetMouseState(
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_GetGlobalMouseState(
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_GetRelativeMouseState(
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null
+  ): number;
   SDL_WarpMouseInWindow(window: SDL_Window | null, x: number, y: number): void;
   SDL_WarpMouseGlobal(x: number, y: number): boolean;
-  SDL_SetWindowRelativeMouseMode(window: SDL_Window | null, enabled: boolean): boolean;
+  SDL_SetWindowRelativeMouseMode(
+    window: SDL_Window | null,
+    enabled: boolean
+  ): boolean;
   SDL_GetWindowRelativeMouseMode(window: SDL_Window | null): boolean;
   SDL_CaptureMouse(enabled: boolean): boolean;
-  SDL_CreateCursor(data: number, mask: number, w: number, h: number, hot_x: number, hot_y: number): SDL_Cursor | null;
-  SDL_CreateColorCursor(surface: SDL_Surface | null, hot_x: number, hot_y: number): SDL_Cursor | null;
-  SDL_CreateAnimatedCursor(frames: ArrayBufferView | ArrayBuffer | null, frame_count: number, hot_x: number, hot_y: number): SDL_Cursor | null;
+  SDL_CreateCursor(
+    data: number,
+    mask: number,
+    w: number,
+    h: number,
+    hot_x: number,
+    hot_y: number
+  ): SDL_Cursor | null;
+  SDL_CreateColorCursor(
+    surface: SDL_Surface | null,
+    hot_x: number,
+    hot_y: number
+  ): SDL_Cursor | null;
+  SDL_CreateAnimatedCursor(
+    frames: ArrayBufferView | ArrayBuffer | null,
+    frame_count: number,
+    hot_x: number,
+    hot_y: number
+  ): SDL_Cursor | null;
   SDL_CreateSystemCursor(id: number): SDL_Cursor | null;
   SDL_SetCursor(cursor: SDL_Cursor | null): boolean;
   SDL_GetCursor(): SDL_Cursor | null;
@@ -844,37 +1958,76 @@ export interface SdlSymbols {
   SDL_GetTouchDevices(count: ArrayBufferView | ArrayBuffer | null): bigint;
   SDL_GetTouchDeviceName(touchID: number | bigint): string;
   SDL_GetTouchDeviceType(touchID: number | bigint): number;
-  SDL_GetTouchFingers(touchID: number | bigint, count: ArrayBufferView | ArrayBuffer | null): SDL_Finger | null;
+  SDL_GetTouchFingers(
+    touchID: number | bigint,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Finger | null;
   SDL_GetPenDeviceType(instance_id: number): number;
   SDL_PumpEvents(): void;
-  SDL_PeepEvents(events: ArrayBufferView | ArrayBuffer | null, numevents: number, action: number, minType: number, maxType: number): number;
+  SDL_PeepEvents(
+    events: ArrayBufferView | ArrayBuffer | null,
+    numevents: number,
+    action: number,
+    minType: number,
+    maxType: number
+  ): number;
   SDL_HasEvent(type: number): boolean;
   SDL_HasEvents(minType: number, maxType: number): boolean;
   SDL_FlushEvent(type: number): void;
   SDL_FlushEvents(minType: number, maxType: number): void;
   SDL_PollEvent(event: ArrayBufferView | ArrayBuffer | null): boolean;
   SDL_WaitEvent(event: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_WaitEventTimeout(event: ArrayBufferView | ArrayBuffer | null, timeoutMS: number): boolean;
+  SDL_WaitEventTimeout(
+    event: ArrayBufferView | ArrayBuffer | null,
+    timeoutMS: number
+  ): boolean;
   SDL_PushEvent(event: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetEventFilter(filter: SDL_EventFilter | null, userdata: AnyPointer | null): boolean;
+  SDL_GetEventFilter(
+    filter: SDL_EventFilter | null,
+    userdata: AnyPointer | null
+  ): boolean;
   SDL_SetEventEnabled(type: number, enabled: boolean): void;
   SDL_EventEnabled(type: number): boolean;
   SDL_RegisterEvents(numevents: number): number;
-  SDL_GetWindowFromEvent(event: ArrayBufferView | ArrayBuffer | null): SDL_Window | null;
-  SDL_GetEventDescription(event: ArrayBufferView | ArrayBuffer | null, buf: ArrayBufferView | ArrayBuffer | null, buflen: number): number;
+  SDL_GetWindowFromEvent(
+    event: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Window | null;
+  SDL_GetEventDescription(
+    event: ArrayBufferView | ArrayBuffer | null,
+    buf: ArrayBufferView | ArrayBuffer | null,
+    buflen: number
+  ): number;
   SDL_GetBasePath(): string;
-  SDL_GetPrefPath(org: string | null, app: string | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetPrefPath(
+    org: string | null,
+    app: string | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_GetUserFolder(folder: number): string;
   SDL_CreateDirectory(path: string | null): boolean;
   SDL_RemovePath(path: string | null): boolean;
   SDL_RenamePath(oldpath: string | null, newpath: string | null): boolean;
   SDL_CopyFile(oldpath: string | null, newpath: string | null): boolean;
-  SDL_GetPathInfo(path: string | null, info: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GlobDirectory(path: string | null, pattern: string | null, flags: number, count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_GetPathInfo(
+    path: string | null,
+    info: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GlobDirectory(
+    path: string | null,
+    pattern: string | null,
+    flags: number,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_GetCurrentDirectory(): ArrayBufferView | ArrayBuffer | null;
-  SDL_GPUSupportsShaderFormats(format_flags: number, name: string | null): boolean;
+  SDL_GPUSupportsShaderFormats(
+    format_flags: number,
+    name: string | null
+  ): boolean;
   SDL_GPUSupportsProperties(props: number): boolean;
-  SDL_CreateGPUDevice(format_flags: number, debug_mode: boolean, name: string | null): SDL_GPUDevice | null;
+  SDL_CreateGPUDevice(
+    format_flags: number,
+    debug_mode: boolean,
+    name: string | null
+  ): SDL_GPUDevice | null;
   SDL_CreateGPUDeviceWithProperties(props: number): SDL_GPUDevice | null;
   SDL_DestroyGPUDevice(device: SDL_GPUDevice | null): void;
   SDL_GetNumGPUDrivers(): number;
@@ -882,88 +2035,391 @@ export interface SdlSymbols {
   SDL_GetGPUDeviceDriver(device: SDL_GPUDevice | null): string;
   SDL_GetGPUShaderFormats(device: SDL_GPUDevice | null): number;
   SDL_GetGPUDeviceProperties(device: SDL_GPUDevice | null): number;
-  SDL_CreateGPUComputePipeline(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUComputePipeline | null;
-  SDL_CreateGPUGraphicsPipeline(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUGraphicsPipeline | null;
-  SDL_CreateGPUSampler(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUSampler | null;
-  SDL_CreateGPUShader(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUShader | null;
-  SDL_CreateGPUTexture(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUTexture | null;
-  SDL_CreateGPUBuffer(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUBuffer | null;
-  SDL_CreateGPUTransferBuffer(device: SDL_GPUDevice | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPUTransferBuffer | null;
-  SDL_SetGPUBufferName(device: SDL_GPUDevice | null, buffer: SDL_GPUBuffer | null, text: string | null): void;
-  SDL_SetGPUTextureName(device: SDL_GPUDevice | null, texture: SDL_GPUTexture | null, text: string | null): void;
-  SDL_InsertGPUDebugLabel(command_buffer: SDL_GPUCommandBuffer | null, text: string | null): void;
-  SDL_PushGPUDebugGroup(command_buffer: SDL_GPUCommandBuffer | null, name: string | null): void;
+  SDL_CreateGPUComputePipeline(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUComputePipeline | null;
+  SDL_CreateGPUGraphicsPipeline(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUGraphicsPipeline | null;
+  SDL_CreateGPUSampler(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUSampler | null;
+  SDL_CreateGPUShader(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUShader | null;
+  SDL_CreateGPUTexture(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUTexture | null;
+  SDL_CreateGPUBuffer(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUBuffer | null;
+  SDL_CreateGPUTransferBuffer(
+    device: SDL_GPUDevice | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPUTransferBuffer | null;
+  SDL_SetGPUBufferName(
+    device: SDL_GPUDevice | null,
+    buffer: SDL_GPUBuffer | null,
+    text: string | null
+  ): void;
+  SDL_SetGPUTextureName(
+    device: SDL_GPUDevice | null,
+    texture: SDL_GPUTexture | null,
+    text: string | null
+  ): void;
+  SDL_InsertGPUDebugLabel(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    text: string | null
+  ): void;
+  SDL_PushGPUDebugGroup(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    name: string | null
+  ): void;
   SDL_PopGPUDebugGroup(command_buffer: SDL_GPUCommandBuffer | null): void;
-  SDL_ReleaseGPUTexture(device: SDL_GPUDevice | null, texture: SDL_GPUTexture | null): void;
-  SDL_ReleaseGPUSampler(device: SDL_GPUDevice | null, sampler: SDL_GPUSampler | null): void;
-  SDL_ReleaseGPUBuffer(device: SDL_GPUDevice | null, buffer: SDL_GPUBuffer | null): void;
-  SDL_ReleaseGPUTransferBuffer(device: SDL_GPUDevice | null, transfer_buffer: SDL_GPUTransferBuffer | null): void;
-  SDL_ReleaseGPUComputePipeline(device: SDL_GPUDevice | null, compute_pipeline: SDL_GPUComputePipeline | null): void;
-  SDL_ReleaseGPUShader(device: SDL_GPUDevice | null, shader: SDL_GPUShader | null): void;
-  SDL_ReleaseGPUGraphicsPipeline(device: SDL_GPUDevice | null, graphics_pipeline: SDL_GPUGraphicsPipeline | null): void;
-  SDL_AcquireGPUCommandBuffer(device: SDL_GPUDevice | null): SDL_GPUCommandBuffer | null;
-  SDL_PushGPUVertexUniformData(command_buffer: SDL_GPUCommandBuffer | null, slot_index: number, data: AnyPointer | null, length: number): void;
-  SDL_PushGPUFragmentUniformData(command_buffer: SDL_GPUCommandBuffer | null, slot_index: number, data: AnyPointer | null, length: number): void;
-  SDL_PushGPUComputeUniformData(command_buffer: SDL_GPUCommandBuffer | null, slot_index: number, data: AnyPointer | null, length: number): void;
-  SDL_BeginGPURenderPass(command_buffer: SDL_GPUCommandBuffer | null, color_target_infos: ArrayBufferView | ArrayBuffer | null, num_color_targets: number, depth_stencil_target_info: ArrayBufferView | ArrayBuffer | null): SDL_GPURenderPass | null;
-  SDL_BindGPUGraphicsPipeline(render_pass: SDL_GPURenderPass | null, graphics_pipeline: SDL_GPUGraphicsPipeline | null): void;
-  SDL_SetGPUViewport(render_pass: SDL_GPURenderPass | null, viewport: ArrayBufferView | ArrayBuffer | null): void;
-  SDL_SetGPUScissor(render_pass: SDL_GPURenderPass | null, scissor: ArrayBufferView | ArrayBuffer | null): void;
-  SDL_SetGPUStencilReference(render_pass: SDL_GPURenderPass | null, reference: number): void;
-  SDL_BindGPUVertexBuffers(render_pass: SDL_GPURenderPass | null, first_slot: number, bindings: ArrayBufferView | ArrayBuffer | null, num_bindings: number): void;
-  SDL_BindGPUIndexBuffer(render_pass: SDL_GPURenderPass | null, binding: ArrayBufferView | ArrayBuffer | null, index_element_size: number): void;
-  SDL_BindGPUVertexSamplers(render_pass: SDL_GPURenderPass | null, first_slot: number, texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null, num_bindings: number): void;
-  SDL_BindGPUVertexStorageTextures(render_pass: SDL_GPURenderPass | null, first_slot: number, storage_textures: SDL_GPUTexture | null, num_bindings: number): void;
-  SDL_BindGPUVertexStorageBuffers(render_pass: SDL_GPURenderPass | null, first_slot: number, storage_buffers: SDL_GPUBuffer | null, num_bindings: number): void;
-  SDL_BindGPUFragmentSamplers(render_pass: SDL_GPURenderPass | null, first_slot: number, texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null, num_bindings: number): void;
-  SDL_BindGPUFragmentStorageTextures(render_pass: SDL_GPURenderPass | null, first_slot: number, storage_textures: SDL_GPUTexture | null, num_bindings: number): void;
-  SDL_BindGPUFragmentStorageBuffers(render_pass: SDL_GPURenderPass | null, first_slot: number, storage_buffers: SDL_GPUBuffer | null, num_bindings: number): void;
-  SDL_DrawGPUIndexedPrimitives(render_pass: SDL_GPURenderPass | null, num_indices: number, num_instances: number, first_index: number, vertex_offset: number, first_instance: number): void;
-  SDL_DrawGPUPrimitives(render_pass: SDL_GPURenderPass | null, num_vertices: number, num_instances: number, first_vertex: number, first_instance: number): void;
-  SDL_DrawGPUPrimitivesIndirect(render_pass: SDL_GPURenderPass | null, buffer: SDL_GPUBuffer | null, offset: number, draw_count: number): void;
-  SDL_DrawGPUIndexedPrimitivesIndirect(render_pass: SDL_GPURenderPass | null, buffer: SDL_GPUBuffer | null, offset: number, draw_count: number): void;
+  SDL_ReleaseGPUTexture(
+    device: SDL_GPUDevice | null,
+    texture: SDL_GPUTexture | null
+  ): void;
+  SDL_ReleaseGPUSampler(
+    device: SDL_GPUDevice | null,
+    sampler: SDL_GPUSampler | null
+  ): void;
+  SDL_ReleaseGPUBuffer(
+    device: SDL_GPUDevice | null,
+    buffer: SDL_GPUBuffer | null
+  ): void;
+  SDL_ReleaseGPUTransferBuffer(
+    device: SDL_GPUDevice | null,
+    transfer_buffer: SDL_GPUTransferBuffer | null
+  ): void;
+  SDL_ReleaseGPUComputePipeline(
+    device: SDL_GPUDevice | null,
+    compute_pipeline: SDL_GPUComputePipeline | null
+  ): void;
+  SDL_ReleaseGPUShader(
+    device: SDL_GPUDevice | null,
+    shader: SDL_GPUShader | null
+  ): void;
+  SDL_ReleaseGPUGraphicsPipeline(
+    device: SDL_GPUDevice | null,
+    graphics_pipeline: SDL_GPUGraphicsPipeline | null
+  ): void;
+  SDL_AcquireGPUCommandBuffer(
+    device: SDL_GPUDevice | null
+  ): SDL_GPUCommandBuffer | null;
+  SDL_PushGPUVertexUniformData(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    slot_index: number,
+    data: AnyPointer | null,
+    length: number
+  ): void;
+  SDL_PushGPUFragmentUniformData(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    slot_index: number,
+    data: AnyPointer | null,
+    length: number
+  ): void;
+  SDL_PushGPUComputeUniformData(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    slot_index: number,
+    data: AnyPointer | null,
+    length: number
+  ): void;
+  SDL_BeginGPURenderPass(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    color_target_infos: ArrayBufferView | ArrayBuffer | null,
+    num_color_targets: number,
+    depth_stencil_target_info: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPURenderPass | null;
+  SDL_BindGPUGraphicsPipeline(
+    render_pass: SDL_GPURenderPass | null,
+    graphics_pipeline: SDL_GPUGraphicsPipeline | null
+  ): void;
+  SDL_SetGPUViewport(
+    render_pass: SDL_GPURenderPass | null,
+    viewport: ArrayBufferView | ArrayBuffer | null
+  ): void;
+  SDL_SetGPUScissor(
+    render_pass: SDL_GPURenderPass | null,
+    scissor: ArrayBufferView | ArrayBuffer | null
+  ): void;
+  SDL_SetGPUStencilReference(
+    render_pass: SDL_GPURenderPass | null,
+    reference: number
+  ): void;
+  SDL_BindGPUVertexBuffers(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    bindings: ArrayBufferView | ArrayBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUIndexBuffer(
+    render_pass: SDL_GPURenderPass | null,
+    binding: ArrayBufferView | ArrayBuffer | null,
+    index_element_size: number
+  ): void;
+  SDL_BindGPUVertexSamplers(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUVertexStorageTextures(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    storage_textures: SDL_GPUTexture | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUVertexStorageBuffers(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    storage_buffers: SDL_GPUBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUFragmentSamplers(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUFragmentStorageTextures(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    storage_textures: SDL_GPUTexture | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUFragmentStorageBuffers(
+    render_pass: SDL_GPURenderPass | null,
+    first_slot: number,
+    storage_buffers: SDL_GPUBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_DrawGPUIndexedPrimitives(
+    render_pass: SDL_GPURenderPass | null,
+    num_indices: number,
+    num_instances: number,
+    first_index: number,
+    vertex_offset: number,
+    first_instance: number
+  ): void;
+  SDL_DrawGPUPrimitives(
+    render_pass: SDL_GPURenderPass | null,
+    num_vertices: number,
+    num_instances: number,
+    first_vertex: number,
+    first_instance: number
+  ): void;
+  SDL_DrawGPUPrimitivesIndirect(
+    render_pass: SDL_GPURenderPass | null,
+    buffer: SDL_GPUBuffer | null,
+    offset: number,
+    draw_count: number
+  ): void;
+  SDL_DrawGPUIndexedPrimitivesIndirect(
+    render_pass: SDL_GPURenderPass | null,
+    buffer: SDL_GPUBuffer | null,
+    offset: number,
+    draw_count: number
+  ): void;
   SDL_EndGPURenderPass(render_pass: SDL_GPURenderPass | null): void;
-  SDL_BeginGPUComputePass(command_buffer: SDL_GPUCommandBuffer | null, storage_texture_bindings: ArrayBufferView | ArrayBuffer | null, num_storage_texture_bindings: number, storage_buffer_bindings: ArrayBufferView | ArrayBuffer | null, num_storage_buffer_bindings: number): SDL_GPUComputePass | null;
-  SDL_BindGPUComputePipeline(compute_pass: SDL_GPUComputePass | null, compute_pipeline: SDL_GPUComputePipeline | null): void;
-  SDL_BindGPUComputeSamplers(compute_pass: SDL_GPUComputePass | null, first_slot: number, texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null, num_bindings: number): void;
-  SDL_BindGPUComputeStorageTextures(compute_pass: SDL_GPUComputePass | null, first_slot: number, storage_textures: SDL_GPUTexture | null, num_bindings: number): void;
-  SDL_BindGPUComputeStorageBuffers(compute_pass: SDL_GPUComputePass | null, first_slot: number, storage_buffers: SDL_GPUBuffer | null, num_bindings: number): void;
-  SDL_DispatchGPUCompute(compute_pass: SDL_GPUComputePass | null, groupcount_x: number, groupcount_y: number, groupcount_z: number): void;
-  SDL_DispatchGPUComputeIndirect(compute_pass: SDL_GPUComputePass | null, buffer: SDL_GPUBuffer | null, offset: number): void;
+  SDL_BeginGPUComputePass(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    storage_texture_bindings: ArrayBufferView | ArrayBuffer | null,
+    num_storage_texture_bindings: number,
+    storage_buffer_bindings: ArrayBufferView | ArrayBuffer | null,
+    num_storage_buffer_bindings: number
+  ): SDL_GPUComputePass | null;
+  SDL_BindGPUComputePipeline(
+    compute_pass: SDL_GPUComputePass | null,
+    compute_pipeline: SDL_GPUComputePipeline | null
+  ): void;
+  SDL_BindGPUComputeSamplers(
+    compute_pass: SDL_GPUComputePass | null,
+    first_slot: number,
+    texture_sampler_bindings: ArrayBufferView | ArrayBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUComputeStorageTextures(
+    compute_pass: SDL_GPUComputePass | null,
+    first_slot: number,
+    storage_textures: SDL_GPUTexture | null,
+    num_bindings: number
+  ): void;
+  SDL_BindGPUComputeStorageBuffers(
+    compute_pass: SDL_GPUComputePass | null,
+    first_slot: number,
+    storage_buffers: SDL_GPUBuffer | null,
+    num_bindings: number
+  ): void;
+  SDL_DispatchGPUCompute(
+    compute_pass: SDL_GPUComputePass | null,
+    groupcount_x: number,
+    groupcount_y: number,
+    groupcount_z: number
+  ): void;
+  SDL_DispatchGPUComputeIndirect(
+    compute_pass: SDL_GPUComputePass | null,
+    buffer: SDL_GPUBuffer | null,
+    offset: number
+  ): void;
   SDL_EndGPUComputePass(compute_pass: SDL_GPUComputePass | null): void;
-  SDL_MapGPUTransferBuffer(device: SDL_GPUDevice | null, transfer_buffer: SDL_GPUTransferBuffer | null, cycle: boolean): AnyPointer | null;
-  SDL_UnmapGPUTransferBuffer(device: SDL_GPUDevice | null, transfer_buffer: SDL_GPUTransferBuffer | null): void;
-  SDL_BeginGPUCopyPass(command_buffer: SDL_GPUCommandBuffer | null): SDL_GPUCopyPass | null;
-  SDL_UploadToGPUTexture(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null, cycle: boolean): void;
-  SDL_UploadToGPUBuffer(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null, cycle: boolean): void;
-  SDL_CopyGPUTextureToTexture(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null, w: number, h: number, d: number, cycle: boolean): void;
-  SDL_CopyGPUBufferToBuffer(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null, size: number, cycle: boolean): void;
-  SDL_DownloadFromGPUTexture(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null): void;
-  SDL_DownloadFromGPUBuffer(copy_pass: SDL_GPUCopyPass | null, source: ArrayBufferView | ArrayBuffer | null, destination: ArrayBufferView | ArrayBuffer | null): void;
+  SDL_MapGPUTransferBuffer(
+    device: SDL_GPUDevice | null,
+    transfer_buffer: SDL_GPUTransferBuffer | null,
+    cycle: boolean
+  ): AnyPointer | null;
+  SDL_UnmapGPUTransferBuffer(
+    device: SDL_GPUDevice | null,
+    transfer_buffer: SDL_GPUTransferBuffer | null
+  ): void;
+  SDL_BeginGPUCopyPass(
+    command_buffer: SDL_GPUCommandBuffer | null
+  ): SDL_GPUCopyPass | null;
+  SDL_UploadToGPUTexture(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null,
+    cycle: boolean
+  ): void;
+  SDL_UploadToGPUBuffer(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null,
+    cycle: boolean
+  ): void;
+  SDL_CopyGPUTextureToTexture(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null,
+    w: number,
+    h: number,
+    d: number,
+    cycle: boolean
+  ): void;
+  SDL_CopyGPUBufferToBuffer(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null,
+    size: number,
+    cycle: boolean
+  ): void;
+  SDL_DownloadFromGPUTexture(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null
+  ): void;
+  SDL_DownloadFromGPUBuffer(
+    copy_pass: SDL_GPUCopyPass | null,
+    source: ArrayBufferView | ArrayBuffer | null,
+    destination: ArrayBufferView | ArrayBuffer | null
+  ): void;
   SDL_EndGPUCopyPass(copy_pass: SDL_GPUCopyPass | null): void;
-  SDL_GenerateMipmapsForGPUTexture(command_buffer: SDL_GPUCommandBuffer | null, texture: SDL_GPUTexture | null): void;
-  SDL_BlitGPUTexture(command_buffer: SDL_GPUCommandBuffer | null, info: ArrayBufferView | ArrayBuffer | null): void;
-  SDL_WindowSupportsGPUSwapchainComposition(device: SDL_GPUDevice | null, window: SDL_Window | null, swapchain_composition: number): boolean;
-  SDL_WindowSupportsGPUPresentMode(device: SDL_GPUDevice | null, window: SDL_Window | null, present_mode: number): boolean;
-  SDL_ClaimWindowForGPUDevice(device: SDL_GPUDevice | null, window: SDL_Window | null): boolean;
-  SDL_ReleaseWindowFromGPUDevice(device: SDL_GPUDevice | null, window: SDL_Window | null): void;
-  SDL_SetGPUSwapchainParameters(device: SDL_GPUDevice | null, window: SDL_Window | null, swapchain_composition: number, present_mode: number): boolean;
-  SDL_SetGPUAllowedFramesInFlight(device: SDL_GPUDevice | null, allowed_frames_in_flight: number): boolean;
-  SDL_GetGPUSwapchainTextureFormat(device: SDL_GPUDevice | null, window: SDL_Window | null): number;
-  SDL_AcquireGPUSwapchainTexture(command_buffer: SDL_GPUCommandBuffer | null, window: SDL_Window | null, swapchain_texture: SDL_GPUTexture | null, swapchain_texture_width: number, swapchain_texture_height: number): boolean;
-  SDL_WaitForGPUSwapchain(device: SDL_GPUDevice | null, window: SDL_Window | null): boolean;
-  SDL_WaitAndAcquireGPUSwapchainTexture(command_buffer: SDL_GPUCommandBuffer | null, window: SDL_Window | null, swapchain_texture: SDL_GPUTexture | null, swapchain_texture_width: number, swapchain_texture_height: number): boolean;
-  SDL_SubmitGPUCommandBuffer(command_buffer: SDL_GPUCommandBuffer | null): boolean;
-  SDL_SubmitGPUCommandBufferAndAcquireFence(command_buffer: SDL_GPUCommandBuffer | null): SDL_GPUFence | null;
-  SDL_CancelGPUCommandBuffer(command_buffer: SDL_GPUCommandBuffer | null): boolean;
+  SDL_GenerateMipmapsForGPUTexture(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    texture: SDL_GPUTexture | null
+  ): void;
+  SDL_BlitGPUTexture(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    info: ArrayBufferView | ArrayBuffer | null
+  ): void;
+  SDL_WindowSupportsGPUSwapchainComposition(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null,
+    swapchain_composition: number
+  ): boolean;
+  SDL_WindowSupportsGPUPresentMode(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null,
+    present_mode: number
+  ): boolean;
+  SDL_ClaimWindowForGPUDevice(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null
+  ): boolean;
+  SDL_ReleaseWindowFromGPUDevice(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null
+  ): void;
+  SDL_SetGPUSwapchainParameters(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null,
+    swapchain_composition: number,
+    present_mode: number
+  ): boolean;
+  SDL_SetGPUAllowedFramesInFlight(
+    device: SDL_GPUDevice | null,
+    allowed_frames_in_flight: number
+  ): boolean;
+  SDL_GetGPUSwapchainTextureFormat(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null
+  ): number;
+  SDL_AcquireGPUSwapchainTexture(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    window: SDL_Window | null,
+    swapchain_texture: SDL_GPUTexture | null,
+    swapchain_texture_width: number,
+    swapchain_texture_height: number
+  ): boolean;
+  SDL_WaitForGPUSwapchain(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null
+  ): boolean;
+  SDL_WaitAndAcquireGPUSwapchainTexture(
+    command_buffer: SDL_GPUCommandBuffer | null,
+    window: SDL_Window | null,
+    swapchain_texture: SDL_GPUTexture | null,
+    swapchain_texture_width: number,
+    swapchain_texture_height: number
+  ): boolean;
+  SDL_SubmitGPUCommandBuffer(
+    command_buffer: SDL_GPUCommandBuffer | null
+  ): boolean;
+  SDL_SubmitGPUCommandBufferAndAcquireFence(
+    command_buffer: SDL_GPUCommandBuffer | null
+  ): SDL_GPUFence | null;
+  SDL_CancelGPUCommandBuffer(
+    command_buffer: SDL_GPUCommandBuffer | null
+  ): boolean;
   SDL_WaitForGPUIdle(device: SDL_GPUDevice | null): boolean;
-  SDL_WaitForGPUFences(device: SDL_GPUDevice | null, wait_all: boolean, fences: SDL_GPUFence | null, num_fences: number): boolean;
-  SDL_QueryGPUFence(device: SDL_GPUDevice | null, fence: SDL_GPUFence | null): boolean;
-  SDL_ReleaseGPUFence(device: SDL_GPUDevice | null, fence: SDL_GPUFence | null): void;
+  SDL_WaitForGPUFences(
+    device: SDL_GPUDevice | null,
+    wait_all: boolean,
+    fences: SDL_GPUFence | null,
+    num_fences: number
+  ): boolean;
+  SDL_QueryGPUFence(
+    device: SDL_GPUDevice | null,
+    fence: SDL_GPUFence | null
+  ): boolean;
+  SDL_ReleaseGPUFence(
+    device: SDL_GPUDevice | null,
+    fence: SDL_GPUFence | null
+  ): void;
   SDL_GPUTextureFormatTexelBlockSize(format: number): number;
-  SDL_GPUTextureSupportsFormat(device: SDL_GPUDevice | null, format: number, type: number, usage: number): boolean;
-  SDL_GPUTextureSupportsSampleCount(device: SDL_GPUDevice | null, format: number, sample_count: number): boolean;
-  SDL_CalculateGPUTextureFormatSize(format: number, width: number, height: number, depth_or_layer_count: number): number;
+  SDL_GPUTextureSupportsFormat(
+    device: SDL_GPUDevice | null,
+    format: number,
+    type: number,
+    usage: number
+  ): boolean;
+  SDL_GPUTextureSupportsSampleCount(
+    device: SDL_GPUDevice | null,
+    format: number,
+    sample_count: number
+  ): boolean;
+  SDL_CalculateGPUTextureFormatSize(
+    format: number,
+    width: number,
+    height: number,
+    depth_or_layer_count: number
+  ): number;
   SDL_GetPixelFormatFromGPUTextureFormat(format: number): number;
   SDL_GetGPUTextureFormatFromPixelFormat(format: number): number;
   SDL_GetHaptics(count: ArrayBufferView | ArrayBuffer | null): number;
@@ -981,46 +2437,126 @@ export interface SdlSymbols {
   SDL_GetMaxHapticEffectsPlaying(haptic: SDL_Haptic | null): number;
   SDL_GetHapticFeatures(haptic: SDL_Haptic | null): number;
   SDL_GetNumHapticAxes(haptic: SDL_Haptic | null): number;
-  SDL_HapticEffectSupported(haptic: SDL_Haptic | null, effect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_CreateHapticEffect(haptic: SDL_Haptic | null, effect: ArrayBufferView | ArrayBuffer | null): number;
-  SDL_UpdateHapticEffect(haptic: SDL_Haptic | null, effect: number, data: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RunHapticEffect(haptic: SDL_Haptic | null, effect: number, iterations: number): boolean;
+  SDL_HapticEffectSupported(
+    haptic: SDL_Haptic | null,
+    effect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_CreateHapticEffect(
+    haptic: SDL_Haptic | null,
+    effect: ArrayBufferView | ArrayBuffer | null
+  ): number;
+  SDL_UpdateHapticEffect(
+    haptic: SDL_Haptic | null,
+    effect: number,
+    data: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RunHapticEffect(
+    haptic: SDL_Haptic | null,
+    effect: number,
+    iterations: number
+  ): boolean;
   SDL_StopHapticEffect(haptic: SDL_Haptic | null, effect: number): boolean;
   SDL_DestroyHapticEffect(haptic: SDL_Haptic | null, effect: number): void;
   SDL_GetHapticEffectStatus(haptic: SDL_Haptic | null, effect: number): boolean;
   SDL_SetHapticGain(haptic: SDL_Haptic | null, gain: number): boolean;
-  SDL_SetHapticAutocenter(haptic: SDL_Haptic | null, autocenter: number): boolean;
+  SDL_SetHapticAutocenter(
+    haptic: SDL_Haptic | null,
+    autocenter: number
+  ): boolean;
   SDL_PauseHaptic(haptic: SDL_Haptic | null): boolean;
   SDL_ResumeHaptic(haptic: SDL_Haptic | null): boolean;
   SDL_StopHapticEffects(haptic: SDL_Haptic | null): boolean;
   SDL_HapticRumbleSupported(haptic: SDL_Haptic | null): boolean;
   SDL_InitHapticRumble(haptic: SDL_Haptic | null): boolean;
-  SDL_PlayHapticRumble(haptic: SDL_Haptic | null, strength: number, length: number): boolean;
+  SDL_PlayHapticRumble(
+    haptic: SDL_Haptic | null,
+    strength: number,
+    length: number
+  ): boolean;
   SDL_StopHapticRumble(haptic: SDL_Haptic | null): boolean;
   SDL_hid_init(): number;
   SDL_hid_exit(): number;
   SDL_hid_device_change_count(): number;
-  SDL_hid_enumerate(vendor_id: number, product_id: number): SDL_hid_device_info | null;
+  SDL_hid_enumerate(
+    vendor_id: number,
+    product_id: number
+  ): SDL_hid_device_info | null;
   SDL_hid_free_enumeration(devs: SDL_hid_device_info | null): void;
-  SDL_hid_open(vendor_id: number, product_id: number, serial_number: number): SDL_hid_device | null;
+  SDL_hid_open(
+    vendor_id: number,
+    product_id: number,
+    serial_number: number
+  ): SDL_hid_device | null;
   SDL_hid_open_path(path: string | null): SDL_hid_device | null;
   SDL_hid_get_properties(dev: SDL_hid_device | null): number;
-  SDL_hid_write(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint): number;
-  SDL_hid_read_timeout(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint, milliseconds: number): number;
-  SDL_hid_read(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint): number;
+  SDL_hid_write(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint
+  ): number;
+  SDL_hid_read_timeout(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint,
+    milliseconds: number
+  ): number;
+  SDL_hid_read(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint
+  ): number;
   SDL_hid_set_nonblocking(dev: SDL_hid_device | null, nonblock: number): number;
-  SDL_hid_send_feature_report(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint): number;
-  SDL_hid_get_feature_report(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint): number;
-  SDL_hid_get_input_report(dev: SDL_hid_device | null, data: ArrayBufferView | ArrayBuffer | null, length: number | bigint): number;
+  SDL_hid_send_feature_report(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint
+  ): number;
+  SDL_hid_get_feature_report(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint
+  ): number;
+  SDL_hid_get_input_report(
+    dev: SDL_hid_device | null,
+    data: ArrayBufferView | ArrayBuffer | null,
+    length: number | bigint
+  ): number;
   SDL_hid_close(dev: SDL_hid_device | null): number;
-  SDL_hid_get_manufacturer_string(dev: SDL_hid_device | null, string: number, maxlen: number | bigint): number;
-  SDL_hid_get_product_string(dev: SDL_hid_device | null, string: number, maxlen: number | bigint): number;
-  SDL_hid_get_serial_number_string(dev: SDL_hid_device | null, string: number, maxlen: number | bigint): number;
-  SDL_hid_get_indexed_string(dev: SDL_hid_device | null, string_index: number, string: number, maxlen: number | bigint): number;
-  SDL_hid_get_device_info(dev: SDL_hid_device | null): SDL_hid_device_info | null;
-  SDL_hid_get_report_descriptor(dev: SDL_hid_device | null, buf: ArrayBufferView | ArrayBuffer | null, buf_size: number | bigint): number;
+  SDL_hid_get_manufacturer_string(
+    dev: SDL_hid_device | null,
+    string: number,
+    maxlen: number | bigint
+  ): number;
+  SDL_hid_get_product_string(
+    dev: SDL_hid_device | null,
+    string: number,
+    maxlen: number | bigint
+  ): number;
+  SDL_hid_get_serial_number_string(
+    dev: SDL_hid_device | null,
+    string: number,
+    maxlen: number | bigint
+  ): number;
+  SDL_hid_get_indexed_string(
+    dev: SDL_hid_device | null,
+    string_index: number,
+    string: number,
+    maxlen: number | bigint
+  ): number;
+  SDL_hid_get_device_info(
+    dev: SDL_hid_device | null
+  ): SDL_hid_device_info | null;
+  SDL_hid_get_report_descriptor(
+    dev: SDL_hid_device | null,
+    buf: ArrayBufferView | ArrayBuffer | null,
+    buf_size: number | bigint
+  ): number;
   SDL_hid_ble_scan(active: boolean): void;
-  SDL_SetHintWithPriority(name: string | null, value: string | null, priority: number): boolean;
+  SDL_SetHintWithPriority(
+    name: string | null,
+    value: string | null,
+    priority: number
+  ): boolean;
   SDL_SetHint(name: string | null, value: string | null): boolean;
   SDL_ResetHint(name: string | null): boolean;
   SDL_ResetHints(): void;
@@ -1032,152 +2568,572 @@ export interface SdlSymbols {
   SDL_WasInit(flags: number): number;
   SDL_Quit(): void;
   SDL_IsMainThread(): boolean;
-  SDL_SetAppMetadata(appname: string | null, appversion: string | null, appidentifier: string | null): boolean;
-  SDL_SetAppMetadataProperty(name: string | null, value: string | null): boolean;
+  SDL_SetAppMetadata(
+    appname: string | null,
+    appversion: string | null,
+    appidentifier: string | null
+  ): boolean;
+  SDL_SetAppMetadataProperty(
+    name: string | null,
+    value: string | null
+  ): boolean;
   SDL_GetAppMetadataProperty(name: string | null): string;
   SDL_LoadObject(sofile: string | null): SDL_SharedObject | null;
   SDL_UnloadObject(handle: SDL_SharedObject | null): void;
-  SDL_GetPreferredLocales(count: ArrayBufferView | ArrayBuffer | null): SDL_Locale | null;
+  SDL_GetPreferredLocales(
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Locale | null;
   SDL_SetLogPriorities(priority: number): void;
   SDL_SetLogPriority(category: number, priority: number): void;
   SDL_GetLogPriority(category: number): number;
   SDL_ResetLogPriorities(): void;
   SDL_SetLogPriorityPrefix(priority: number, prefix: string | null): boolean;
-  SDL_LogMessageV(category: number, priority: number, fmt: string | null, ap: ArrayBufferView | ArrayBuffer | null): void;
-  SDL_GetLogOutputFunction(callback: SDL_LogOutputFunction | null, userdata: AnyPointer | null): void;
-  SDL_ShowMessageBox(messageboxdata: ArrayBufferView | ArrayBuffer | null, buttonid: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_ShowSimpleMessageBox(flags: number, title: string | null, message: string | null, window: SDL_Window | null): boolean;
+  SDL_LogMessageV(
+    category: number,
+    priority: number,
+    fmt: string | null,
+    ap: ArrayBufferView | ArrayBuffer | null
+  ): void;
+  SDL_GetLogOutputFunction(
+    callback: SDL_LogOutputFunction | null,
+    userdata: AnyPointer | null
+  ): void;
+  SDL_ShowMessageBox(
+    messageboxdata: ArrayBufferView | ArrayBuffer | null,
+    buttonid: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_ShowSimpleMessageBox(
+    flags: number,
+    title: string | null,
+    message: string | null,
+    window: SDL_Window | null
+  ): boolean;
   SDL_Metal_CreateView(window: SDL_Window | null): AnyPointer | null;
   SDL_Metal_DestroyView(view: AnyPointer | null): void;
   SDL_Metal_GetLayer(view: AnyPointer | null): AnyPointer | null;
   SDL_OpenURL(url: string | null): boolean;
   SDL_GetPlatform(): string;
-  SDL_CreateProcess(args: string | null, pipe_stdio: boolean): SDL_Process | null;
+  SDL_CreateProcess(
+    args: string | null,
+    pipe_stdio: boolean
+  ): SDL_Process | null;
   SDL_CreateProcessWithProperties(props: number): SDL_Process | null;
   SDL_GetProcessProperties(process: SDL_Process | null): number;
-  SDL_ReadProcess(process: SDL_Process | null, datasize: number | bigint, exitcode: ArrayBufferView | ArrayBuffer | null): AnyPointer | null;
+  SDL_ReadProcess(
+    process: SDL_Process | null,
+    datasize: number | bigint,
+    exitcode: ArrayBufferView | ArrayBuffer | null
+  ): AnyPointer | null;
   SDL_GetProcessInput(process: SDL_Process | null): SDL_IOStream | null;
   SDL_GetProcessOutput(process: SDL_Process | null): SDL_IOStream | null;
   SDL_KillProcess(process: SDL_Process | null, force: boolean): boolean;
-  SDL_WaitProcess(process: SDL_Process | null, block: boolean, exitcode: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_WaitProcess(
+    process: SDL_Process | null,
+    block: boolean,
+    exitcode: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_DestroyProcess(process: SDL_Process | null): void;
   SDL_GetNumRenderDrivers(): number;
   SDL_GetRenderDriver(index: number): string;
-  SDL_CreateWindowAndRenderer(title: string | null, width: number, height: number, window_flags: number | bigint, window: SDL_Window | null, renderer: SDL_Renderer | null): boolean;
-  SDL_CreateRenderer(window: SDL_Window | null, name: string | null): SDL_Renderer | null;
+  SDL_CreateWindowAndRenderer(
+    title: string | null,
+    width: number,
+    height: number,
+    window_flags: number | bigint,
+    window: SDL_Window | null,
+    renderer: SDL_Renderer | null
+  ): boolean;
+  SDL_CreateRenderer(
+    window: SDL_Window | null,
+    name: string | null
+  ): SDL_Renderer | null;
   SDL_CreateRendererWithProperties(props: number): SDL_Renderer | null;
-  SDL_CreateGPURenderer(device: SDL_GPUDevice | null, window: SDL_Window | null): SDL_Renderer | null;
+  SDL_CreateGPURenderer(
+    device: SDL_GPUDevice | null,
+    window: SDL_Window | null
+  ): SDL_Renderer | null;
   SDL_GetGPURendererDevice(renderer: SDL_Renderer | null): SDL_GPUDevice | null;
   SDL_CreateSoftwareRenderer(surface: SDL_Surface | null): SDL_Renderer | null;
   SDL_GetRenderer(window: SDL_Window | null): SDL_Renderer | null;
   SDL_GetRenderWindow(renderer: SDL_Renderer | null): SDL_Window | null;
   SDL_GetRendererName(renderer: SDL_Renderer | null): string;
   SDL_GetRendererProperties(renderer: SDL_Renderer | null): number;
-  SDL_GetRenderOutputSize(renderer: SDL_Renderer | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetCurrentRenderOutputSize(renderer: SDL_Renderer | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_CreateTexture(renderer: SDL_Renderer | null, format: number, access: number, w: number, h: number): SDL_Texture | null;
-  SDL_CreateTextureFromSurface(renderer: SDL_Renderer | null, surface: SDL_Surface | null): SDL_Texture | null;
-  SDL_CreateTextureWithProperties(renderer: SDL_Renderer | null, props: number): SDL_Texture | null;
+  SDL_GetRenderOutputSize(
+    renderer: SDL_Renderer | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetCurrentRenderOutputSize(
+    renderer: SDL_Renderer | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_CreateTexture(
+    renderer: SDL_Renderer | null,
+    format: number,
+    access: number,
+    w: number,
+    h: number
+  ): SDL_Texture | null;
+  SDL_CreateTextureFromSurface(
+    renderer: SDL_Renderer | null,
+    surface: SDL_Surface | null
+  ): SDL_Texture | null;
+  SDL_CreateTextureWithProperties(
+    renderer: SDL_Renderer | null,
+    props: number
+  ): SDL_Texture | null;
   SDL_GetTextureProperties(texture: SDL_Texture | null): number;
   SDL_GetRendererFromTexture(texture: SDL_Texture | null): SDL_Renderer | null;
-  SDL_GetTextureSize(texture: SDL_Texture | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetTexturePalette(texture: SDL_Texture | null, palette: SDL_Palette | null): boolean;
+  SDL_GetTextureSize(
+    texture: SDL_Texture | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetTexturePalette(
+    texture: SDL_Texture | null,
+    palette: SDL_Palette | null
+  ): boolean;
   SDL_GetTexturePalette(texture: SDL_Texture | null): SDL_Palette | null;
-  SDL_SetTextureColorMod(texture: SDL_Texture | null, r: number, g: number, b: number): boolean;
-  SDL_SetTextureColorModFloat(texture: SDL_Texture | null, r: number, g: number, b: number): boolean;
-  SDL_GetTextureColorMod(texture: SDL_Texture | null, r: number, g: number, b: number): boolean;
-  SDL_GetTextureColorModFloat(texture: SDL_Texture | null, r: ArrayBufferView | ArrayBuffer | null, g: ArrayBufferView | ArrayBuffer | null, b: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetTextureColorMod(
+    texture: SDL_Texture | null,
+    r: number,
+    g: number,
+    b: number
+  ): boolean;
+  SDL_SetTextureColorModFloat(
+    texture: SDL_Texture | null,
+    r: number,
+    g: number,
+    b: number
+  ): boolean;
+  SDL_GetTextureColorMod(
+    texture: SDL_Texture | null,
+    r: number,
+    g: number,
+    b: number
+  ): boolean;
+  SDL_GetTextureColorModFloat(
+    texture: SDL_Texture | null,
+    r: ArrayBufferView | ArrayBuffer | null,
+    g: ArrayBufferView | ArrayBuffer | null,
+    b: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_SetTextureAlphaMod(texture: SDL_Texture | null, alpha: number): boolean;
-  SDL_SetTextureAlphaModFloat(texture: SDL_Texture | null, alpha: number): boolean;
+  SDL_SetTextureAlphaModFloat(
+    texture: SDL_Texture | null,
+    alpha: number
+  ): boolean;
   SDL_GetTextureAlphaMod(texture: SDL_Texture | null, alpha: number): boolean;
-  SDL_GetTextureAlphaModFloat(texture: SDL_Texture | null, alpha: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetTextureBlendMode(texture: SDL_Texture | null, blendMode: number): boolean;
-  SDL_GetTextureBlendMode(texture: SDL_Texture | null, blendMode: number): boolean;
-  SDL_SetTextureScaleMode(texture: SDL_Texture | null, scaleMode: number): boolean;
-  SDL_GetTextureScaleMode(texture: SDL_Texture | null, scaleMode: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_UpdateTexture(texture: SDL_Texture | null, rect: ArrayBufferView | ArrayBuffer | null, pixels: AnyPointer | null, pitch: number): boolean;
-  SDL_UpdateYUVTexture(texture: SDL_Texture | null, rect: ArrayBufferView | ArrayBuffer | null, Yplane: number, Ypitch: number, Uplane: number, Upitch: number, Vplane: number, Vpitch: number): boolean;
-  SDL_UpdateNVTexture(texture: SDL_Texture | null, rect: ArrayBufferView | ArrayBuffer | null, Yplane: number, Ypitch: number, UVplane: number, UVpitch: number): boolean;
-  SDL_LockTexture(texture: SDL_Texture | null, rect: ArrayBufferView | ArrayBuffer | null, pixels: AnyPointer | null, pitch: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_LockTextureToSurface(texture: SDL_Texture | null, rect: ArrayBufferView | ArrayBuffer | null, surface: SDL_Surface | null): boolean;
+  SDL_GetTextureAlphaModFloat(
+    texture: SDL_Texture | null,
+    alpha: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetTextureBlendMode(
+    texture: SDL_Texture | null,
+    blendMode: number
+  ): boolean;
+  SDL_GetTextureBlendMode(
+    texture: SDL_Texture | null,
+    blendMode: number
+  ): boolean;
+  SDL_SetTextureScaleMode(
+    texture: SDL_Texture | null,
+    scaleMode: number
+  ): boolean;
+  SDL_GetTextureScaleMode(
+    texture: SDL_Texture | null,
+    scaleMode: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_UpdateTexture(
+    texture: SDL_Texture | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    pixels: AnyPointer | null,
+    pitch: number
+  ): boolean;
+  SDL_UpdateYUVTexture(
+    texture: SDL_Texture | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    Yplane: number,
+    Ypitch: number,
+    Uplane: number,
+    Upitch: number,
+    Vplane: number,
+    Vpitch: number
+  ): boolean;
+  SDL_UpdateNVTexture(
+    texture: SDL_Texture | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    Yplane: number,
+    Ypitch: number,
+    UVplane: number,
+    UVpitch: number
+  ): boolean;
+  SDL_LockTexture(
+    texture: SDL_Texture | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    pixels: AnyPointer | null,
+    pitch: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_LockTextureToSurface(
+    texture: SDL_Texture | null,
+    rect: ArrayBufferView | ArrayBuffer | null,
+    surface: SDL_Surface | null
+  ): boolean;
   SDL_UnlockTexture(texture: SDL_Texture | null): void;
-  SDL_SetRenderTarget(renderer: SDL_Renderer | null, texture: SDL_Texture | null): boolean;
+  SDL_SetRenderTarget(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null
+  ): boolean;
   SDL_GetRenderTarget(renderer: SDL_Renderer | null): SDL_Texture | null;
-  SDL_SetRenderLogicalPresentation(renderer: SDL_Renderer | null, w: number, h: number, mode: number): boolean;
-  SDL_GetRenderLogicalPresentation(renderer: SDL_Renderer | null, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null, mode: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRenderLogicalPresentationRect(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderCoordinatesFromWindow(renderer: SDL_Renderer | null, window_x: number, window_y: number, x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderCoordinatesToWindow(renderer: SDL_Renderer | null, x: number, y: number, window_x: ArrayBufferView | ArrayBuffer | null, window_y: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_ConvertEventToRenderCoordinates(renderer: SDL_Renderer | null, event: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetRenderViewport(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRenderViewport(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_SetRenderLogicalPresentation(
+    renderer: SDL_Renderer | null,
+    w: number,
+    h: number,
+    mode: number
+  ): boolean;
+  SDL_GetRenderLogicalPresentation(
+    renderer: SDL_Renderer | null,
+    w: ArrayBufferView | ArrayBuffer | null,
+    h: ArrayBufferView | ArrayBuffer | null,
+    mode: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRenderLogicalPresentationRect(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderCoordinatesFromWindow(
+    renderer: SDL_Renderer | null,
+    window_x: number,
+    window_y: number,
+    x: ArrayBufferView | ArrayBuffer | null,
+    y: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderCoordinatesToWindow(
+    renderer: SDL_Renderer | null,
+    x: number,
+    y: number,
+    window_x: ArrayBufferView | ArrayBuffer | null,
+    window_y: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_ConvertEventToRenderCoordinates(
+    renderer: SDL_Renderer | null,
+    event: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetRenderViewport(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRenderViewport(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_RenderViewportSet(renderer: SDL_Renderer | null): boolean;
-  SDL_GetRenderSafeArea(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetRenderClipRect(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_GetRenderClipRect(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetRenderSafeArea(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetRenderClipRect(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_GetRenderClipRect(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_RenderClipEnabled(renderer: SDL_Renderer | null): boolean;
-  SDL_SetRenderScale(renderer: SDL_Renderer | null, scaleX: number, scaleY: number): boolean;
-  SDL_GetRenderScale(renderer: SDL_Renderer | null, scaleX: ArrayBufferView | ArrayBuffer | null, scaleY: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetRenderDrawColor(renderer: SDL_Renderer | null, r: number, g: number, b: number, a: number): boolean;
-  SDL_SetRenderDrawColorFloat(renderer: SDL_Renderer | null, r: number, g: number, b: number, a: number): boolean;
-  SDL_GetRenderDrawColor(renderer: SDL_Renderer | null, r: number, g: number, b: number, a: number): boolean;
-  SDL_GetRenderDrawColorFloat(renderer: SDL_Renderer | null, r: ArrayBufferView | ArrayBuffer | null, g: ArrayBufferView | ArrayBuffer | null, b: ArrayBufferView | ArrayBuffer | null, a: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetRenderColorScale(renderer: SDL_Renderer | null, scale: number): boolean;
-  SDL_GetRenderColorScale(renderer: SDL_Renderer | null, scale: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_SetRenderDrawBlendMode(renderer: SDL_Renderer | null, blendMode: number): boolean;
-  SDL_GetRenderDrawBlendMode(renderer: SDL_Renderer | null, blendMode: number): boolean;
+  SDL_SetRenderScale(
+    renderer: SDL_Renderer | null,
+    scaleX: number,
+    scaleY: number
+  ): boolean;
+  SDL_GetRenderScale(
+    renderer: SDL_Renderer | null,
+    scaleX: ArrayBufferView | ArrayBuffer | null,
+    scaleY: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetRenderDrawColor(
+    renderer: SDL_Renderer | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_SetRenderDrawColorFloat(
+    renderer: SDL_Renderer | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_GetRenderDrawColor(
+    renderer: SDL_Renderer | null,
+    r: number,
+    g: number,
+    b: number,
+    a: number
+  ): boolean;
+  SDL_GetRenderDrawColorFloat(
+    renderer: SDL_Renderer | null,
+    r: ArrayBufferView | ArrayBuffer | null,
+    g: ArrayBufferView | ArrayBuffer | null,
+    b: ArrayBufferView | ArrayBuffer | null,
+    a: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetRenderColorScale(
+    renderer: SDL_Renderer | null,
+    scale: number
+  ): boolean;
+  SDL_GetRenderColorScale(
+    renderer: SDL_Renderer | null,
+    scale: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_SetRenderDrawBlendMode(
+    renderer: SDL_Renderer | null,
+    blendMode: number
+  ): boolean;
+  SDL_GetRenderDrawBlendMode(
+    renderer: SDL_Renderer | null,
+    blendMode: number
+  ): boolean;
   SDL_RenderClear(renderer: SDL_Renderer | null): boolean;
   SDL_RenderPoint(renderer: SDL_Renderer | null, x: number, y: number): boolean;
-  SDL_RenderPoints(renderer: SDL_Renderer | null, points: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_RenderLine(renderer: SDL_Renderer | null, x1: number, y1: number, x2: number, y2: number): boolean;
-  SDL_RenderLines(renderer: SDL_Renderer | null, points: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_RenderRect(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderRects(renderer: SDL_Renderer | null, rects: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_RenderFillRect(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderFillRects(renderer: SDL_Renderer | null, rects: ArrayBufferView | ArrayBuffer | null, count: number): boolean;
-  SDL_RenderTexture(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderTextureRotated(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, dstrect: ArrayBufferView | ArrayBuffer | null, angle: number, center: ArrayBufferView | ArrayBuffer | null, flip: number): boolean;
-  SDL_RenderTextureAffine(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, origin: ArrayBufferView | ArrayBuffer | null, right: ArrayBufferView | ArrayBuffer | null, down: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderTextureTiled(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, scale: number, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderTexture9Grid(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, left_width: number, right_width: number, top_height: number, bottom_height: number, scale: number, dstrect: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderTexture9GridTiled(renderer: SDL_Renderer | null, texture: SDL_Texture | null, srcrect: ArrayBufferView | ArrayBuffer | null, left_width: number, right_width: number, top_height: number, bottom_height: number, scale: number, dstrect: ArrayBufferView | ArrayBuffer | null, tileScale: number): boolean;
-  SDL_RenderGeometry(renderer: SDL_Renderer | null, texture: SDL_Texture | null, vertices: ArrayBufferView | ArrayBuffer | null, num_vertices: number, indices: ArrayBufferView | ArrayBuffer | null, num_indices: number): boolean;
-  SDL_RenderGeometryRaw(renderer: SDL_Renderer | null, texture: SDL_Texture | null, xy: ArrayBufferView | ArrayBuffer | null, xy_stride: number, color: ArrayBufferView | ArrayBuffer | null, color_stride: number, uv: ArrayBufferView | ArrayBuffer | null, uv_stride: number, num_vertices: number, indices: AnyPointer | null, num_indices: number, size_indices: number): boolean;
-  SDL_SetRenderTextureAddressMode(renderer: SDL_Renderer | null, u_mode: number, v_mode: number): boolean;
-  SDL_GetRenderTextureAddressMode(renderer: SDL_Renderer | null, u_mode: ArrayBufferView | ArrayBuffer | null, v_mode: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderReadPixels(renderer: SDL_Renderer | null, rect: ArrayBufferView | ArrayBuffer | null): SDL_Surface | null;
+  SDL_RenderPoints(
+    renderer: SDL_Renderer | null,
+    points: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_RenderLine(
+    renderer: SDL_Renderer | null,
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+  ): boolean;
+  SDL_RenderLines(
+    renderer: SDL_Renderer | null,
+    points: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_RenderRect(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderRects(
+    renderer: SDL_Renderer | null,
+    rects: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_RenderFillRect(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderFillRects(
+    renderer: SDL_Renderer | null,
+    rects: ArrayBufferView | ArrayBuffer | null,
+    count: number
+  ): boolean;
+  SDL_RenderTexture(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderTextureRotated(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    dstrect: ArrayBufferView | ArrayBuffer | null,
+    angle: number,
+    center: ArrayBufferView | ArrayBuffer | null,
+    flip: number
+  ): boolean;
+  SDL_RenderTextureAffine(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    origin: ArrayBufferView | ArrayBuffer | null,
+    right: ArrayBufferView | ArrayBuffer | null,
+    down: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderTextureTiled(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    scale: number,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderTexture9Grid(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    left_width: number,
+    right_width: number,
+    top_height: number,
+    bottom_height: number,
+    scale: number,
+    dstrect: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderTexture9GridTiled(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    srcrect: ArrayBufferView | ArrayBuffer | null,
+    left_width: number,
+    right_width: number,
+    top_height: number,
+    bottom_height: number,
+    scale: number,
+    dstrect: ArrayBufferView | ArrayBuffer | null,
+    tileScale: number
+  ): boolean;
+  SDL_RenderGeometry(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    vertices: ArrayBufferView | ArrayBuffer | null,
+    num_vertices: number,
+    indices: ArrayBufferView | ArrayBuffer | null,
+    num_indices: number
+  ): boolean;
+  SDL_RenderGeometryRaw(
+    renderer: SDL_Renderer | null,
+    texture: SDL_Texture | null,
+    xy: ArrayBufferView | ArrayBuffer | null,
+    xy_stride: number,
+    color: ArrayBufferView | ArrayBuffer | null,
+    color_stride: number,
+    uv: ArrayBufferView | ArrayBuffer | null,
+    uv_stride: number,
+    num_vertices: number,
+    indices: AnyPointer | null,
+    num_indices: number,
+    size_indices: number
+  ): boolean;
+  SDL_SetRenderTextureAddressMode(
+    renderer: SDL_Renderer | null,
+    u_mode: number,
+    v_mode: number
+  ): boolean;
+  SDL_GetRenderTextureAddressMode(
+    renderer: SDL_Renderer | null,
+    u_mode: ArrayBufferView | ArrayBuffer | null,
+    v_mode: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderReadPixels(
+    renderer: SDL_Renderer | null,
+    rect: ArrayBufferView | ArrayBuffer | null
+  ): SDL_Surface | null;
   SDL_RenderPresent(renderer: SDL_Renderer | null): boolean;
   SDL_DestroyTexture(texture: SDL_Texture | null): void;
   SDL_DestroyRenderer(renderer: SDL_Renderer | null): void;
   SDL_FlushRenderer(renderer: SDL_Renderer | null): boolean;
   SDL_GetRenderMetalLayer(renderer: SDL_Renderer | null): AnyPointer | null;
-  SDL_GetRenderMetalCommandEncoder(renderer: SDL_Renderer | null): AnyPointer | null;
-  SDL_AddVulkanRenderSemaphores(renderer: SDL_Renderer | null, wait_stage_mask: number, wait_semaphore: number | bigint, signal_semaphore: number | bigint): boolean;
+  SDL_GetRenderMetalCommandEncoder(
+    renderer: SDL_Renderer | null
+  ): AnyPointer | null;
+  SDL_AddVulkanRenderSemaphores(
+    renderer: SDL_Renderer | null,
+    wait_stage_mask: number,
+    wait_semaphore: number | bigint,
+    signal_semaphore: number | bigint
+  ): boolean;
   SDL_SetRenderVSync(renderer: SDL_Renderer | null, vsync: number): boolean;
-  SDL_GetRenderVSync(renderer: SDL_Renderer | null, vsync: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_RenderDebugText(renderer: SDL_Renderer | null, x: number, y: number, str: string | null): boolean;
-  SDL_SetDefaultTextureScaleMode(renderer: SDL_Renderer | null, scale_mode: number): boolean;
-  SDL_GetDefaultTextureScaleMode(renderer: SDL_Renderer | null, scale_mode: ArrayBufferView | ArrayBuffer | null): boolean;
-  SDL_CreateGPURenderState(renderer: SDL_Renderer | null, createinfo: ArrayBufferView | ArrayBuffer | null): SDL_GPURenderState | null;
-  SDL_SetGPURenderStateFragmentUniforms(state: SDL_GPURenderState | null, slot_index: number, data: AnyPointer | null, length: number): boolean;
-  SDL_SetGPURenderState(renderer: SDL_Renderer | null, state: SDL_GPURenderState | null): boolean;
+  SDL_GetRenderVSync(
+    renderer: SDL_Renderer | null,
+    vsync: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_RenderDebugText(
+    renderer: SDL_Renderer | null,
+    x: number,
+    y: number,
+    str: string | null
+  ): boolean;
+  SDL_SetDefaultTextureScaleMode(
+    renderer: SDL_Renderer | null,
+    scale_mode: number
+  ): boolean;
+  SDL_GetDefaultTextureScaleMode(
+    renderer: SDL_Renderer | null,
+    scale_mode: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
+  SDL_CreateGPURenderState(
+    renderer: SDL_Renderer | null,
+    createinfo: ArrayBufferView | ArrayBuffer | null
+  ): SDL_GPURenderState | null;
+  SDL_SetGPURenderStateFragmentUniforms(
+    state: SDL_GPURenderState | null,
+    slot_index: number,
+    data: AnyPointer | null,
+    length: number
+  ): boolean;
+  SDL_SetGPURenderState(
+    renderer: SDL_Renderer | null,
+    state: SDL_GPURenderState | null
+  ): boolean;
   SDL_DestroyGPURenderState(state: SDL_GPURenderState | null): void;
-  SDL_OpenTitleStorage(override: string | null, props: number): SDL_Storage | null;
-  SDL_OpenUserStorage(org: string | null, app: string | null, props: number): SDL_Storage | null;
+  SDL_OpenTitleStorage(
+    override: string | null,
+    props: number
+  ): SDL_Storage | null;
+  SDL_OpenUserStorage(
+    org: string | null,
+    app: string | null,
+    props: number
+  ): SDL_Storage | null;
   SDL_OpenFileStorage(path: string | null): SDL_Storage | null;
-  SDL_OpenStorage(iface: ArrayBufferView | ArrayBuffer | null, userdata: AnyPointer | null): SDL_Storage | null;
+  SDL_OpenStorage(
+    iface: ArrayBufferView | ArrayBuffer | null,
+    userdata: AnyPointer | null
+  ): SDL_Storage | null;
   SDL_CloseStorage(storage: SDL_Storage | null): boolean;
   SDL_StorageReady(storage: SDL_Storage | null): boolean;
-  SDL_GetStorageFileSize(storage: SDL_Storage | null, path: string | null, length: number | bigint): boolean;
-  SDL_ReadStorageFile(storage: SDL_Storage | null, path: string | null, destination: AnyPointer | null, length: number | bigint): boolean;
-  SDL_WriteStorageFile(storage: SDL_Storage | null, path: string | null, source: AnyPointer | null, length: number | bigint): boolean;
-  SDL_CreateStorageDirectory(storage: SDL_Storage | null, path: string | null): boolean;
-  SDL_RemoveStoragePath(storage: SDL_Storage | null, path: string | null): boolean;
-  SDL_RenameStoragePath(storage: SDL_Storage | null, oldpath: string | null, newpath: string | null): boolean;
-  SDL_CopyStorageFile(storage: SDL_Storage | null, oldpath: string | null, newpath: string | null): boolean;
-  SDL_GetStoragePathInfo(storage: SDL_Storage | null, path: string | null, info: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetStorageFileSize(
+    storage: SDL_Storage | null,
+    path: string | null,
+    length: number | bigint
+  ): boolean;
+  SDL_ReadStorageFile(
+    storage: SDL_Storage | null,
+    path: string | null,
+    destination: AnyPointer | null,
+    length: number | bigint
+  ): boolean;
+  SDL_WriteStorageFile(
+    storage: SDL_Storage | null,
+    path: string | null,
+    source: AnyPointer | null,
+    length: number | bigint
+  ): boolean;
+  SDL_CreateStorageDirectory(
+    storage: SDL_Storage | null,
+    path: string | null
+  ): boolean;
+  SDL_RemoveStoragePath(
+    storage: SDL_Storage | null,
+    path: string | null
+  ): boolean;
+  SDL_RenameStoragePath(
+    storage: SDL_Storage | null,
+    oldpath: string | null,
+    newpath: string | null
+  ): boolean;
+  SDL_CopyStorageFile(
+    storage: SDL_Storage | null,
+    oldpath: string | null,
+    newpath: string | null
+  ): boolean;
+  SDL_GetStoragePathInfo(
+    storage: SDL_Storage | null,
+    path: string | null,
+    info: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetStorageSpaceRemaining(storage: SDL_Storage | null): bigint;
-  SDL_GlobStorageDirectory(storage: SDL_Storage | null, path: string | null, pattern: string | null, flags: number, count: ArrayBufferView | ArrayBuffer | null): ArrayBufferView | ArrayBuffer | null;
+  SDL_GlobStorageDirectory(
+    storage: SDL_Storage | null,
+    path: string | null,
+    pattern: string | null,
+    flags: number,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): ArrayBufferView | ArrayBuffer | null;
   SDL_IsTablet(): boolean;
   SDL_IsTV(): boolean;
   SDL_GetSandbox(): number;
@@ -1187,11 +3143,25 @@ export interface SdlSymbols {
   SDL_OnApplicationDidEnterBackground(): void;
   SDL_OnApplicationWillEnterForeground(): void;
   SDL_OnApplicationDidEnterForeground(): void;
-  SDL_GetDateTimeLocalePreferences(dateFormat: ArrayBufferView | ArrayBuffer | null, timeFormat: ArrayBufferView | ArrayBuffer | null): boolean;
+  SDL_GetDateTimeLocalePreferences(
+    dateFormat: ArrayBufferView | ArrayBuffer | null,
+    timeFormat: ArrayBufferView | ArrayBuffer | null
+  ): boolean;
   SDL_GetCurrentTime(ticks: number | bigint): boolean;
-  SDL_TimeToDateTime(ticks: number | bigint, dt: ArrayBufferView | ArrayBuffer | null, localTime: boolean): boolean;
-  SDL_DateTimeToTime(dt: ArrayBufferView | ArrayBuffer | null, ticks: number | bigint): boolean;
-  SDL_TimeToWindows(ticks: number | bigint, dwLowDateTime: number, dwHighDateTime: number): void;
+  SDL_TimeToDateTime(
+    ticks: number | bigint,
+    dt: ArrayBufferView | ArrayBuffer | null,
+    localTime: boolean
+  ): boolean;
+  SDL_DateTimeToTime(
+    dt: ArrayBufferView | ArrayBuffer | null,
+    ticks: number | bigint
+  ): boolean;
+  SDL_TimeToWindows(
+    ticks: number | bigint,
+    dwLowDateTime: number,
+    dwHighDateTime: number
+  ): void;
   SDL_TimeFromWindows(dwLowDateTime: number, dwHighDateTime: number): bigint;
   SDL_GetDaysInMonth(year: number, month: number): number;
   SDL_GetDayOfYear(year: number, month: number, day: number): number;
@@ -1204,17 +3174,31 @@ export interface SdlSymbols {
   SDL_DelayNS(ns: number | bigint): void;
   SDL_DelayPrecise(ns: number | bigint): void;
   SDL_RemoveTimer(id: number): boolean;
-  SDL_CreateTray(icon: SDL_Surface | null, tooltip: string | null): SDL_Tray | null;
+  SDL_CreateTray(
+    icon: SDL_Surface | null,
+    tooltip: string | null
+  ): SDL_Tray | null;
   SDL_SetTrayIcon(tray: SDL_Tray | null, icon: SDL_Surface | null): void;
   SDL_SetTrayTooltip(tray: SDL_Tray | null, tooltip: string | null): void;
   SDL_CreateTrayMenu(tray: SDL_Tray | null): SDL_TrayMenu | null;
   SDL_CreateTraySubmenu(entry: SDL_TrayEntry | null): SDL_TrayMenu | null;
   SDL_GetTrayMenu(tray: SDL_Tray | null): SDL_TrayMenu | null;
   SDL_GetTraySubmenu(entry: SDL_TrayEntry | null): SDL_TrayMenu | null;
-  SDL_GetTrayEntries(menu: SDL_TrayMenu | null, count: ArrayBufferView | ArrayBuffer | null): SDL_TrayEntry | null;
+  SDL_GetTrayEntries(
+    menu: SDL_TrayMenu | null,
+    count: ArrayBufferView | ArrayBuffer | null
+  ): SDL_TrayEntry | null;
   SDL_RemoveTrayEntry(entry: SDL_TrayEntry | null): void;
-  SDL_InsertTrayEntryAt(menu: SDL_TrayMenu | null, pos: number, label: string | null, flags: number): SDL_TrayEntry | null;
-  SDL_SetTrayEntryLabel(entry: SDL_TrayEntry | null, label: string | null): void;
+  SDL_InsertTrayEntryAt(
+    menu: SDL_TrayMenu | null,
+    pos: number,
+    label: string | null,
+    flags: number
+  ): SDL_TrayEntry | null;
+  SDL_SetTrayEntryLabel(
+    entry: SDL_TrayEntry | null,
+    label: string | null
+  ): void;
   SDL_GetTrayEntryLabel(entry: SDL_TrayEntry | null): string;
   SDL_SetTrayEntryChecked(entry: SDL_TrayEntry | null, checked: boolean): void;
   SDL_GetTrayEntryChecked(entry: SDL_TrayEntry | null): boolean;
