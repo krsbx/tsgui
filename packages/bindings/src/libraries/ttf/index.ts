@@ -3,16 +3,14 @@ import { runtime } from "../../runtime.ts";
 
 export * from "./generated/constants.ts";
 export type { TtfSymbols } from "./generated/types.ts";
-export type { TtfFunctions } from "./generated/functions.ts";
-import type { TtfSymbols } from "./generated/types.ts";
-import type { TtfFunctions } from "./generated/functions.ts";
+export type { TtfExtensionSymbols } from "./extension.ts";
 
 const backend = await (runtime === "bun"
   ? import("./bun.ts")
   : import("./node.ts"));
 
 /** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const ttfRaw: TtfSymbols = backend.ttfRaw;
+export const ttfRaw = backend.ttfRaw;
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const ttf: TtfFunctions = backend.ttf;
+/** Object-param surface — generated wrappers + extension, merged. */
+export const ttf = backend.ttf;

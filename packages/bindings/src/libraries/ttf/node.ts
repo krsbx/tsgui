@@ -1,18 +1,19 @@
-/** SDL3_ttf backend for Node — node:ffi dlopen over the generated table. */
+/** ttf backend for Node — node:ffi consumes the neutral defs natively. */
 import { dlopen } from "node:ffi";
-import { ttfDefs } from "./generated/defs-node.ts";
-import { createTtfFunctions, type TtfFunctions } from "./generated/functions.ts";
-import type { TtfSymbols } from "./generated/types.ts";
-import { resolveLibrary } from "./path.ts";
+import { resolveDefs } from "../../resolve-defs.ts";
 import { wrapStringReturns } from "../../string-returns.ts";
+import { ttfExtension, ttfExtensionDefs } from "./extension.ts";
+import { ttfDefs } from "./generated/defs.ts";
+import { createTtfFunctions } from "./generated/functions.ts";
+import { resolveLibrary } from "./path.ts";
 
-const raw = wrapStringReturns(
-  ttfDefs,
-  dlopen(resolveLibrary(), ttfDefs).functions
-) as unknown as TtfSymbols;
+const defs = resolveDefs(ttfDefs, ttfExtensionDefs);
 
-/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const ttfRaw: TtfSymbols = raw;
+/** Raw positional symbols — includes the extension functions. */
+export const ttfRaw = wrapStringReturns(
+  defs,
+  dlopen(resolveLibrary(), defs).functions
+);
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const ttf: TtfFunctions = createTtfFunctions(raw);
+/** Object-param surface — generated wrappers + extension, merged. */
+export const ttf = createTtfFunctions(ttfRaw, ttfExtension);

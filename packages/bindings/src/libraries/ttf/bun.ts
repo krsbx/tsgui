@@ -1,15 +1,17 @@
-/** SDL3_ttf backend for Bun — bun:ffi dlopen over the generated table. */
+/** ttf backend for Bun — bun:ffi dlopen over the neutral defs table. */
 import { dlopen } from "bun:ffi";
-import { ttfDefs } from "./generated/defs-bun.ts";
-import { createTtfFunctions, type TtfFunctions } from "./generated/functions.ts";
-import type { TtfSymbols } from "./generated/types.ts";
+import { toBunDefs } from "../../bun-dialect.ts";
+import { resolveDefs } from "../../resolve-defs.ts";
+import { ttfExtension, ttfExtensionDefs } from "./extension.ts";
+import { ttfDefs } from "./generated/defs.ts";
+import { createTtfFunctions } from "./generated/functions.ts";
 import { resolveLibrary } from "./path.ts";
 
-/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const ttfRaw: TtfSymbols = dlopen(
+/** Raw positional symbols — includes the extension functions. */
+export const ttfRaw = dlopen(
   resolveLibrary(),
-  ttfDefs
-).symbols as unknown as TtfSymbols;
+  toBunDefs(resolveDefs(ttfDefs, ttfExtensionDefs))
+).symbols;
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const ttf: TtfFunctions = createTtfFunctions(ttfRaw);
+/** Object-param surface — generated wrappers + extension, merged. */
+export const ttf = createTtfFunctions(ttfRaw, ttfExtension);

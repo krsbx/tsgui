@@ -1,15 +1,15 @@
-/** SDL3_image backend for Bun — bun:ffi dlopen over the generated table. */
+/** image backend for Bun — bun:ffi dlopen over the neutral defs table. */
 import { dlopen } from "bun:ffi";
-import { imageDefs } from "./generated/defs-bun.ts";
-import { createImageFunctions, type ImageFunctions } from "./generated/functions.ts";
-import type { ImageSymbols } from "./generated/types.ts";
+import { toBunDefs } from "../../bun-dialect.ts";
+import { resolveDefs } from "../../resolve-defs.ts";
+import { imageDefs } from "./generated/defs.ts";
+import { createImageFunctions } from "./generated/functions.ts";
 import { resolveLibrary } from "./path.ts";
 
-/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const imageRaw: ImageSymbols = dlopen(
+export const imageRaw = dlopen(
   resolveLibrary(),
-  imageDefs
-).symbols as unknown as ImageSymbols;
+  toBunDefs(resolveDefs(imageDefs))
+).symbols;
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const image: ImageFunctions = createImageFunctions(imageRaw);
+/** Object-param surface — generated wrappers + extension, merged. */
+export const image = createImageFunctions(imageRaw);

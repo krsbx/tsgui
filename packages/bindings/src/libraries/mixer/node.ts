@@ -1,18 +1,18 @@
-/** SDL3_mixer backend for Node — node:ffi dlopen over the generated table. */
+/** mixer backend for Node — node:ffi consumes the neutral defs natively. */
 import { dlopen } from "node:ffi";
-import { mixerDefs } from "./generated/defs-node.ts";
-import { createMixerFunctions, type MixerFunctions } from "./generated/functions.ts";
-import type { MixerSymbols } from "./generated/types.ts";
-import { resolveLibrary } from "./path.ts";
+import { resolveDefs } from "../../resolve-defs.ts";
 import { wrapStringReturns } from "../../string-returns.ts";
+import { mixerDefs } from "./generated/defs.ts";
+import { createMixerFunctions } from "./generated/functions.ts";
+import { resolveLibrary } from "./path.ts";
 
-const raw = wrapStringReturns(
-  mixerDefs,
-  dlopen(resolveLibrary(), mixerDefs).functions
-) as unknown as MixerSymbols;
+const defs = resolveDefs(mixerDefs);
 
-/** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const mixerRaw: MixerSymbols = raw;
+/** Raw positional symbols — includes the extension functions. */
+export const mixerRaw = wrapStringReturns(
+  defs,
+  dlopen(resolveLibrary(), defs).functions
+);
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const mixer: MixerFunctions = createMixerFunctions(raw);
+/** Object-param surface — generated wrappers + extension, merged. */
+export const mixer = createMixerFunctions(mixerRaw);

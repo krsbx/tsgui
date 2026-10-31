@@ -57,7 +57,11 @@ type FunctionDefinitions = {
   [symbols: string]: FnDef;
 };
 
-type BunFFIArgument<T extends FFIReturnType> = (typeof BY_NAME)[T];
+// Resolve by assignability rather than indexing, so `handle<T>()` slots
+// (`"pointer"` & a type-only brand) still map to their bun name.
+type BunFFIArgument<T extends FFIReturnType> = {
+  [N in keyof typeof BY_NAME]: [T] extends [N] ? (typeof BY_NAME)[N] : never;
+}[keyof typeof BY_NAME];
 
 type BunFFIArguments<Args extends readonly FFIArgumentType[]> = {
   -readonly [K in keyof Args]: BunFFIArgument<Args[K]>;
@@ -66,7 +70,7 @@ type BunFFIArguments<Args extends readonly FFIArgumentType[]> = {
 export type BunDefs<T extends FunctionDefinitions> = {
   [K in keyof T]: {
     args: BunFFIArguments<T[K]["arguments"]>;
-    returns: (typeof BY_NAME)[T[K]["return"]];
+    returns: BunFFIArgument<T[K]["return"]>;
   };
 };
 

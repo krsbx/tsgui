@@ -1,15 +1,16 @@
-/** SDL3 backend for Bun — bun:ffi dlopen over the generated table. */
+/** SDL3 backend for Bun — bun:ffi dlopen over the neutral defs table. */
 import { dlopen } from "bun:ffi";
-import { sdlDefs } from "./generated/defs-bun.ts";
-import { createSdlFunctions, type SdlFunctions } from "./generated/functions.ts";
-import type { SdlSymbols } from "./generated/types.ts";
+import { toBunDefs } from "../../bun-dialect.ts";
+import { resolveDefs } from "../../resolve-defs.ts";
+import { sdlDefs } from "./generated/defs.ts";
+import { createSdlFunctions } from "./generated/functions.ts";
 import { resolveLibrary } from "./path.ts";
 
 /** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const sdlRaw: SdlSymbols = dlopen(
+export const sdlRaw = dlopen(
   resolveLibrary(),
-  sdlDefs
-).symbols as unknown as SdlSymbols;
+  toBunDefs(resolveDefs(sdlDefs))
+).symbols;
 
-/** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const sdl: SdlFunctions = createSdlFunctions(sdlRaw);
+/** Object-param surface — generated wrappers + extension, merged. */
+export const sdl = createSdlFunctions(sdlRaw);
