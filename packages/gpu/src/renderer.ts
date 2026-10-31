@@ -12,9 +12,12 @@ import type {
 // Prop names are string #defines — invisible to the codegen's numeric
 // scanner, so they live here verbatim (documented in SDL_render.h).
 const PROP_RENDERER_CREATE_NAME = "SDL.renderer.create.name";
+const PROP_RENDERER_CREATE_WINDOW = "SDL.renderer.create.window";
 
-const FLOATS_PER_VERTEX = 5;
-const BYTES_PER_VERTEX = 20; // 2f pos + 4×u8 color + 2f uv
+// SDL3's SDL_Vertex is 2f position + SDL_FColor (4×f32) + 2f uv — the SDL2
+// 20-byte layout with a packed-u32 color silently draws nothing.
+const FLOATS_PER_VERTEX = 8;
+const BYTES_PER_VERTEX = 32;
 const INITIAL_VERTICES = 1 << 16;
 
 export class GpuRenderer {
@@ -23,7 +26,6 @@ export class GpuRenderer {
 
   private vertexData: Uint8Array;
   private vertexF32: Float32Array;
-  private vertexU32: Uint32Array;
   private indexData: Int32Array;
 
   private vertexCount = 0;
@@ -37,16 +39,21 @@ export class GpuRenderer {
 
   clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
 
-  constructor(window: WindowHandle) {
-    // Prefer the GPU backend; fall back to SDL's default choice.
+  constructor(window: WindowHandle, options: { driver?: string } = {}) {
+    // Prefer the GPU backend; fall back to SDL's default choice. Tests pin
+    // `driver` (e.g. "software") for deterministic pixel readback.
     const props = sdlRaw.SDL_CreateProperties();
-    sdlRaw.SDL_SetStringProperty(props, PROP_RENDERER_CREATE_NAME, "gpu");
+    sdlRaw.SDL_SetStringProperty(props, PROP_RENDERER_CREATE_NAME, options.driver ?? "gpu");
+    sdlRaw.SDL_SetPointerProperty(props, PROP_RENDERER_CREATE_WINDOW, window);
     const renderer = sdlRaw.SDL_CreateRendererWithProperties(props);
     sdlRaw.SDL_DestroyProperties(props);
 
     if (renderer) {
       this.renderer = renderer;
     } else {
+      // SDL_GetError is sticky from the props attempt — clear so the throw
+      // names the fallback's own failure.
+      sdlRaw.SDL_ClearError();
       const fallback = sdlRaw.SDL_CreateRenderer(window, null);
       if (!fallback) {
         throw new Error(`GpuRenderer: ${sdlRaw.SDL_GetError()}`);
@@ -61,7 +68,6 @@ export class GpuRenderer {
 
     this.vertexData = new Uint8Array(INITIAL_VERTICES * BYTES_PER_VERTEX);
     this.vertexF32 = new Float32Array(this.vertexData.buffer);
-    this.vertexU32 = new Uint32Array(this.vertexData.buffer);
     this.indexData = new Int32Array(INITIAL_VERTICES * 3);
   }
 
@@ -119,7 +125,6 @@ export class GpuRenderer {
       data.set(this.vertexData);
       this.vertexData = data;
       this.vertexF32 = new Float32Array(data.buffer);
-      this.vertexU32 = new Uint32Array(data.buffer);
       this.indexData = new Int32Array(capacity * 3);
     }
     if (this.indexCount + indices > this.indexData.length) {
@@ -130,23 +135,42 @@ export class GpuRenderer {
   }
 
   /**
+   * Write one SDL_Vertex: 2f position, SDL_FColor (packed ABGR → 4 floats),
+   * 2f uv. `vi` is the float index of the vertex start.
+   */
+  private writeVertex(
+    vi: number,
+    x: number,
+    y: number,
+    color: number,
+    u: number,
+    v: number
+  ): void {
+    const f = this.vertexF32;
+    f[vi] = x;
+    f[vi + 1] = y;
+    f[vi + 2] = (color & 255) / 255;
+    f[vi + 3] = ((color >>> 8) & 255) / 255;
+    f[vi + 4] = ((color >>> 16) & 255) / 255;
+    f[vi + 5] = ((color >>> 24) & 255) / 255;
+    f[vi + 6] = u;
+    f[vi + 7] = v;
+  }
+
+  /**
    * Queue an axis-aligned solid-color rectangle for the current frame.
    * Single-object params per the toolkit convention (docs/ARCHITECTURE.md).
    */
   fillRect({ x, y, w, h, color }: RectOptions): void {
     this.ensureCapacity(4, 6);
     const base = this.vertexCount;
-    const f = this.vertexF32;
-    const u32 = this.vertexU32;
+    const S = FLOATS_PER_VERTEX;
+    const vi = base * S;
 
-    let vi = base * FLOATS_PER_VERTEX;
-    f[vi] = x; f[vi + 1] = y; u32[vi + 2] = color; f[vi + 3] = 0; f[vi + 4] = 0;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x + w; f[vi + 1] = y; u32[vi + 2] = color; f[vi + 3] = 0; f[vi + 4] = 0;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x + w; f[vi + 1] = y + h; u32[vi + 2] = color; f[vi + 3] = 0; f[vi + 4] = 0;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x; f[vi + 1] = y + h; u32[vi + 2] = color; f[vi + 3] = 0; f[vi + 4] = 0;
+    this.writeVertex(vi, x, y, color, 0, 0);
+    this.writeVertex(vi + S, x + w, y, color, 0, 0);
+    this.writeVertex(vi + S * 2, x + w, y + h, color, 0, 0);
+    this.writeVertex(vi + S * 3, x, y + h, color, 0, 0);
 
     let ii = this.indexCount;
     this.indexData[ii++] = base;
@@ -171,17 +195,13 @@ export class GpuRenderer {
     this.batchTexture = texture;
     this.ensureCapacity(4, 6);
     const base = this.vertexCount;
-    const f = this.vertexF32;
-    const u32 = this.vertexU32;
+    const S = FLOATS_PER_VERTEX;
+    const vi = base * S;
 
-    let vi = base * FLOATS_PER_VERTEX;
-    f[vi] = x; f[vi + 1] = y; u32[vi + 2] = tint; f[vi + 3] = 0; f[vi + 4] = 0;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x + w; f[vi + 1] = y; u32[vi + 2] = tint; f[vi + 3] = 1; f[vi + 4] = 0;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x + w; f[vi + 1] = y + h; u32[vi + 2] = tint; f[vi + 3] = 1; f[vi + 4] = 1;
-    vi += FLOATS_PER_VERTEX;
-    f[vi] = x; f[vi + 1] = y + h; u32[vi + 2] = tint; f[vi + 3] = 0; f[vi + 4] = 1;
+    this.writeVertex(vi, x, y, tint, 0, 0);
+    this.writeVertex(vi + S, x + w, y, tint, 1, 0);
+    this.writeVertex(vi + S * 2, x + w, y + h, tint, 1, 1);
+    this.writeVertex(vi + S * 3, x, y + h, tint, 0, 1);
 
     let ii = this.indexCount;
     this.indexData[ii++] = base;
@@ -224,16 +244,13 @@ export class GpuRenderer {
     this.ensureCapacity(1 + P, P * 3);
 
     const base = this.vertexCount;
-    const f = this.vertexF32;
-    const u32 = this.vertexU32;
+    const S = FLOATS_PER_VERTEX;
+    let vi = base * S;
 
     const cx = x + w / 2;
     const cy = y + h / 2;
-    let vi = base * FLOATS_PER_VERTEX;
-    f[vi] = cx;
-    f[vi + 1] = cy;
-    u32[vi + 2] = color;
-    vi += FLOATS_PER_VERTEX;
+    this.writeVertex(vi, cx, cy, color, 0, 0);
+    vi += S;
 
     const corners = [
       { cx: x + w - r, cy: y + r, a0: -Math.PI / 2 }, // TR
@@ -244,10 +261,8 @@ export class GpuRenderer {
     for (const { cx: ccx, cy: ccy, a0 } of corners) {
       for (let i = 0; i <= segments; i++) {
         const a = a0 + (i / segments) * (Math.PI / 2);
-        f[vi] = ccx + r * Math.cos(a);
-        f[vi + 1] = ccy + r * Math.sin(a);
-        u32[vi + 2] = color;
-        vi += FLOATS_PER_VERTEX;
+        this.writeVertex(vi, ccx + r * Math.cos(a), ccy + r * Math.sin(a), color, 0, 0);
+        vi += S;
       }
     }
 
@@ -275,6 +290,11 @@ export class GpuRenderer {
     if (!ok) {
       throw new Error(`SDL_RenderGeometry: ${sdlRaw.SDL_GetError()}`);
     }
+  }
+
+  /** Send all queued geometry to SDL without presenting. */
+  flush(): void {
+    this.flushBatch();
   }
 
   /** Flush remaining batches and present the frame. */
