@@ -8,7 +8,7 @@ import type {
   CTypeDecl,
 } from '../clang/types';
 import { DeclarationKind } from '../clang/types';
-import { classifyFfiType, scalarTs } from './kinds';
+import { classifyFfiType, PRIMITIVES, scalarTs } from './kinds';
 import { classifyPointerTs } from './pointers';
 import { collectEnums } from './enums';
 import type {
@@ -40,20 +40,21 @@ export function buildFfiTables(
   const handleTypes = new Set<string>();
 
   // Pass 1: typedef aliases, enum names, complete record (struct/union)
-  // names — the C opacity rule: a record with a complete definition is
-  // memory the caller constructs; an incomplete one is an opaque handle.
+  // names, and pointer types that functions RETURN — the handle/data rule:
+  //   incomplete type, or a complete type some function returns
+  //   → branded handle (you obtain it, you never construct it)
+  //   anything else through a pointer → caller-constructed memory
+  // SDL_Texture is publicly defined in 3.4 (read-only fields) yet only
+  // ever obtained from CreateTexture* — the return rule brands it.
   const aliases = new Map<string, CTypeDecl>();
   const enumNames = new Set<string>();
   const completeRecords = new Set<string>();
-  let pendingAnonymousRecord = false;
+  const returnedPointees = new Set<string>();
   for (const decl of header.declarations) {
     if (decl.kind === DeclarationKind.TYPEDEF) {
       const t = decl as CTypedefDecl;
       if (t.tag === null && !('params' in t.underlyingType)) {
         aliases.set(t.name, t.underlyingType as CTypeDecl);
-      } else if (pendingAnonymousRecord && (t.tag === 'struct' || t.tag === 'union')) {
-        completeRecords.add(t.name);
-        pendingAnonymousRecord = false;
       }
     } else if (decl.kind === DeclarationKind.ENUM) {
       const e = decl as CEnumDecl;
@@ -63,11 +64,28 @@ export function buildFfiTables(
       decl.kind === DeclarationKind.UNION
     ) {
       const r = decl as CStructDecl;
-      if (r.name) {
-        if (!r.isOpaque) completeRecords.add(r.name);
-      } else if (!r.isOpaque) {
-        pendingAnonymousRecord = true;
-      }
+      // SDL uses named tags (struct SDL_Texture { … }), so completeness is
+      // read off the named record directly. Anonymous records have no name
+      // to brand and don't appear in SDL's public pointer signatures.
+      if (r.name && !r.isOpaque) completeRecords.add(r.name);
+    }
+  }
+  for (const decl of header.declarations) {
+    if (decl.kind !== DeclarationKind.FUNCTION) continue;
+    const fn = decl as CFunctionDecl;
+    if (fn.returnType.pointerDepth < 1 || fn.returnType.isFunctionPointer) {
+      continue;
+    }
+    let t = fn.returnType;
+    for (let i = 0; aliases.has(t.name) && i < 8; i++) {
+      t = aliases.get(t.name)!;
+    }
+    if (
+      t.name !== 'void' &&
+      PRIMITIVES[t.name] === undefined &&
+      t.name !== 'char'
+    ) {
+      returnedPointees.add(t.name);
     }
   }
 
@@ -97,6 +115,7 @@ export function buildFfiTables(
             aliases,
             enumNames,
             completeRecords,
+            returnedPointees,
             handleTypes
           )
         : scalarTs(returnKind, 'return');
@@ -127,6 +146,7 @@ export function buildFfiTables(
               aliases,
               enumNames,
               completeRecords,
+              returnedPointees,
               handleTypes
             )
           : scalarTs(kind, 'param');

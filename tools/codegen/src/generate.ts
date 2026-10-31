@@ -14,10 +14,9 @@ import { scanNumericDefines } from './defines';
 import { dumpAst } from './ast-dump';
 import { includeDir, type TargetSpec } from './targets';
 import {
-  generateBunDefs,
+  generateDefs,
   generateFfiConstants,
   generateFunctions,
-  generateNodeDefs,
   generateTypes,
   summarizeUnsafe,
 } from './gen/index.ts';
@@ -53,15 +52,13 @@ export async function generateTarget(
     defines,
     `${pascalCase(spec.name)}Defines`
   );
-  const bunDefs = generateBunDefs(tables, spec.origin, `${spec.name}Defs`);
-  const nodeDefs = generateNodeDefs(tables, spec.origin, `${spec.name}Defs`);
+  const defs = generateDefs(tables, spec.origin, `${spec.name}Defs`);
   const types = generateTypes(tables, pascalCase(spec.name), spec.prefix);
   const functions = generateFunctions(tables, pascalCase(spec.name));
 
   const outputs: [string, string][] = [
     [join(outDir, 'constants.ts'), constants],
-    [join(outDir, 'defs-bun.ts'), bunDefs],
-    [join(outDir, 'defs-node.ts'), nodeDefs],
+    [join(outDir, 'defs.ts'), defs],
     [join(outDir, 'types.ts'), types],
     [join(outDir, 'functions.ts'), functions],
   ];
