@@ -12,6 +12,7 @@ import {
 } from "@tsgui/layout";
 import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
+import { createDragValueHandler } from "./slider/drag.ts";
 import {
   HANDLE_SIZE,
   TRACK_THICKNESS,
@@ -41,35 +42,29 @@ export function SliderBar(props: SliderBarProps): ReconcilableWidget {
   const min = props.min ?? 0;
   const max = props.max ?? 100;
 
-  /**
-   * Per-descriptor last notified value — event-fed moves recompute the
-   * same position several times before the app re-renders, and the stale
-   * `props.value` comparison alone can't dedupe those.
-   */
-  let lastApplied: number | null = null;
-
-  /** Track press → jump; handle press → drag from current (no jump). */
-  const applyPointerValue = (
-    x: number,
-    y: number,
-    node: { screenX: number; screenY: number; width: number; height: number }
-  ): void => {
-    if (props.disabled) return;
-
-    const next = pointerToValue({
-      coord: isHorizontal ? x : y,
-      start: isHorizontal ? node.screenX : node.screenY,
-      length: isHorizontal ? node.width : node.height,
-      flip: !isHorizontal,
-      min,
-      max,
-      step: props.step,
-    });
-
-    if (next === (lastApplied ?? props.value)) return;
-    lastApplied = next;
-    props.onChange?.(next);
-  };
+  const drag = createDragValueHandler({
+    disabled: props.disabled,
+    value: props.value,
+    onChange: props.onChange,
+    positionToValue: (x, y, node) =>
+      pointerToValue({
+        coord: isHorizontal ? x : y,
+        start: isHorizontal ? node.screenX : node.screenY,
+        length: isHorizontal ? node.width : node.height,
+        flip: !isHorizontal,
+        min,
+        max,
+        step: props.step,
+      }),
+    onHandle: (x, y, node) =>
+      isOnBarHandle({
+        x,
+        y,
+        node,
+        ratio: valueToRatio({ value: sliderValue(props), min, max }),
+        isVertical: !isHorizontal,
+      }),
+  });
 
   return createWidget({
     type: WidgetType.SliderBar,
@@ -122,37 +117,15 @@ export function SliderBar(props: SliderBarProps): ReconcilableWidget {
       ...handlers,
       onClick: (payload) => {
         onClick?.(payload);
-        if (props.disabled) return;
-        // Track click (not on the handle) jumps straight to the value.
-        const ratio = valueToRatio({ value: sliderValue(props), min, max });
-        const onHandle = isOnBarHandle({
-          x: payload.x,
-          y: payload.y,
-          node: payload.node,
-          ratio,
-          isVertical: !isHorizontal,
-        });
-        if (!onHandle) applyPointerValue(payload.x, payload.y, payload.node);
+        drag.onClick(payload);
       },
       onPointerDown: (payload) => {
         onPointerDown?.(payload);
-        if (props.disabled) return;
-        const ratio = valueToRatio({ value: sliderValue(props), min, max });
-        const onHandle = isOnBarHandle({
-          x: payload.x,
-          y: payload.y,
-          node: payload.node,
-          ratio,
-          isVertical: !isHorizontal,
-        });
-        if (!onHandle) applyPointerValue(payload.x, payload.y, payload.node);
-        payload.capturePointer?.();
+        drag.onPointerDown(payload);
       },
       onPointerMove: (payload) => {
         onPointerMove?.(payload);
-        // Drag applies only while captured — hover moves don't mutate.
-        if (!payload.captured) return;
-        applyPointerValue(payload.x, payload.y, payload.node);
+        drag.onPointerMove(payload);
       },
     },
   });

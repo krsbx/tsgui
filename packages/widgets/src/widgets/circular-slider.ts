@@ -4,10 +4,11 @@
  * press on the handle dot drags, captured moves apply. Controlled-only
  * (uncontrolled lands with the state milestone).
  */
-import { clamp, type LayoutNode } from "@tsgui/layout";
+import { clamp } from "@tsgui/layout";
 import { PointerEvents, WidgetType } from "@tsgui/layout";
 import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
+import { createDragValueHandler } from "./slider/drag.ts";
 import {
   DEFAULT_CIRCULAR_SIZE,
   DEFAULT_CIRCULAR_THICKNESS,
@@ -18,7 +19,7 @@ import {
   sliderValue,
 } from "./slider/geometry.ts";
 import type { CircularSliderProps } from "./slider/types.ts";
-import type { PointerPayload, ReconcilableWidget } from "../types.ts";
+import type { ReconcilableWidget } from "../types.ts";
 
 export type { CircularSliderProps };
 
@@ -40,33 +41,31 @@ export function CircularSlider(props: CircularSliderProps): ReconcilableWidget {
   const size = props.size ?? DEFAULT_CIRCULAR_SIZE;
   const thickness = props.thickness ?? DEFAULT_CIRCULAR_THICKNESS;
 
-  /** Per-descriptor dedupe — see SliderBar's lastApplied note. */
-  let lastApplied: number | null = null;
-
-  const applyPointerValue = (x: number, y: number, node: LayoutNode): void => {
-    if (props.disabled) return;
-
-    const geo = resolveGeometry(props, node);
-    const next = clamp({
-      value: pointerToAngleValue({ ...geo, pointerX: x, pointerY: y, step: props.step }),
-      min,
-      max,
-    });
-
-    if (next === (lastApplied ?? props.value)) return;
-    lastApplied = next;
-    props.onChange?.(next);
-  };
-
-  const onHandle = (payload: PointerPayload): boolean =>
-    isOnCircularHandle({
-      x: payload.x,
-      y: payload.y,
-      geo: resolveGeometry(props, payload.node),
-      value: sliderValue(props),
-      size,
-      thickness,
-    });
+  const drag = createDragValueHandler({
+    disabled: props.disabled,
+    value: props.value,
+    onChange: props.onChange,
+    positionToValue: (x, y, node) =>
+      clamp({
+        value: pointerToAngleValue({
+          ...resolveGeometry(props, node),
+          pointerX: x,
+          pointerY: y,
+          step: props.step,
+        }),
+        min,
+        max,
+      }),
+    onHandle: (x, y, node) =>
+      isOnCircularHandle({
+        x,
+        y,
+        geo: resolveGeometry(props, node),
+        value: sliderValue(props),
+        size,
+        thickness,
+      }),
+  });
 
   return createWidget({
     type: WidgetType.CircularSlider,
@@ -120,19 +119,15 @@ export function CircularSlider(props: CircularSliderProps): ReconcilableWidget {
       ...handlers,
       onClick: (payload) => {
         onClick?.(payload);
-        if (props.disabled) return;
-        if (!onHandle(payload)) applyPointerValue(payload.x, payload.y, payload.node);
+        drag.onClick(payload);
       },
       onPointerDown: (payload) => {
         onPointerDown?.(payload);
-        if (props.disabled) return;
-        if (!onHandle(payload)) applyPointerValue(payload.x, payload.y, payload.node);
-        payload.capturePointer?.();
+        drag.onPointerDown(payload);
       },
       onPointerMove: (payload) => {
         onPointerMove?.(payload);
-        if (!payload.captured) return;
-        applyPointerValue(payload.x, payload.y, payload.node);
+        drag.onPointerMove(payload);
       },
     },
   });
