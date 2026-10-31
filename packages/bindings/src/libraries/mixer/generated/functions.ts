@@ -99,8 +99,33 @@ export interface MixerFunctions {
   MIX_DecodeAudio(opts: { audiodecoder: MIX_AudioDecoder | null; buffer: AnyPointer | null; buflen: number; spec: ArrayBufferView | ArrayBuffer | null }): number;
 }
 
-export function createMixerFunctions(symbols: MixerSymbols): MixerFunctions {
-  return {
+/**
+ * Structural "Like" surface over MixerSymbols (or an extended
+ * symbols type S): every symbol must exist and take no more params
+ * than declared, but argument and return types stay open — so raw
+ * dlopen symbols from either backend (bun:ffi / node:ffi) fit without
+ * a cast.
+ */
+export type MixerSymbolsLike<S extends MixerSymbols = MixerSymbols> = {
+  [K in keyof S]: S[K] extends (...args: infer A) => any
+    ? (...args: { [I in keyof A]: any }) => unknown
+    : S[K];
+};
+
+/**
+ * Checked brand: view raw backend symbols as the branded S surface.
+ * Symbol keys are compile-checked; handle types are trusted.
+ */
+export function asMixerSymbols<S extends MixerSymbols = MixerSymbols>(symbols: MixerSymbolsLike<NoInfer<S>>): S {
+  return symbols as unknown as S;
+}
+
+export function createMixerFunctions(symbols: MixerSymbolsLike): MixerFunctions;
+export function createMixerFunctions<S extends MixerSymbols, U extends object>(symbols: MixerSymbolsLike<NoInfer<S>>, extension: (symbols: S) => U): MixerFunctions & U;
+export function createMixerFunctions<U extends object>(symbols: MixerSymbolsLike, extension: U extends Function ? never : U): MixerFunctions & U;
+export function createMixerFunctions(raw: MixerSymbolsLike, extension?: object | ((symbols: MixerSymbols) => object)): MixerFunctions {
+  const symbols = asMixerSymbols(raw);
+  const res = {
     MIX_Version: () => symbols.MIX_Version(),
     MIX_Init: () => symbols.MIX_Init(),
     MIX_Quit: () => symbols.MIX_Quit(),
@@ -190,5 +215,6 @@ export function createMixerFunctions(symbols: MixerSymbols): MixerFunctions {
     MIX_GetAudioDecoderProperties: (opts) => symbols.MIX_GetAudioDecoderProperties(opts.audiodecoder),
     MIX_GetAudioDecoderFormat: (opts) => symbols.MIX_GetAudioDecoderFormat(opts.audiodecoder, opts.spec),
     MIX_DecodeAudio: (opts) => symbols.MIX_DecodeAudio(opts.audiodecoder, opts.buffer, opts.buflen, opts.spec),
-  };
+  } satisfies MixerFunctions;
+  return extension ? Object.assign(res, typeof extension === 'function' ? extension(symbols) : extension) : res;
 }
