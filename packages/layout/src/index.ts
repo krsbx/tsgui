@@ -7,6 +7,8 @@ export {
   ROOT_FONT_SIZE,
 } from "./style-resolve.ts";
 export type {
+  Coordinate2D,
+  Size,
   Background,
   BoxShadow,
   GradientStop,
