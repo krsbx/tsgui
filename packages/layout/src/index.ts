@@ -1,0 +1,25 @@
+/** @tsgui/layout — CSS-like flexbox engine. Pure TypeScript, zero FFI. */
+export * from "./enums.ts";
+export {
+  layoutConstraints,
+  resolveSize,
+  resolveSpacing,
+  ROOT_FONT_SIZE,
+} from "./style-resolve.ts";
+export type {
+  Background,
+  BoxShadow,
+  GradientStop,
+  PseudoStateStyle,
+  ResolvedSpacing,
+  Spacing,
+  SpacingInput,
+  TextStyle,
+  ValidColor,
+  ViewStyle,
+  WidgetDescriptor,
+  WidgetProps,
+} from "./style.ts";
+export * from "./types.ts";
+export { layoutFlex } from "./layout.ts";
+export { listLayoutFlex, widgetLevelLayoutFlex } from "./processor/list.ts";
