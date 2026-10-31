@@ -3,7 +3,7 @@
  * Painter (GpuRenderer satisfies this structurally; tests use a recorder).
  */
 import type { TextStyle, ViewStyle } from "@tsgui/layout";
-import type { LayoutNode } from "@tsgui/layout";
+import { WidgetType, type LayoutNode } from "@tsgui/layout";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
@@ -99,7 +99,7 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
   paintBackground(ctx.gpu, node, style);
 
   switch (node.widget.type) {
-    case "Label": {
+    case WidgetType.Label: {
       const text = node.widget.props["text"];
       if (typeof text === "string") {
         const color = (node.widget.style as TextStyle | undefined)?.color ?? "#eceef5";
@@ -112,7 +112,7 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       }
       break;
     }
-    case "Image": {
+    case WidgetType.Image: {
       const texture = node.widget.props["texture"];
       if (texture) {
         ctx.gpu.drawTexture({

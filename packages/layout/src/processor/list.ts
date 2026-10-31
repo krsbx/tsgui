@@ -1,5 +1,5 @@
 /** List virtualization processor — ported from flying-pan. */
-import { WidgetType } from "../enums.ts";
+import { ListOrientation, WidgetType } from "../enums.ts";
 import type { WidgetDescriptor } from "../style.ts";
 import type { LayoutContext, LayoutNode } from "../types.ts";
 
@@ -38,7 +38,7 @@ export function listLayoutFlex(options: WidgetLevelLayoutFlexOptions): void {
   const props = node.props as unknown as ListProps;
   const { itemCount, itemSize, renderItem, overscan = 3, orientation } = props;
 
-  const isHorizontal = orientation === "horizontal";
+  const isHorizontal = orientation === ListOrientation.Horizontal;
   const scrollOffset = ctx.scrollOffsetOf(layoutNode);
   const viewport = isHorizontal ? contentWidth : contentHeight;
 

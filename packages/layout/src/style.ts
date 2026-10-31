@@ -1,4 +1,13 @@
 /** Style model + size/spacing resolution — ported from flying-pan's widget styles. */
+import type {
+  FlexAlign,
+  FlexDirection,
+  FlexJustify,
+  FlexWrap,
+  Overflow,
+  PointerEvents,
+  Position,
+} from "./enums.ts";
 import { SizeUnit } from "./enums.ts";
 
 export const SizeUnitValues = SizeUnit;
@@ -64,31 +73,15 @@ export interface ViewStyle {
   maxHeight?: SizeInput;
 
   // Flexbox
-  flexDirection?: "row" | "column";
-  justifyContent?:
-    | "flex-start"
-    | "flex-end"
-    | "center"
-    | "space-between"
-    | "space-around"
-    | "space-evenly";
-  alignItems?:
-    | "flex-start"
-    | "flex-end"
-    | "center"
-    | "stretch"
-    | "baseline";
-  alignSelf?:
-    | "flex-start"
-    | "flex-end"
-    | "center"
-    | "stretch"
-    | "baseline";
+  flexDirection?: FlexDirection;
+  justifyContent?: FlexJustify;
+  alignItems?: FlexAlign;
+  alignSelf?: FlexAlign;
   gap?: SizeInput;
   flex?: number;
   flexGrow?: number;
   flexShrink?: number;
-  flexWrap?: "nowrap" | "wrap";
+  flexWrap?: FlexWrap;
 
   // Visual (paint reads these; layout ignores them)
   backgroundColor?: ValidColor;
@@ -99,7 +92,7 @@ export interface ViewStyle {
   opacity?: number;
 
   // Position
-  position?: "relative" | "absolute";
+  position?: Position;
   x?: SizeInput;
   y?: SizeInput;
   top?: SizeInput;
@@ -108,7 +101,7 @@ export interface ViewStyle {
   left?: SizeInput;
 
   // Interaction (data only — dispatch is phase 4)
-  pointerEvents?: "auto" | "none";
+  pointerEvents?: PointerEvents;
   focusable?: boolean;
 
   _active?: PseudoStateStyle;
@@ -117,7 +110,7 @@ export interface ViewStyle {
   _checked?: PseudoStateStyle;
   _disabled?: PseudoStateStyle;
 
-  overflow?: "auto" | "scroll" | "visible" | "hidden";
+  overflow?: Overflow;
 
   boxShadow?: BoxShadow | BoxShadow[];
 }

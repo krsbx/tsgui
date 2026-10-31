@@ -1,4 +1,5 @@
 /** Widget descriptor factories — v1 set: View, Label, Image, Button. */
+import { WidgetType } from "@tsgui/layout";
 import type { TextStyle, ViewStyle } from "@tsgui/layout";
 import type { ReconcilableWidget } from "./types.ts";
 
@@ -7,7 +8,7 @@ export function view(opts: {
   children?: ReconcilableWidget[];
   key?: string | number;
 }): ReconcilableWidget {
-  return { type: "View", props: {}, style: opts.style, children: opts.children, key: opts.key };
+  return { type: WidgetType.View, props: {}, style: opts.style, children: opts.children, key: opts.key };
 }
 
 export function label(opts: {
@@ -15,7 +16,7 @@ export function label(opts: {
   style?: TextStyle;
   key?: string | number;
 }): ReconcilableWidget {
-  return { type: "Label", props: { text: opts.text }, style: opts.style, key: opts.key };
+  return { type: WidgetType.Label, props: { text: opts.text }, style: opts.style, key: opts.key };
 }
 
 export function image(opts: {
@@ -26,7 +27,7 @@ export function image(opts: {
   key?: string | number;
 }): ReconcilableWidget {
   return {
-    type: "Image",
+    type: WidgetType.Image,
     props: { src: opts.src, width: opts.width, height: opts.height },
     style: opts.style,
     key: opts.key,
@@ -40,7 +41,7 @@ export function button(opts: {
   key?: string | number;
 }): ReconcilableWidget {
   return {
-    type: "Button",
+    type: WidgetType.Button,
     props: { text: opts.text, onPress: opts.onPress },
     style: opts.style,
     key: opts.key,

@@ -86,6 +86,13 @@ export const PointerEvents = {
 
 export type PointerEvents = (typeof PointerEvents)[keyof typeof PointerEvents];
 
+export const ListOrientation = {
+  Horizontal: "horizontal",
+  Vertical: "vertical",
+} as const;
+
+export type ListOrientation = (typeof ListOrientation)[keyof typeof ListOrientation];
+
 export const Overflow = {
   Auto: "auto",
   Scroll: "scroll",

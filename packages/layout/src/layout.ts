@@ -3,7 +3,7 @@
  * Ported from flying-pan's layout/layout with the renderer context
  * replaced by the minimal injected LayoutContext.
  */
-import { FlexWrap } from "./enums.ts";
+import { FlexDirection, FlexWrap, Overflow } from "./enums.ts";
 import { resolveSize, resolveSpacing } from "./style-resolve.ts";
 import { positionAbsolute } from "./absolute.ts";
 import { measureChildsComponent } from "./measurement.ts";
@@ -17,7 +17,7 @@ export const layoutFlex: LayoutFlexFn = function (options) {
   const style = node.style ?? {};
 
   const padding = resolveSpacing(style.padding, availableWidth);
-  const isRow = style.flexDirection !== "column";
+  const isRow = style.flexDirection !== FlexDirection.Column;
 
   const hasExplicitWidth = style.width != null;
   const hasExplicitHeight = style.height != null;
@@ -52,7 +52,8 @@ export const layoutFlex: LayoutFlexFn = function (options) {
   // Child scroll accumulation: scrollable nodes shift their children's
   // screen-space positions by their committed scroll offset.
   const overflow = style.overflow;
-  const isScrollable = overflow === "scroll" || overflow === "auto";
+  const isScrollable =
+    overflow === Overflow.Scroll || overflow === Overflow.Auto;
 
   const childAccumulated = { ...scrollAccumulated };
 
