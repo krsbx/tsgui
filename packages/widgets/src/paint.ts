@@ -21,9 +21,12 @@ import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
 import { paintTextInput } from "./paint/text-input.ts";
+import {
+  paintCircularProgress,
+  paintProgressBar,
+} from "./paint/progress/index.ts";
 import { paintBackground, paintBorder } from "./paint/fill.ts";
 import { paintMeter } from "./paint/meter.ts";
-import { paintCircularProgress, paintProgressBar } from "./paint/progress.ts";
 import { paintRadio } from "./paint/radio.ts";
 import { paintToggle } from "./paint/toggle.ts";
 import type { InteractionStates } from "./style-resolve.ts";

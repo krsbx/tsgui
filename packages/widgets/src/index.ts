@@ -24,7 +24,7 @@ export {
   ProgressBar,
   type ProgressBarProps,
   type ProgressProps,
-} from "./widgets/progress.ts";
+} from "./widgets/progress/index.ts";
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
@@ -103,4 +103,7 @@ export {
 } from "./paint/fill.ts";
 export { formatValueLabel, paintInlineValueLabel } from "./paint/label.ts";
 export { paintMeter, resolveMeterColor } from "./paint/meter.ts";
-export { paintCircularProgress, paintProgressBar } from "./paint/progress.ts";
+export {
+  paintCircularProgress,
+  paintProgressBar,
+} from "./paint/progress/index.ts";
