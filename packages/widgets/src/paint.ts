@@ -15,7 +15,7 @@ import type {
   TextureDrawOptions,
 } from "@tsgui/gpu";
 import type { Size } from "@tsgui/layout";
-import { type LayoutNode, type ViewStyle, WidgetType } from "@tsgui/layout";
+import { type LayoutNode, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
@@ -26,11 +26,12 @@ import {
   paintProgressBar,
 } from "./paint/progress/index.ts";
 import { paintBackground, paintBorder } from "./paint/shape.ts";
+import { paintShadow } from "./paint/shadow.ts";
 import { paintMeter } from "./paint/meter.ts";
 import { paintRadio } from "./paint/radio.ts";
 import { paintToggle } from "./paint/toggle.ts";
 import type { InteractionStates } from "./style-resolve.ts";
-import { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
+import { parseColor, resolveStyle } from "./style-resolve.ts";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
@@ -69,44 +70,6 @@ const STATES_NONE: InteractionStates = {
   checked: false,
   disabled: false,
 };
-
-/**
- * Stacked rounded-rect layers approximate the Gaussian falloff with the
- * existing primitive (flying-pan's documented approach — a Renderer-level
- * blur lands with the SDF pass).
- */
-function paintShadow(
-  gpu: Painter,
-  rect: Rect,
-  style: ViewStyle,
-  radius: number | undefined
-): void {
-  if (!style.boxShadow) return;
-
-  const shadows = Array.isArray(style.boxShadow)
-    ? style.boxShadow
-    : [style.boxShadow];
-
-  for (const shadow of shadows) {
-    const blur = shadow.blur ?? 0;
-    const spread = shadow.spread ?? 0;
-    const layers = 3;
-    const color = parseColor(shadow.color);
-
-    for (let i = layers; i >= 1; i--) {
-      const grow = (blur + spread) * (i / layers);
-      gpu.fillRoundedRect({
-        x: rect.x + (shadow.x ?? 0) - grow,
-        y: rect.y + (shadow.y ?? 0) - grow,
-        w: rect.w + grow * 2,
-        h: rect.h + grow * 2,
-        // Layers stay concentric with the source rect's corners.
-        radius: (radius ?? 0) + grow,
-        color: colorWithOpacity(color, i / layers),
-      });
-    }
-  }
-}
 
 /** Widgets whose checked flag comes from props (Radio uses `selected`). */
 const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([
