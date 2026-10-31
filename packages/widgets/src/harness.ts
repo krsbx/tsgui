@@ -20,11 +20,23 @@ import type { InteractionStates, Painter, TextPainter } from "./paint.ts";
 import { paintTree } from "./paint.ts";
 import type { ReconcilableWidget } from "./types.ts";
 
+/** Recorded draw-call discriminators. */
+export const PaintOpKind = {
+  Rect: "rect",
+  RoundedRect: "rrect",
+  Texture: "tex",
+  Text: "text",
+  Arc: "arc",
+  Ring: "ring",
+} as const;
+
+export type PaintOpKind = (typeof PaintOpKind)[keyof typeof PaintOpKind];
+
 /** One recorded draw call. Colors are packed u32s — see `parseColor`. */
 export type PaintOp =
-  | { op: "rect"; x: number; y: number; w: number; h: number; color: number }
+  | { op: PaintOpKind; x: number; y: number; w: number; h: number; color: number }
   | {
-      op: "rrect";
+      op: PaintOpKind;
       x: number;
       y: number;
       w: number;
@@ -32,8 +44,25 @@ export type PaintOp =
       radius: number;
       color: number;
     }
-  | { op: "tex"; texture: unknown; x: number; y: number; w: number; h: number }
-  | { op: "text"; x: number; y: number; text: string; tint: number };
+  | {
+      op: PaintOpKind;
+      texture: unknown;
+      x: number;
+      y: number;
+      w: number;
+      h: number;
+    }
+  | { op: PaintOpKind; x: number; y: number; text: string; tint: number }
+  | {
+      op: PaintOpKind;
+      cx: number;
+      cy: number;
+      radius: number;
+      innerRadius?: number;
+      startAngle: number;
+      endAngle: number;
+      color: number;
+    };
 
 export interface HeadlessOptions {
   width: number;
@@ -88,14 +117,16 @@ export function renderHeadless(
 
   const ops: PaintOp[] = [];
   const gpu: Painter = {
-    fillRect: (o) => ops.push({ op: "rect", ...o }),
-    fillRoundedRect: (o) => ops.push({ op: "rrect", ...o }),
-    drawTexture: (o) => ops.push({ op: "tex", ...o }),
+    fillRect: (o) => ops.push({ op: PaintOpKind.Rect, ...o }),
+    fillRoundedRect: (o) => ops.push({ op: PaintOpKind.RoundedRect, ...o }),
+    drawTexture: (o) => ops.push({ op: PaintOpKind.Texture, ...o }),
+    fillArc: (o) => ops.push({ op: PaintOpKind.Arc, ...o }),
+    fillRing: (o) => ops.push({ op: PaintOpKind.Ring, ...o }),
   };
   const font: TextPainter = {
     draw: (_gpu, o) =>
       ops.push({
-        op: "text",
+        op: PaintOpKind.Text,
         x: o.x,
         y: o.y,
         text: o.text,

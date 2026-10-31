@@ -28,15 +28,19 @@ import {
   FlexDirection,
   layoutFlex,
   PointerEvents,
+  ProgressValueType,
   type LayoutContext,
   type LayoutNode,
 } from "@tsgui/layout";
 import {
   Button,
+  CircularProgress,
   Image,
   Label,
+  Meter,
   paintTree,
   Palette,
+  ProgressBar,
   Reconciler,
   StateStore,
   View,
@@ -184,6 +188,37 @@ function buildTree(): ReconcilableWidget {
         ],
       }),
 
+      // progress + meters
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 16, alignItems: FlexAlign.Center },
+        children: [
+          ProgressBar({
+            value: 72,
+            min: 0,
+            max: 100,
+            style: { width: 160, height: 6, borderRadius: 3 },
+            showValue: ProgressValueType.Percent,
+          }),
+          ProgressBar({
+            value: 6,
+            min: 0,
+            max: 10,
+            steps: 10,
+            stepGap: 3,
+            style: { width: 100, height: 8 },
+          }),
+          CircularProgress({ value: 0.66, min: 0, max: 1, size: 40 }),
+        ],
+      }),
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 16, alignItems: FlexAlign.Center },
+        children: [
+          Meter({ value: 46, style: { width: 120, height: 6 }, showValue: ProgressValueType.Percent }),
+          Meter({ value: 14, min: 0, max: 100, low: 25, high: 75, optimum: 90, style: { width: 120, height: 6 } }),
+          CircularProgress({ value: 0.3, min: 0, max: 1, size: 40, thickness: 1 }),
+        ],
+      }),
+
       // image row
       View({
         style: { flexDirection: FlexDirection.Row, gap: 12 },
@@ -220,10 +255,7 @@ const layoutCtx: LayoutContext = {
   focusableNodes: [],
   scrollOffsetOf: () => ({ x: 0, y: 0 }),
   getStableId: reconciler.getStableId,
-  measureText: (text) => {
-    const m = font.measure(text);
-    return { width: m.w, height: m.h };
-  },
+  measureText: (text) => font.measure(text),
   getImageSize: () => null, // gallery images carry explicit dimensions
 };
 

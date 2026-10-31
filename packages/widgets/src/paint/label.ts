@@ -1,0 +1,64 @@
+/** Inline value labels — flying-pan's renderer/paint/text value branch. */
+import { ProgressValueType, type TextStyle } from "@tsgui/layout";
+import { Palette } from "../design.ts";
+import { parseColor } from "../style-resolve.ts";
+import type { Painter, TextPainter } from "../paint.ts";
+
+/** Auto label from a value; `null` when there's nothing to show. */
+export function formatValueLabel(options: {
+  value?: number;
+  min?: number;
+  max?: number;
+  format?: ProgressValueType;
+}): string | null {
+  const { value, min, max, format } = options;
+
+  if (format === undefined || value === undefined) return null;
+
+  const lo = min ?? 0;
+  const hi = max ?? 1;
+  const span = hi - lo;
+  const ratio = span === 0 ? 0 : (value - lo) / span;
+
+  if (format === ProgressValueType.Percent) {
+    return `${Math.round(ratio * 100)}%`;
+  }
+
+  return `${value}/${hi}`;
+}
+
+export interface InlineValueLabelOptions {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  /** Explicit text — wins over `showValue`. */
+  label?: string;
+  labelStyle?: TextStyle;
+  value?: number;
+  min?: number;
+  max?: number;
+  showValue?: ProgressValueType;
+}
+
+/** Text centered on a widget's box (progress fills, meters). */
+export function paintInlineValueLabel(
+  gpu: Painter,
+  font: TextPainter,
+  options: InlineValueLabelOptions
+): void {
+  const text = options.label ?? formatValueLabel(options);
+  if (!text) return;
+
+  const measured = font.measure?.(text) ?? {
+    width: text.length * 8,
+    height: 18,
+  };
+
+  font.draw(gpu, {
+    x: options.x + (options.w - measured.width) / 2,
+    y: options.y + (options.h - measured.height) / 2,
+    text,
+    tint: parseColor(options.labelStyle?.color ?? Palette.text),
+  });
+}

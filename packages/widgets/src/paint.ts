@@ -1,36 +1,45 @@
 /**
  * Paint bridge — walks a LayoutNode tree and issues draw calls in
  * flying-pan's proven order: shadow → border → background → per-widget
- * painter → children. Phase 4's dispatch feeds real interaction states.
+ * painter → children. Per-widget painters live in ./paint/*.ts.
  *
  * The Painter surface is STRUCTURAL and reuses @tsgui/gpu's option types,
  * so GpuRenderer satisfies it while headless tests mock it.
  */
 import { WidgetType, type LayoutNode, type ViewStyle } from "@tsgui/layout";
 import type {
+  ArcOptions,
   Rect,
   RectOptions,
+  RingOptions,
   TextureDrawOptions,
 } from "@tsgui/gpu";
 import type { TextDrawOptions } from "@tsgui/gpu";
-import {
-  colorWithOpacity,
-  parseColor,
-  resolveStyle,
-  type InteractionStates,
-} from "./style-resolve.ts";
+import type { InteractionStates, } from "./style-resolve.ts";
+import { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
 import { Palette } from "./design.ts";
+import { paintBackground, paintBorder } from "./paint/fill.ts";
+import { paintMeter } from "./paint/meter.ts";
+import {
+  paintCircularProgress,
+  paintProgressBar,
+} from "./paint/progress.ts";
+import type { Size } from "@tsgui/layout";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
   fillRect(opts: RectOptions): void;
   fillRoundedRect(opts: RectOptions & { radius: number }): void;
+  fillArc(opts: ArcOptions): void;
+  fillRing(opts: RingOptions): void;
   drawTexture(opts: TextureDrawOptions): void;
 }
 
 export interface TextPainter {
   /** Queues a text run at x/y with the packed tint. */
   draw(gpu: Painter, opts: TextDrawOptions): void;
+  /** Rendered size of a string — inline labels center with it. */
+  measure?(text: string): Size;
 }
 
 export interface PaintContext {
@@ -88,63 +97,6 @@ function paintShadow(
   }
 }
 
-/**
- * One shape for both corners paths — square `fillRect` when no radius,
- * concentric rounded fan otherwise. Border and background share it.
- */
-function fillShape(
-  gpu: Painter,
-  rect: Rect,
-  radius: number | undefined,
-  color: number
-): void {
-  if (radius && radius > 0) {
-    gpu.fillRoundedRect({ ...rect, radius, color });
-  } else {
-    gpu.fillRect({ ...rect, color });
-  }
-}
-
-/** Fill-only ring: a slightly larger shape in the border color, painted first. */
-function paintBorder(
-  gpu: Painter,
-  rect: Rect,
-  style: ViewStyle,
-  radius: number | undefined
-): void {
-  const bw = style.borderWidth;
-  if (!bw || !style.borderColor) return;
-
-  fillShape(
-    gpu,
-    {
-      x: rect.x - bw / 2,
-      y: rect.y - bw / 2,
-      w: rect.w + bw,
-      h: rect.h + bw,
-    },
-    radius ? radius + bw / 2 : undefined,
-    parseColor(style.borderColor)
-  );
-  // The background paints over the inner half of the border — net stroke = bw/2.
-}
-
-function paintBackground(
-  gpu: Painter,
-  rect: Rect,
-  style: ViewStyle,
-  radius: number | undefined
-): void {
-  if (!style.backgroundColor) return;
-
-  fillShape(
-    gpu,
-    rect,
-    radius,
-    colorWithOpacity(parseColor(style.backgroundColor), style.opacity ?? 1)
-  );
-}
-
 function paintNode(ctx: PaintContext, node: LayoutNode): void {
   const base = node.widget.style ?? {};
   const style = resolveStyle(base, ctx.statesOf?.(node) ?? STATES_NONE);
@@ -184,6 +136,15 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       }
       break;
     }
+    case WidgetType.ProgressBar:
+      paintProgressBar(ctx, node);
+      break;
+    case WidgetType.CircularProgress:
+      paintCircularProgress(ctx, node);
+      break;
+    case WidgetType.Meter:
+      paintMeter(ctx, node);
+      break;
     default:
       break;
   }

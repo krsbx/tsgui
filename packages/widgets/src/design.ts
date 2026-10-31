@@ -34,6 +34,15 @@ export const Palette = {
 
 export type PaletteColor = keyof typeof Palette;
 
+/** Meter health zones — values index {@link Palette}. */
+export const MeterZone = {
+  Success: "success",
+  Warning: "warning",
+  Error: "error",
+} as const;
+
+export type MeterZone = (typeof MeterZone)[keyof typeof MeterZone];
+
 export const Metrics = {
   borderWidth: 1,
   borderWidthThick: 2,
