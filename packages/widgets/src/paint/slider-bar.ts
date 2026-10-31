@@ -8,7 +8,8 @@ import {
 import { Metrics, Palette } from "../design.ts";
 import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground, paintBorder, resolveFillColorClamped } from "./fill.ts";
+import { paintBackground, paintBorder } from "./shape.ts";
+import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintInlineValueLabel } from "./label.ts";
 import {
   HANDLE_SIZE,

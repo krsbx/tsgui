@@ -25,7 +25,7 @@ import {
   paintCircularProgress,
   paintProgressBar,
 } from "./paint/progress/index.ts";
-import { paintBackground, paintBorder } from "./paint/fill.ts";
+import { paintBackground, paintBorder } from "./paint/shape.ts";
 import { paintMeter } from "./paint/meter.ts";
 import { paintRadio } from "./paint/radio.ts";
 import { paintToggle } from "./paint/toggle.ts";

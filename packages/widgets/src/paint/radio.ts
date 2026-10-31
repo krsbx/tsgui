@@ -2,7 +2,7 @@
 import type { LayoutNode } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
-import { paintBackground, paintBorder } from "./fill.ts";
+import { paintBackground, paintBorder } from "./shape.ts";
 import { propsOf } from "../types.ts";
 import type { RadioProps } from "../widgets/radio.ts";
 

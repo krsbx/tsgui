@@ -92,15 +92,19 @@ export {
 // Paint modules — per-widget painters + shared fill/label helpers
 export {
   type ContinuousFillOptions,
+  fillRatio,
+  paintContinuousFill,
+  paintSteppedFill,
+} from "./paint/fill.ts";
+export {
   fillShape,
   paintBackground,
   paintBorder,
-  paintContinuousFill,
-  paintSteppedFill,
+} from "./paint/shape.ts";
+export {
   resolveFillColor,
   resolveFillColorClamped,
-  type SteppedFillOptions,
-} from "./paint/fill.ts";
+} from "./paint/color-stops.ts";
 export { formatValueLabel, paintInlineValueLabel } from "./paint/label.ts";
 export { paintMeter, resolveMeterColor } from "./paint/meter.ts";
 export {

@@ -1,105 +1,16 @@
 /**
- * Shared fill painters — flying-pan's renderer/paint/fill + color-stop
- * resolution, driven by the structural Painter surface instead of Window.
+ * Value-fill painters — the sub-rect (or segments) of a track that
+ * represent the current value, ported from flying-pan's
+ * renderer/paint/fill. Orientation/direction aware. Walk primitives
+ * (border/background) live in shape.ts; color-stop math in
+ * color-stops.ts.
  */
-import type { Rect } from "@tsgui/gpu";
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
 import { valueToRatio } from "@tsgui/layout";
-import { type ColorStop, Palette } from "../design.ts";
-import { colorWithOpacity, parseColor } from "../style-resolve.ts";
+import { Palette, type ColorStop } from "../design.ts";
 import type { Painter } from "../paint.ts";
-
-/**
- * One shape for both corner paths — square `fillRect` when no radius,
- * concentric rounded fan otherwise. Border and background share it.
- */
-export function fillShape(
-  gpu: Painter,
-  rect: Rect,
-  radius: number | undefined,
-  color: number
-): void {
-  if (radius && radius > 0) {
-    gpu.fillRoundedRect({ ...rect, radius, color });
-  } else {
-    gpu.fillRect({ ...rect, color });
-  }
-}
-
-/** Fill-only ring: a slightly larger shape in the border color, painted first. */
-export function paintBorder(
-  gpu: Painter,
-  rect: Rect,
-  style: ViewStyle,
-  radius: number | undefined
-): void {
-  const bw = style.borderWidth;
-  if (!bw || !style.borderColor) return;
-
-  fillShape(
-    gpu,
-    {
-      x: rect.x - bw / 2,
-      y: rect.y - bw / 2,
-      w: rect.w + bw,
-      h: rect.h + bw,
-    },
-    radius ? radius + bw / 2 : undefined,
-    parseColor(style.borderColor)
-  );
-  // The background paints over the inner half of the border — net stroke = bw/2.
-}
-
-export function paintBackground(
-  gpu: Painter,
-  rect: Rect,
-  style: ViewStyle,
-  radius: number | undefined
-): void {
-  if (!style.backgroundColor) return;
-
-  fillShape(
-    gpu,
-    rect,
-    radius,
-    colorWithOpacity(parseColor(style.backgroundColor), style.opacity ?? 1)
-  );
-}
-
-export function resolveFillColor(options: {
-  ratio: number;
-  fillStyle?: ViewStyle;
-  colorStops?: ColorStop[];
-}): ValidColor {
-  const { ratio, fillStyle, colorStops } = options;
-
-  if (colorStops && colorStops.length > 0) {
-    const sorted = [...colorStops].sort((a, b) => a.at - b.at);
-    let picked = sorted[0]!.color;
-
-    for (const stop of sorted) {
-      if (ratio >= stop.at) picked = stop.color;
-      else break;
-    }
-
-    return picked;
-  }
-
-  return fillStyle?.backgroundColor ?? Palette.accent;
-}
-
-export function resolveFillColorClamped(options: {
-  ratio: number;
-  fillStyle?: ViewStyle;
-  colorStops?: ColorStop[];
-}): ValidColor {
-  const ratio = Math.max(0, Math.min(1, options.ratio));
-  return resolveFillColor({
-    ratio,
-    fillStyle: options.fillStyle,
-    colorStops: options.colorStops,
-  });
-}
+import { paintBackground, paintBorder } from "./shape.ts";
+import { resolveFillColorClamped } from "./color-stops.ts";
 
 export interface ContinuousFillOptions {
   gpu: Painter;
@@ -222,3 +133,7 @@ export function paintSteppedFill(options: SteppedFillOptions): void {
 export function fillRatio(props: { value?: number; min?: number; max?: number }): number {
   return valueToRatio({ value: props.value ?? 0, min: props.min ?? 0, max: props.max ?? 1 });
 }
+
+// Re-exports kept so existing importers of paint/fill keep one surface.
+export { resolveFillColor, resolveFillColorClamped } from "./color-stops.ts";
+export type { ColorStop } from "../design.ts";

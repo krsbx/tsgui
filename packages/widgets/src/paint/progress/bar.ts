@@ -12,8 +12,8 @@ import {
   fillRatio,
   paintContinuousFill,
   paintSteppedFill,
-  resolveFillColorClamped,
 } from "../fill.ts";
+import { resolveFillColorClamped } from "../color-stops.ts";
 import { paintInlineValueLabel } from "../label.ts";
 
 /**

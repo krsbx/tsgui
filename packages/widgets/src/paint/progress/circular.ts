@@ -9,7 +9,8 @@ import { colorWithOpacity, parseColor } from "../../style-resolve.ts";
 import type { PaintContext } from "../../paint.ts";
 import { propsOf } from "../../types.ts";
 import type { CircularProgressProps } from "../../widgets/progress/types.ts";
-import { fillRatio, resolveFillColorClamped } from "../fill.ts";
+import { fillRatio } from "../fill.ts";
+import { resolveFillColorClamped } from "../color-stops.ts";
 import { paintInlineValueLabel } from "../label.ts";
 
 /** CSS color string + opacity → packed u32 for the arc primitives. */
