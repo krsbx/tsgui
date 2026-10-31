@@ -175,4 +175,40 @@ describe("layoutFlex (headless)", () => {
       expect(child.stableId).toBeLessThan(0);
     }
   });
+
+  test("nested auto containers size to content (web intrinsic sizing)", () => {
+    const ctx = makeContext();
+
+    // Row (auto) → column group (auto) → three fixed-size items; the row
+    // must occupy the group's content height so the next sibling lands
+    // BELOW it, not overlapping (the radio-group-over-slider bug).
+    const tree = view(
+      { width: 400, height: 400, flexDirection: FlexDirection.Column, gap: 16, padding: 24 },
+      [
+        view({ flexDirection: FlexDirection.Row, gap: 24, alignItems: "center" }, [
+          view({ width: 16, height: 16 }),
+          view({ flexDirection: FlexDirection.Column, gap: 8 }, [
+            view({ width: 16, height: 18 }),
+            view({ width: 16, height: 18 }),
+            view({ width: 16, height: 18 }),
+          ]),
+        ]),
+        view({ width: 100, height: 24, backgroundColor: "#333" }),
+      ]
+    );
+
+    const root = layoutFlex({ node: tree, x: 0, y: 0, availableWidth: 400, availableHeight: 400, ctx });
+    const row = root.children[0]!;
+    const sibling = root.children[1]!;
+
+    // Group: 3×18 + 2×8 gap = 70 tall, widest item 16 wide.
+    const group = row.children![1]!;
+    expect(group.height).toBe(70);
+    expect(group.width).toBe(16);
+
+    // Row fits its tallest child and the sibling clears it.
+    expect(row.height).toBe(70);
+    expect(row.width).toBe(16 + 24 + 16);
+    expect(sibling.y).toBe(24 + 70 + 16);
+  });
 });

@@ -1,8 +1,13 @@
 /** Child measurement + wrap + justify calculation — ported from flying-pan. */
 import { crossMargin, mainMargin, mainSize } from "./axis.ts";
-import type { WidgetDescriptor } from "./style.ts";
-import { clamp, resolveConstraint, resolveSpacing } from "./style-resolve.ts";
-import { FlexAlign, FlexJustify, Position, SpacingType } from "./enums.ts";
+import type { Size, WidgetDescriptor } from "./style.ts";
+import {
+  clamp,
+  resolveConstraint,
+  resolveSize,
+  resolveSpacing,
+} from "./style-resolve.ts";
+import { FlexAlign, FlexDirection, FlexJustify, Position, SpacingType } from "./enums.ts";
 import type {
   CalculateMainContentSizeOptions,
   CalculateMainContentSizeResult,
@@ -13,6 +18,80 @@ import type {
   WrapMeasurementsOptions,
 } from "./types.ts";
 import { resolveChildSize } from "./resolver.ts";
+import type { LayoutContext } from "./types.ts";
+
+/**
+ * Intrinsic size of a widget, recursing into auto-sized containers — the
+ * web intrinsic-sizing model. A container without explicit dimensions is
+ * as big as its content, computed bottom-up BEFORE positioning; without
+ * this, a nested auto container measures 0 and its siblings overlap it.
+ *
+ * Leaves resolve through {@link resolveChildSize} (style + per-widget
+ * intrinsic resolution); containers fill missing dimensions from their
+ * flow children (main axis sums + gaps, cross axis takes the largest),
+ * plus their own padding. Absolute children are excluded, and
+ * grow/shrink distribution is ignored — intrinsic size is the
+ * pre-flex content size, matching CSS min-content behavior.
+ */
+function intrinsicSize(options: {
+  widget: WidgetDescriptor;
+  ctx: LayoutContext;
+  parentWidth: number;
+  parentHeight: number;
+}): Size {
+  const { widget, ctx, parentWidth, parentHeight } = options;
+  const size = resolveChildSize({ widget, ctx, parentWidth, parentHeight });
+
+  const needsWidth = size.width === 0;
+  const needsHeight = size.height === 0;
+  if ((!needsWidth && !needsHeight) || widget.children === undefined) {
+    return size;
+  }
+
+  const style = widget.style ?? {};
+  const isRow = style.flexDirection !== FlexDirection.Column;
+  const padding = resolveSpacing(style.padding, parentWidth);
+  const gap = resolveSize(style.gap, size.width || parentWidth);
+
+  let maxH = 0;
+  let sumH = 0;
+  let maxW = 0;
+  let sumW = 0;
+  let flowCount = 0;
+
+  for (const child of widget.children) {
+    if (child.style?.position === Position.Absolute) continue;
+    flowCount++;
+
+    const childSize = intrinsicSize({
+      widget: child,
+      ctx,
+      parentWidth: size.width || parentWidth,
+      parentHeight: size.height || parentHeight,
+    });
+    const margin = resolveSpacing(child.style?.[SpacingType.Margin], parentWidth);
+
+    const h = childSize.height + margin.top + margin.bottom;
+    const w = childSize.width + margin.left + margin.right;
+    maxH = Math.max(maxH, h);
+    sumH += h;
+    maxW = Math.max(maxW, w);
+    sumW += w;
+  }
+
+  if (flowCount === 0) return size;
+
+  const gaps = flowCount > 1 ? gap * (flowCount - 1) : 0;
+  if (needsHeight) {
+    size.height =
+      (isRow ? maxH : sumH + gaps) + padding.top + padding.bottom;
+  }
+  if (needsWidth) {
+    size.width = (isRow ? sumW + gaps : maxW) + padding.left + padding.right;
+  }
+
+  return size;
+}
 
 export function measureChildsComponent(
   options: MeasureChildsComponentOptions
@@ -34,9 +113,9 @@ export function measureChildsComponent(
     const flex = isAbsolute ? 0 : flexValue;
     const flexShrink = isAbsolute ? 0 : flexShrinkValue;
 
-    let { height, width } = resolveChildSize({
-      ctx: options.ctx,
+    let { height, width } = intrinsicSize({
       widget: child,
+      ctx: options.ctx,
       parentHeight,
       parentWidth,
     });

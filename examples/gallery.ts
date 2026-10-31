@@ -26,34 +26,34 @@ import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@tsgui/gpu";
 import {
   FlexAlign,
   FlexDirection,
-  layoutFlex,
-  ProgressValueType,
   type LayoutContext,
+  layoutFlex,
   type LayoutNode,
+  ProgressValueType,
 } from "@tsgui/layout";
 import {
   Button,
   Checkbox,
-  CircularSlider,
   CircularProgress,
+  CircularSlider,
   Image,
   Label,
   Meter,
+  type MouseButton,
   paintTree,
   Palette,
   PointerDispatcher,
+  type PointerInputEvent,
   PointerInputKind,
   ProgressBar,
   Radio,
   RadioGroup,
-  SliderBar,
+  type ReconcilableWidget,
   Reconciler,
+  SliderBar,
   StateStore,
   Toggle,
   View,
-  type MouseButton,
-  type PointerInputEvent,
-  type ReconcilableWidget,
 } from "@tsgui/widgets";
 
 const selftest = process.argv.includes("--selftest");
@@ -164,9 +164,14 @@ function buildTree(): ReconcilableWidget {
       View({
         style: { flexDirection: FlexDirection.Row, gap: 12 },
         children: [
-          Button({ children: [Label({ text: "Default" })], onClick: increment }),
           Button({
-            children: [Label({ text: "Accent", style: { color: Palette.textOnAccent } })],
+            children: [Label({ text: "Default" })],
+            onClick: increment,
+          }),
+          Button({
+            children: [
+              Label({ text: "Accent", style: { color: Palette.textOnAccent } }),
+            ],
             style: {
               backgroundColor: Palette.accent,
               borderColor: Palette.accent,
@@ -187,7 +192,11 @@ function buildTree(): ReconcilableWidget {
 
       // controls — click dispatch through the pointer dispatcher
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 24,
+          alignItems: FlexAlign.Center,
+        },
         children: [
           Checkbox({
             checked: agree,
@@ -229,7 +238,11 @@ function buildTree(): ReconcilableWidget {
 
       // sliders — drag through the dispatcher's press capture
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 24,
+          alignItems: FlexAlign.Center,
+        },
         children: [
           SliderBar({
             value: volume,
@@ -281,7 +294,11 @@ function buildTree(): ReconcilableWidget {
 
       // progress + meters
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 16, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 16,
+          alignItems: FlexAlign.Center,
+        },
         children: [
           ProgressBar({
             value: 72,
@@ -302,11 +319,33 @@ function buildTree(): ReconcilableWidget {
         ],
       }),
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 16, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 16,
+          alignItems: FlexAlign.Center,
+        },
         children: [
-          Meter({ value: 46, style: { width: 120, height: 6 }, showValue: ProgressValueType.Percent }),
-          Meter({ value: 14, min: 0, max: 100, low: 25, high: 75, optimum: 90, style: { width: 120, height: 6 } }),
-          CircularProgress({ value: 0.3, min: 0, max: 1, size: 40, thickness: 1 }),
+          Meter({
+            value: 46,
+            style: { width: 120, height: 6 },
+            showValue: ProgressValueType.Percent,
+          }),
+          Meter({
+            value: 14,
+            min: 0,
+            max: 100,
+            low: 25,
+            high: 75,
+            optimum: 90,
+            style: { width: 120, height: 6 },
+          }),
+          CircularProgress({
+            value: 0.3,
+            min: 0,
+            max: 1,
+            size: 40,
+            thickness: 1,
+          }),
         ],
       }),
 
