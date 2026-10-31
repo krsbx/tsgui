@@ -46,6 +46,25 @@
         "@types/node": "^26.6.6",
       },
     },
+    "packages/layout": {
+      "name": "@tsgui/layout",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
+    "packages/widgets": {
+      "name": "@tsgui/widgets",
+      "version": "0.0.1",
+      "dependencies": {
+        "@tsgui/layout": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
     "tools/codegen": {
       "name": "@tsgui/codegen",
       "version": "0.0.1",
@@ -186,6 +205,10 @@
     "@tsgui/codegen": ["@tsgui/codegen@workspace:tools/codegen"],
 
     "@tsgui/gpu": ["@tsgui/gpu@workspace:packages/gpu"],
+
+    "@tsgui/layout": ["@tsgui/layout@workspace:packages/layout"],
+
+    "@tsgui/widgets": ["@tsgui/widgets@workspace:packages/widgets"],
 
     "@types/bun": ["@types/bun@1.4.4", "", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 
