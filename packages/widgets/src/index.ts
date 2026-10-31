@@ -22,3 +22,13 @@ export {
   type TextPainter,
   type InteractionStates,
 } from "./paint.ts";
+
+// Headless harness — tree → reconcile → layout → recorded ops
+export {
+  renderHeadless,
+  serializeLayoutTree,
+  type HeadlessOptions,
+  type HeadlessFrame,
+  type PaintOp,
+  type SerializedLayoutNode,
+} from "./harness.ts";
