@@ -1,5 +1,5 @@
 /** Reconcilable widget trees + interaction contract. */
-import type { WidgetDescriptor } from "@tsgui/layout";
+import type { LayoutNode, WidgetDescriptor } from "@tsgui/layout";
 
 export type Key = string | number;
 
@@ -25,6 +25,10 @@ export interface PointerPayload {
   count: number;
   /** stableId of the node the handler is routed to. */
   stableId: number;
+  /** The laid-out node the event routed to — geometry for drags. */
+  node: LayoutNode;
+  /** True while this node holds the pointer capture (drag in progress). */
+  captured: boolean;
   /**
    * onPointerDown only: capture the pointer so move/up route here until
    * release — drags (sliders) opt in; plain clicks don't, which is what

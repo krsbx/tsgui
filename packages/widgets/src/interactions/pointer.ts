@@ -13,7 +13,7 @@ import type { InteractionStates } from "../style-resolve.ts";
 import type { PointerPayload, ReconcilableWidget } from "../types.ts";
 import { MouseButton } from "../types.ts";
 import { hitTest } from "./hit-test.ts";
-import type { PointerInputEvent } from "./types.ts";
+import { type PointerInputEvent, PointerInputKind } from "./types.ts";
 
 const DOUBLE_CLICK_MS = 500;
 
@@ -93,22 +93,20 @@ export class PointerDispatcher {
 
     switch (event.kind) {
       // --- Pointer move: captured widget first, else the hit target ---
-      case "move": {
+      case PointerInputKind.Move: {
         const moveTarget =
           (this.capturedId !== null
             ? layoutIndex.get(this.capturedId)
             : undefined) ?? hit;
 
         if (moveTarget) {
-          widget(moveTarget).onPointerMove?.(
-            payload(moveTarget, event, 0)
-          );
+          widget(moveTarget).onPointerMove?.(payload(moveTarget, event, 0));
         }
         break;
       }
 
       // --- Button down: press; capture only if the widget opts in ---
-      case "down": {
+      case PointerInputKind.Down: {
         if (event.button === undefined) break;
         for (const button of TRACKED_BUTTONS) {
           if (event.button !== button) continue;
@@ -130,7 +128,7 @@ export class PointerDispatcher {
       }
 
       // --- Button up: route to capture target, click on press match ---
-      case "up": {
+      case PointerInputKind.Up: {
         if (event.button === undefined) break;
         for (const button of TRACKED_BUTTONS) {
           if (event.button !== button) continue;
@@ -138,12 +136,13 @@ export class PointerDispatcher {
           const isCaptured =
             this.capturedId !== null && button === this.capturedButton;
           const clickNode =
-            (isCaptured ? layoutIndex.get(this.capturedId!) : undefined) ??
-            hit;
+            (isCaptured ? layoutIndex.get(this.capturedId!) : undefined) ?? hit;
           const clickId = isCaptured ? this.capturedId : hitId;
 
           if (clickNode) {
-            widget(clickNode).onPointerUp?.(payload(clickNode, event, 0));
+            widget(clickNode).onPointerUp?.(
+              payload(clickNode, event, 0, isCaptured)
+            );
 
             // Click = down and up on the same widget with the same button.
             if (
@@ -236,7 +235,8 @@ export class PointerDispatcher {
 function payload(
   node: LayoutNode,
   event: PointerInputEvent,
-  count: number
+  count: number,
+  captured = false
 ): PointerPayload {
   return {
     x: event.x,
@@ -244,5 +244,7 @@ function payload(
     button: event.button ?? MouseButton.None,
     count,
     stableId: node.stableId,
+    node,
+    captured,
   };
 }
