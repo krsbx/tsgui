@@ -3,6 +3,7 @@
  * (stableId) and dispatch lifecycle hooks. Ported from flying-pan with
  * the `window` parameter dropped; hooks receive a plain payload.
  */
+import type { WidgetDescriptor } from "@tsgui/layout";
 import type {
   Key,
   ReconcilableWidget,
@@ -14,10 +15,14 @@ export class Reconciler {
   private prevTree: ReconciledNode | null = null;
   /** 0 is reserved for "not reconciled". */
   private nextId = 1;
-  private readonly stableIdByWidget = new Map<ReconcilableWidget, number>();
+  private readonly stableIdByWidget = new Map<WidgetDescriptor, number>();
   private changed_ = false;
+  /** Parameter properties break node:ffi's strip-only type erasure. */
+  private readonly stateStore: StateStore;
 
-  public constructor(private readonly stateStore: StateStore) {}
+  public constructor(stateStore: StateStore) {
+    this.stateStore = stateStore;
+  }
 
   /**
    * Identity short-circuit: passing the same descriptor reference as last
@@ -43,7 +48,8 @@ export class Reconciler {
     return this.changed_;
   }
 
-  public getStableId = (widget: ReconcilableWidget): number => {
+  /** Accepts any descriptor — LayoutContext.getStableId is typed the same. */
+  public getStableId = (widget: WidgetDescriptor): number => {
     // Virtual list items (generated during layout) bypass the map.
     if (widget._virtualStableId != null) return widget._virtualStableId;
     return this.stableIdByWidget.get(widget) ?? 0;
