@@ -9,6 +9,7 @@
  * optional-heavy, give it a lazy `loadXxx()` instead of eager top-level await.
  */
 export { runtime, type Runtime } from "./runtime.ts";
+export { readCString } from "./read-cstring.ts";
 
 export * from "./libraries/sdl/index.ts";
 export * from "./libraries/image/index.ts";

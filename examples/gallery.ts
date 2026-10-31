@@ -18,6 +18,7 @@ import {
   EventType,
   image,
   PixelFormat,
+  readCString,
   Scancode,
   sdl,
   SdlDefines,
@@ -36,13 +37,17 @@ import {
   Checkbox,
   CircularProgress,
   CircularSlider,
+  FocusDispatcher,
   Image,
+  KeyModifiers,
+  KeyboardInputKind,
   Label,
   Meter,
   type MouseButton,
   paintTree,
   Palette,
   PointerDispatcher,
+  type KeyboardInputEvent,
   type PointerInputEvent,
   PointerInputKind,
   ProgressBar,
@@ -71,6 +76,11 @@ const window = sdl.SDL_CreateWindow({
   flags: SdlDefines.SDL_WINDOW_RESIZABLE,
 });
 if (!window) throw new Error(`SDL_CreateWindow: ${sdl.SDL_GetError()}`);
+
+// SDL3 requires explicit opt-in before SDL_EVENT_TEXT_INPUT flows.
+if (!sdl.SDL_StartTextInput({ window })) {
+  throw new Error(`SDL_StartTextInput: ${sdl.SDL_GetError()}`);
+}
 
 const gpu = new GpuRenderer(window);
 gpu.clearColor = { r: 17, g: 24, b: 39, a: 255 }; // gray-900 backdrop
@@ -411,9 +421,11 @@ const layoutCtx: LayoutContext = {
   getImageSize: () => null, // gallery images carry explicit dimensions
 };
 
-// --- pointer dispatch (the phase 4 port) -----------------------------------
+// --- dispatchers (the phase 4 port) ----------------------------------------
 const pointer = new PointerDispatcher();
+const focusDispatcher = new FocusDispatcher();
 const pointerEvents: PointerInputEvent[] = [];
+const keyboardEvents: KeyboardInputEvent[] = [];
 
 // --- frame loop ------------------------------------------------------------
 const eventData = new Uint8Array(256);
@@ -434,6 +446,43 @@ while (running) {
       eventView.getUint32(24, true) === Scancode.SDL_SCANCODE_ESCAPE
     ) {
       running = false;
+    }
+    if (type === EventType.SDL_EVENT_KEY_DOWN || type === EventType.SDL_EVENT_KEY_UP) {
+      // SDL_KeyboardEvent: scancode@24, keycode@28, mod@32, repeat@39.
+      const mod = eventView.getUint32(32, true);
+      keyboardEvents.push({
+        kind:
+          type === EventType.SDL_EVENT_KEY_DOWN
+            ? KeyboardInputKind.KeyDown
+            : KeyboardInputKind.KeyUp,
+        key: eventView.getUint32(28, true),
+        // SDL_KMOD shift/ctrl/gui variants collapse to the toolkit bits.
+        modifiers: ((
+          ((mod & (SdlDefines.SDL_KMOD_LSHIFT | SdlDefines.SDL_KMOD_RSHIFT)) !== 0
+            ? KeyModifiers.Shift
+            : 0) |
+          ((mod & (SdlDefines.SDL_KMOD_LCTRL | SdlDefines.SDL_KMOD_RCTRL)) !== 0
+            ? KeyModifiers.Control
+            : 0) |
+          ((mod & (SdlDefines.SDL_KMOD_LGUI | SdlDefines.SDL_KMOD_RGUI)) !== 0
+            ? KeyModifiers.Meta
+            : 0)
+        ) as KeyModifiers),
+        repeat: eventView.getUint8(39) !== 0,
+      });
+    }
+    if (type === EventType.SDL_EVENT_TEXT_INPUT) {
+      // SDL_TextInputEvent: const char *text @ 24 — NUL-terminated UTF-8.
+      const textPtr = eventView.getBigUint64(24, true);
+      const text = readCString(textPtr);
+      if (text) {
+        keyboardEvents.push({
+          kind: KeyboardInputKind.Char,
+          key: 0,
+          text,
+          modifiers: 0,
+        });
+      }
     }
     if (type === EventType.SDL_EVENT_MOUSE_MOTION) {
       pointerEvents.push({
@@ -477,10 +526,25 @@ while (running) {
   });
 
   pointer.dispatch({ events: pointerEvents, root, layoutIndex });
+  focusDispatcher.dispatch({
+    pointerEvents,
+    keyboardEvents,
+    root,
+    layoutIndex,
+    focusableNodes: layoutCtx.focusableNodes,
+  });
   pointerEvents.length = 0;
+  keyboardEvents.length = 0;
 
   gpu.beginFrame();
-  paintTree({ gpu, font, statesOf: (node) => pointer.statesOf(node) }, root);
+  paintTree({
+    gpu,
+    font,
+    statesOf: (node) => ({
+      ...pointer.statesOf(node),
+      ...focusDispatcher.statesOf(node),
+    }),
+  }, root);
   gpu.present();
 
   frames++;
