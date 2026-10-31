@@ -47,7 +47,7 @@ export function generateDefs(
       `  ${fn.name}: { arguments: ${args}, return: ${JSON.stringify(NEUTRAL_TYPE[fn.returns.kind])} },`
     );
   }
-  L.push(`} satisfies Record<string, FunctionSignature>;`);
+  L.push(`} as const satisfies Record<string, FunctionSignature>;`);
   L.push(``);
   return L.join("\n");
 }

@@ -41,19 +41,45 @@ export function generateFunctions(
   }
   L.push(`}`);
   L.push(``);
+  L.push(`/**`);
+  L.push(` * Structural "Like" surface over ${pascalName}Symbols (or an extended`);
+  L.push(` * symbols type S): every symbol must exist and take no more params`);
+  L.push(` * than declared, but argument and return types stay open — so raw`);
+  L.push(` * dlopen symbols from either backend (bun:ffi / node:ffi) fit without`);
+  L.push(` * a cast.`);
+  L.push(` */`);
   L.push(
-    `export function create${pascalName}Functions<T extends ${pascalName}Symbols & object>(symbols: T): ${pascalName}Functions`
+    `export type ${pascalName}SymbolsLike<S extends ${pascalName}Symbols = ${pascalName}Symbols> = {`
+  );
+  L.push(`  [K in keyof S]: S[K] extends (...args: infer A) => any`);
+  L.push(`    ? (...args: { [I in keyof A]: any }) => unknown`);
+  L.push(`    : S[K];`);
+  L.push(`};`);
+  L.push(``);
+  L.push(`/**`);
+  L.push(` * Checked brand: view raw backend symbols as the branded S surface.`);
+  L.push(` * Symbol keys are compile-checked; handle types are trusted.`);
+  L.push(` */`);
+  L.push(
+    `export function as${pascalName}Symbols<S extends ${pascalName}Symbols = ${pascalName}Symbols>(symbols: ${pascalName}SymbolsLike<NoInfer<S>>): S {`
+  );
+  L.push(`  return symbols as unknown as S;`);
+  L.push(`}`);
+  L.push(``);
+  L.push(
+    `export function create${pascalName}Functions(symbols: ${pascalName}SymbolsLike): ${pascalName}Functions;`
   );
   L.push(
-    `export function create${pascalName}Functions<T extends ${pascalName}Symbols & object, U extends object>(symbols: T, exntesion: (symbols: T) => U): ${pascalName}Functions & U`
+    `export function create${pascalName}Functions<S extends ${pascalName}Symbols, U extends object>(symbols: ${pascalName}SymbolsLike<NoInfer<S>>, extension: (symbols: S) => U): ${pascalName}Functions & U;`
   );
   L.push(
-    `export function create${pascalName}Functions<T extends ${pascalName}Symbols & object, U extends object>(symbols: T, exntesion: U): ${pascalName}Functions & U`
+    `export function create${pascalName}Functions<U extends object>(symbols: ${pascalName}SymbolsLike, extension: U extends Function ? never : U): ${pascalName}Functions & U;`
   );
   L.push(
-    `export function create${pascalName}Functions(symbols: ${pascalName}Symbols, extension?: (symbols: ${pascalName}Symbols) => object): ${pascalName}Functions {`
+    `export function create${pascalName}Functions(raw: ${pascalName}SymbolsLike, extension?: object | ((symbols: ${pascalName}Symbols) => object)): ${pascalName}Functions {`
   );
-  L.push(`const res = {`);
+  L.push(`  const symbols = as${pascalName}Symbols(raw);`);
+  L.push(`  const res = {`);
   for (const fn of tables.functions) {
     if (fn.args.length === 0) {
       L.push(`    ${fn.name}: () => symbols.${fn.name}(),`);
