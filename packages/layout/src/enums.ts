@@ -65,6 +65,8 @@ export const WidgetType = {
   Checkbox: "Checkbox",
   Toggle: "Toggle",
   Radio: "Radio",
+  SliderBar: "SliderBar",
+  CircularSlider: "CircularSlider",
   ProgressBar: "ProgressBar",
   CircularProgress: "CircularProgress",
   Meter: "Meter",

@@ -25,6 +25,21 @@ export {
   type ProgressProps,
 } from "./widgets/progress.ts";
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
+export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
+export {
+  isOnBarHandle,
+  isOnCircularHandle,
+  pointerToAngleValue,
+  pointerToValue,
+  resolveGeometry,
+  sliderValue,
+  type CircularGeometry,
+} from "./widgets/slider/geometry.ts";
+export { type SliderMark } from "./widgets/slider/types.ts";
+export type {
+  CircularSliderProps,
+  SliderProps,
+} from "./widgets/slider/types.ts";
 export { Radio, type RadioProps } from "./widgets/radio.ts";
 export { Toggle, type ToggleProps } from "./widgets/toggle.ts";
 export { View, type ViewProps } from "./widgets/view.ts";

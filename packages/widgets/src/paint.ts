@@ -18,6 +18,7 @@ import type { Size } from "@tsgui/layout";
 import { type LayoutNode, type ViewStyle, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
+import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintBackground, paintBorder } from "./paint/fill.ts";
 import { paintMeter } from "./paint/meter.ts";
 import { paintCircularProgress, paintProgressBar } from "./paint/progress.ts";
@@ -172,6 +173,9 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       break;
     case WidgetType.Radio:
       paintRadio(ctx, node, checked);
+      break;
+    case WidgetType.SliderBar:
+      paintSliderBar(ctx, node);
       break;
     default:
       break;

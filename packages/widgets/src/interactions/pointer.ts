@@ -100,7 +100,14 @@ export class PointerDispatcher {
             : undefined) ?? hit;
 
         if (moveTarget) {
-          widget(moveTarget).onPointerMove?.(payload(moveTarget, event, 0));
+          widget(moveTarget).onPointerMove?.(
+            payload(
+              moveTarget,
+              event,
+              0,
+              moveTarget.stableId === this.capturedId
+            )
+          );
         }
         break;
       }
