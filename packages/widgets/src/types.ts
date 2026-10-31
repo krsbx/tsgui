@@ -76,6 +76,11 @@ export interface PointerPayload {
   capturePointer?(): void;
 }
 
+export interface WidgetLifecyclePayload {
+  widget: ReconcilableWidget;
+  stableId: number;
+}
+
 /** Payload for key handlers — routed to the focused widget. */
 export interface KeyPayload {
   /** SDL keycode — see {@link KeyCode}. */
@@ -84,12 +89,16 @@ export interface KeyPayload {
   /** True while the key auto-repeats. */
   repeat: boolean;
   stableId: number;
+  /** The laid-out focused node — geometry for edit scroll math. */
+  node: LayoutNode;
 }
 
 /** Payload for text (char) input — routed to the focused widget. */
 export interface CharPayload {
   text: string;
   stableId: number;
+  /** The laid-out focused node — geometry for edit scroll math. */
+  node: LayoutNode;
 }
 
 /** Payload for focus transitions. */
@@ -110,17 +119,14 @@ export interface InteractionProps {
   onClick?(payload: PointerPayload): void;
   onPointerEnter?(payload: PointerPayload): void;
   onPointerLeave?(payload: PointerPayload): void;
+  /** Released with the widget — cleanup hook for keyed edit state. */
+  onUnmount?(payload: WidgetLifecyclePayload): void;
   onKeyDown?(payload: KeyPayload): void;
   onKeyUp?(payload: KeyPayload): void;
   /** Decoded text input (SDL_EVENT_TEXT_INPUT) — focused widget only. */
   onChar?(payload: CharPayload): void;
   onFocus?(payload: FocusPayload): void;
   onBlur?(payload: FocusPayload): void;
-}
-
-export interface WidgetLifecyclePayload {
-  widget: ReconcilableWidget;
-  stableId: number;
 }
 
 export interface WidgetUpdatePayload extends WidgetLifecyclePayload {

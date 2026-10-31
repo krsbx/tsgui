@@ -33,6 +33,10 @@ export function resolveChildSize(options: ResolveChildSizeOptions): Size {
       resolveLabelSize({ widget, ctx: options.ctx, size });
       break;
 
+    case WidgetType.TextInput:
+      resolveTextInputSize({ widget, ctx: options.ctx, size });
+      break;
+
     default:
       break;
   }
@@ -65,6 +69,26 @@ function propsWidth(widget: WidgetDescriptor): number | undefined {
 function propsHeight(widget: WidgetDescriptor): number | undefined {
   const h = widget.props["height"];
   return typeof h === "number" ? h : undefined;
+}
+
+/** Text fields size to their value (or placeholder) + generous padding. */
+function resolveTextInputSize(options: {
+  widget: WidgetDescriptor;
+  ctx: LayoutContext;
+  size: Size;
+}): void {
+  const text =
+    (typeof options.widget.props["value"] === "string"
+      ? (options.widget.props["value"] as string)
+      : "") ||
+    (typeof options.widget.props["placeholder"] === "string"
+      ? (options.widget.props["placeholder"] as string)
+      : "");
+  if (!text) return;
+
+  const measured = options.ctx.measureText(text, options.widget.style);
+  options.size.width ||= measured.width + 32; // padding + caret room
+  options.size.height ||= measured.height + 16;
 }
 
 function resolveLabelSize(options: {

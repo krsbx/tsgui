@@ -1,5 +1,10 @@
 /** SliderBar painter — track, fill, marks, handle; ported from flying-pan. */
-import { ProgressBarOrientation, valueToRatio, type LayoutNode } from "@tsgui/layout";
+import {
+  ProgressBarOrientation,
+  ProgressValueType,
+  valueToRatio,
+  type LayoutNode,
+} from "@tsgui/layout";
 import { Metrics, Palette } from "../design.ts";
 import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
@@ -108,7 +113,7 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
     value,
     min,
     max,
-    showValue: props.showValue ? "percent" : undefined,
+    showValue: props.showValue ? ProgressValueType.Percent : undefined,
   });
 }
 

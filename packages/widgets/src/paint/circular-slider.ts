@@ -1,5 +1,10 @@
 /** CircularSlider painter — track arc, filled arc, handle dot. */
-import { valueToRatio, type LayoutNode } from "@tsgui/layout";
+import {
+  CircularProgressDirection,
+  ProgressValueType,
+  valueToRatio,
+  type LayoutNode,
+} from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
@@ -20,7 +25,9 @@ export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
   const startAngle = props.startAngle ?? -Math.PI / 2;
   const sweep = props.sweep ?? Math.PI * 2;
   const dirSign =
-    props.direction === "counterclockwise" ? -1 : 1;
+    props.direction === CircularProgressDirection.CounterClockwise
+      ? -1
+      : 1;
 
   const cx = node.screenX + node.width / 2;
   const cy = node.screenY + node.height / 2;
@@ -98,6 +105,6 @@ export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
     value,
     min,
     max,
-    showValue: props.showValue ? "percent" : undefined,
+    showValue: props.showValue ? ProgressValueType.Percent : undefined,
   });
 }

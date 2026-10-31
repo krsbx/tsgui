@@ -116,12 +116,20 @@ export function selectAll(state: TextInputState): TextInputState {
   return { ...state, caret: state.value.length, anchor: 0 };
 }
 
-export type CaretMove = "left" | "right" | "home" | "end";
+export const CaretDirection = {
+  Left: "left",
+  Right: "right",
+  Home: "home",
+  End: "end",
+} as const;
+
+export type CaretDirection =
+  (typeof CaretDirection)[keyof typeof CaretDirection];
 
 /** Move the caret; shift extends the selection from the anchor. */
 export function moveCaret(
   state: TextInputState,
-  direction: CaretMove,
+  direction: CaretDirection,
   shift: boolean
 ): TextInputState {
   const anchor = state.anchor;

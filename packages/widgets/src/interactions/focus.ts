@@ -215,7 +215,7 @@ export class FocusDispatcher {
     const widget = node.widget as ReconcilableWidget;
 
     if (event.kind === KeyboardInputKind.Char) {
-      widget.onChar?.({ text: event.text ?? "", stableId: node.stableId });
+      widget.onChar?.({ text: event.text ?? "", stableId: node.stableId, node });
       return;
     }
 
@@ -227,6 +227,7 @@ export class FocusDispatcher {
       modifiers: event.modifiers,
       repeat: event.repeat ?? false,
       stableId: node.stableId,
+      node,
     };
 
     if (event.kind === KeyboardInputKind.KeyDown) {

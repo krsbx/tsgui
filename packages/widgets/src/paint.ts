@@ -20,6 +20,7 @@ import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
+import { paintTextInput } from "./paint/text-input.ts";
 import { paintBackground, paintBorder } from "./paint/fill.ts";
 import { paintMeter } from "./paint/meter.ts";
 import { paintCircularProgress, paintProgressBar } from "./paint/progress.ts";
@@ -35,6 +36,9 @@ export interface Painter {
   fillArc(opts: ArcOptions): void;
   fillRing(opts: RingOptions): void;
   drawTexture(opts: TextureDrawOptions): void;
+  /** Scissor clip for scrolled content (text fields). Optional for mocks. */
+  pushClip?(clip: Rect): void;
+  popClip?(): void;
 }
 
 export interface TextPainter {
@@ -180,6 +184,9 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       break;
     case WidgetType.CircularSlider:
       paintCircularSlider(ctx, node);
+      break;
+    case WidgetType.TextInput:
+      paintTextInput(ctx, node);
       break;
     default:
       break;
