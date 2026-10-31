@@ -13,12 +13,10 @@ import { makeTextInputState } from "./core.ts";
 const editingStates = new Map<number, TextInputState>();
 
 /**
- * Editing state accessor — also what the painter reads to draw
- * caret/selection.
- *
- * Controlled reconciliation: when `props.value` differs from the stored
- * value, the app has re-rendered with new text — adopt it and clamp the
- * caret (the standard controlled-input contract).
+ * Editing state accessor for handler/dispatch paths — the controlled
+ * reconciliation point: when `props.value` differs from the stored value,
+ * the app has re-rendered with new text — adopt it and clamp the caret
+ * (the standard controlled-input contract).
  */
 export function editingStateOf(
   stableId: number,
@@ -56,3 +54,22 @@ export const textInputClipboard: { get(): string; set(text: string): void } = {
   get: () => "",
   set: () => {},
 };
+
+/**
+ * Raw read for painters — no controlled reconciliation. The paint pass
+ * runs on the previous frame's descriptor, whose `props.value` lags the
+ * live editing state by one change; adopting a differing value here
+ * would revert the just-typed edit and clamp the caret to 0.
+ *
+ * `props` seeds the initial view before the first interaction (the
+ * controlled initial value / placeholder) — creation only, never stored.
+ */
+export function peekEditingState(
+  stableId: number,
+  props?: { value?: string }
+): TextInputState {
+  return (
+    editingStates.get(stableId) ??
+    makeTextInputState({ value: props?.value })
+  );
+}

@@ -36,6 +36,10 @@
     "packages/**/*.{js,jsx,ts,tsx,md,mdx,json}": [
       "eslint --fix",
       "bun fmt"
+    ],
+    "tools/**/*.{js,jsx,ts,tsx,md,mdx,json}": [
+      "eslint --fix",
+      "bun fmt"
     ]
   },
   "scripts": {

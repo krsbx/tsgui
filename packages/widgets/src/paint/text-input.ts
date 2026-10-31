@@ -4,7 +4,7 @@ import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
 import { propsOf } from "../types.ts";
 import type { TextInputProps } from "../widgets/text-input/index.ts";
-import { editingStateOf } from "../widgets/text-input/state.ts";
+import { peekEditingState } from "../widgets/text-input/state.ts";
 import type { LayoutNode } from "@tsgui/layout";
 
 export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
@@ -12,8 +12,12 @@ export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
   const style = node.widget.style ?? {};
   const focused = ctx.statesOf?.(node)?.focused ?? false;
 
-  const state = editingStateOf(node.stableId, { value: props.value });
-  const value = props.value ?? state.value;
+  // Live editing state — NOT the controlled resync. The paint pass runs
+  // on the previous frame's descriptor, whose props.value lags the edits
+  // made earlier this frame; adopting it would revert the keystroke and
+  // clamp the caret to 0.
+  const state = peekEditingState(node.stableId, { value: props.value });
+  const value = state.value;
 
   const hasValue = value.length > 0;
   const text = hasValue ? value : (props.placeholder ?? "");

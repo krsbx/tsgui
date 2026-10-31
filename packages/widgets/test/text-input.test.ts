@@ -309,6 +309,42 @@ describe("TextInput paint", () => {
     expect(caret.length).toBe(1);
   });
 
+  test("painter reads the live editing state, not the stale descriptor", () => {
+    // Simulate the one-frame lag: the editing store holds the just-typed
+    // text while the laid-out descriptor still carries the old value.
+    const state = editingStateOf(2, { value: "" });
+    state.value = "h";
+    state.caret = 1;
+    state.anchor = 1;
+
+    const stale = renderHeadless(
+      View({ children: [TextInput({ value: "" })] }),
+      {
+        width: 300,
+        height: 100,
+        statesOf: (node) => ({
+          hovered: false,
+          pressed: false,
+          focused: node.stableId === 2,
+          checked: false,
+          disabled: false,
+        }),
+      }
+    );
+
+    // The painter must draw "h" with the caret after it — not the
+    // placeholder with a caret clamped to 0.
+    type TextOp = PaintOp & { text: string };
+    const texts = stale.ops.filter((op): op is TextOp => op.op === PaintOpKind.Text);
+    expect(texts.map((op) => op.text)).toEqual(["h"]);
+    const caret = stale.ops.filter(
+      (op): op is PaintOp & { w: number; x: number } =>
+        op.op === PaintOpKind.Rect && (op as PaintOp & { w: number }).w === 1
+    );
+    expect(caret.length).toBe(1);
+    expect(caret[0]!.x).toBeGreaterThan(8); // past the padding, after "h"
+  });
+
   test("unfocused field paints text but no caret", () => {
     const seed = editingStateOf(2, { value: "hello" });
     seed.caret = 4;

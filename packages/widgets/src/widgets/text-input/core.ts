@@ -13,9 +13,7 @@ export interface TextInputState {
   scrollX: number;
 }
 
-export function makeTextInputState(props: {
-  value?: string;
-}): TextInputState {
+export function makeTextInputState(props: { value?: string }): TextInputState {
   const value = props.value ?? "";
 
   return { value, caret: value.length, anchor: value.length, scrollX: 0 };
@@ -61,7 +59,12 @@ export function insertText(
   const nextValue = value.slice(0, insertAt) + text + value.slice(replaceUntil);
   const nextCaret = insertAt + text.length;
 
-  return { value: nextValue, caret: nextCaret, anchor: nextCaret, scrollX: state.scrollX };
+  return {
+    value: nextValue,
+    caret: nextCaret,
+    anchor: nextCaret,
+    scrollX: state.scrollX,
+  };
 }
 
 /** Backspace: delete the selection, else the character before the caret. */
@@ -79,7 +82,8 @@ export function backspace(state: TextInputState): TextInputState {
   if (state.caret === 0) return state;
 
   return {
-    value: state.value.slice(0, state.caret - 1) + state.value.slice(state.caret),
+    value:
+      state.value.slice(0, state.caret - 1) + state.value.slice(state.caret),
     caret: state.caret - 1,
     anchor: state.caret - 1,
     scrollX: state.scrollX,
@@ -101,7 +105,8 @@ export function deleteForward(state: TextInputState): TextInputState {
   if (state.caret >= state.value.length) return state;
 
   return {
-    value: state.value.slice(0, state.caret) + state.value.slice(state.caret + 1),
+    value:
+      state.value.slice(0, state.caret) + state.value.slice(state.caret + 1),
     caret: state.caret,
     anchor: state.caret,
     scrollX: state.scrollX,
@@ -135,18 +140,22 @@ export function moveCaret(
   const anchor = state.anchor;
 
   switch (direction) {
-    case "left": {
+    case CaretDirection.Left: {
       const caret = Math.max(0, state.caret - 1);
       return { ...state, caret, anchor: shift ? anchor : caret };
     }
-    case "right": {
+    case CaretDirection.Right: {
       const caret = Math.min(state.value.length, state.caret + 1);
       return { ...state, caret, anchor: shift ? anchor : caret };
     }
-    case "home":
+    case CaretDirection.Home:
       return { ...state, caret: 0, anchor: shift ? anchor : 0 };
-    case "end":
-      return { ...state, caret: state.value.length, anchor: shift ? anchor : state.value.length };
+    case CaretDirection.End:
+      return {
+        ...state,
+        caret: state.value.length,
+        anchor: shift ? anchor : state.value.length,
+      };
   }
 }
 
