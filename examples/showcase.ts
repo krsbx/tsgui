@@ -165,7 +165,7 @@ while (running) {
   fontSmall.draw(gpu, {
     x: 80,
     y: 520,
-    text: "clipped image pane — GPU renderer, 6 FFI calls per frame",
+    text: "clipped image pane — one RenderGeometry per texture batch",
     tint: rgba({ r: 160, g: 168, b: 190 }),
   });
   fontSmall.draw(gpu, {

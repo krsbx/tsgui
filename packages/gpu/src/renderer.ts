@@ -165,6 +165,8 @@ export class GpuRenderer {
    * Single-object params per the toolkit convention (docs/ARCHITECTURE.md).
    */
   fillRect({ x, y, w, h, color }: RectOptions): void {
+    // Untextured geometry can't join an open textured batch.
+    if (this.batchTexture !== null) this.flushBatch();
     this.ensureCapacity(4, 6);
     const base = this.vertexCount;
     const S = FLOATS_PER_VERTEX;
@@ -192,7 +194,8 @@ export class GpuRenderer {
    * texture differs from the open batch's texture.
    */
   drawTexture({ texture, x, y, w, h, tint = 0xffffffff }: TextureDrawOptions): void {
-    if (this.batchTexture !== null && this.batchTexture !== texture) {
+    // Any texture change — including untextured → textured — starts a batch.
+    if (this.batchTexture !== texture) {
       this.flushBatch();
     }
     this.batchTexture = texture;
@@ -232,6 +235,8 @@ export class GpuRenderer {
     color,
     segments = 8,
   }: RoundedRectOptions): void {
+    // Untextured geometry can't join an open textured batch.
+    if (this.batchTexture !== null) this.flushBatch();
     const r = Math.min(radius, w / 2, h / 2);
     const P = 4 * (segments + 1); // perimeter points
     this.ensureCapacity(1 + P, P * 3);
@@ -283,6 +288,11 @@ export class GpuRenderer {
     if (!ok) {
       throw new Error(`SDL_RenderGeometry: ${sdlRaw.SDL_GetError()}`);
     }
+    // The batch is sent — restart accumulation, or the next flush re-renders
+    // every earlier quad under the newer batch's texture.
+    this.vertexCount = 0;
+    this.indexCount = 0;
+    this.batchTexture = null;
   }
 
   /** Send all queued geometry to SDL without presenting. */
