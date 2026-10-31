@@ -31,8 +31,10 @@ FFI (see PLATFORM.md).
 
 - [x] Renderer module in `@tsgui/gpu`: GPU-backend renderer per window
       (`SDL_CreateRendererWithProperties`, "gpu" backend confirmed on
-      macOS), batch accumulator into a reused 20-byte-SDL_Vertex buffer,
-      flush = `SDL_RenderGeometry` per texture batch.
+      macOS), batch accumulator into a reused vertex buffer, flush =
+      `SDL_RenderGeometry` per texture batch. (Buffer since corrected to
+      SDL3's 32-byte float-color `SDL_Vertex` — the SDL2-era 20-byte
+      packed-u32 layout silently draws nothing.)
 - [x] Texture path: procedural pixels → `SDL_CreateTextureWithProperties`
       + `SDL_UpdateTexture`, drawn through the textured batch. (Also fixed
       en route: the codegen dropped every enum-by-value param function —
@@ -59,31 +61,64 @@ FFI (see PLATFORM.md).
 Bun — measured **avg 0.35ms/frame (≈2,850 fps), p99 < 1ms, 6 calls/frame,
 `renderer: gpu` on both runtimes** (Apple M-series; ~33× the 60fps budget).
 
-## Phase 2 — Renderer core
+## Phase 2 — Renderer core ✅ (2026-10-31)
 
-- [ ] SDF rounded-rect/border/shadow shader + `flags` dispatch.
-- [ ] Font atlas (port stb_truetype baking from flying-pan), text quads.
-- [ ] Image textures via `tsgui_image_decode` + upload.
-- [ ] Scissor-in-batch clipping.
-- [ ] Install-time source build verified end-to-end (cmake-js + vendored
-      deps + user-level cache) on macOS, Linux, and Windows.
+Revised mid-phase: the zero-C decision routes decoration through the SDL
+tiers instead of porting stb_truetype / stb_image C sources, and the
+install-time source build disappeared along with libtsgui — nothing
+compiles at all.
 
-**Exit:** a static "kitchen sink" window — decorated boxes, text, images —
-drawn with one render call, on Node and Bun.
+- [x] Scissor clipping — `SDL_SetRenderClipRect` push/pop around batch
+      flushes (`GpuRenderer.pushClip`/`popClip`). (2026-10-31)
+- [x] Text via the SDL3_ttf tier — per-run texture cache, white glyphs +
+      tint; supersedes the stb_truetype atlas port. (2026-10-31)
+- [x] Image textures via the SDL3_image tier — `IMG_LoadTexture`, runtime
+      PNG through surface + `SDL_SavePNG`; supersedes
+      `tsgui_image_decode`. (2026-10-31)
+- [x] Decoration layers in `@tsgui/widgets`' paint walk — shadow (stacked
+      rounded-rect falloff), border (oversized shape), background
+      (rounded when radius is set). (2026-10-31)
+- [x] ~~Install-time source build~~ — dropped with the zero-C decision:
+      zero compiled artifacts is the feature.
+- [ ] → SDF rounded-rect/border/shadow shader + `flags` dispatch is the
+      **Phase 2.5 spike** (see phase 1 notes); CPU tessellation ships.
 
-## Phase 3 — Layout + reconciler
+**Exit (met):** the "kitchen sink" window — `examples/showcase.ts`
+(decorated boxes, clips, images, text) and `examples/gallery.ts` (the
+widget-layer kitchen sink) render on Node and Bun; `bun test` includes
+pixel-readback guards for the geometry/vertex ABI and batch isolation.
+
+## Phase 2.5 — SDF decoration spike (parked)
+
+- [ ] `SDL_SetGPURenderState` + a fragment shader for rounded-rect /
+      border / shadow; `flags` dispatch in the paint walk replaces the
+      stacked-layer approximation.
+- Everything needed is bound and confirmed: `SDL_CreateGPURenderState`,
+      the fragment-shader create-info, and the device via
+      `SDL_PROP_RENDERER_GPU_DEVICE_POINTER` ("SDL.renderer.gpu.device").
+      Requires the SDL_shadercross offline toolchain.
+
+**Exit:** hairline-smooth decoration at any radius, no CPU tessellation
+in the paint path.
+
+## Phase 3 — Layout + reconciler ✅ (2026-10-31)
 
 - [x] Port flying-pan's flexbox engine into `@tsgui/layout` (2026-10-31)
       — GL coupling stripped, `LayoutContext` minimal + injected (was
       aliased to the renderer's PaintContext), single-object params kept,
       per-run text measurement via the `ttf` tier. 8 headless tests green
       on the full semantic surface; see docs/LAYOUT.md.
-- [ ] Port reconciler + `stableId` + `StateStore` into `@tsgui/widgets`.
-- [ ] **Headless harness**: layout + encode with a null GPU backend;
-      golden-snapshot tests over layout trees and encoded buffers.
+- [x] Port reconciler + `stableId` + `StateStore` into `@tsgui/widgets`
+      (2026-10-31) — keyed children, identity short-circuit, mount/update/
+      unmount hooks, state destroy-on-unmount.
+- [x] **Headless harness** (2026-10-31) — `renderHeadless()` runs tree →
+      reconcile → layout → recorded paint ops with a null GPU (injected
+      text measurement + interaction states); golden snapshots over layout
+      trees and op buffers via `toMatchSnapshot`.
 
-**Exit:** widget tree → layout → encoded frame entirely in `bun test`, no
-window; snapshot CI green.
+**Exit (met):** widget tree → layout → paint ops entirely in `bun test`,
+no window; CI runs the suite plus showcase/gallery selftests on both
+runtimes.
 
 ## Phase 4 — Interactions + animation
 
