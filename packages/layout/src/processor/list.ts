@@ -10,7 +10,7 @@ interface ListProps {
   itemSize: number;
   renderItem(index: number): WidgetDescriptor;
   overscan?: number;
-  orientation?: "horizontal" | "vertical";
+  orientation?: ListOrientation;
 }
 
 function withVirtualStableId(
@@ -97,7 +97,9 @@ export function listLayoutFlex(options: WidgetLevelLayoutFlexOptions): void {
   node.children = virtualChildren;
 }
 
-export function widgetLevelLayoutFlex(options: WidgetLevelLayoutFlexOptions): void {
+export function widgetLevelLayoutFlex(
+  options: WidgetLevelLayoutFlexOptions
+): void {
   if (options.node.type === WidgetType.List) {
     listLayoutFlex(options);
   }
