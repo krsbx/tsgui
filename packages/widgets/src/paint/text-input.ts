@@ -3,7 +3,8 @@ import { Metrics, Palette } from "../design.ts";
 import { parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
 import { propsOf } from "../types.ts";
-import { editingStateOf, type TextInputProps } from "../widgets/text-input.ts";
+import type { TextInputProps } from "../widgets/text-input.ts";
+import { editingStateOf } from "../widgets/text-input-state.ts";
 import type { LayoutNode } from "@tsgui/layout";
 
 export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {

@@ -57,6 +57,13 @@ export const Metrics = {
 
 export type MetricKey = keyof typeof Metrics;
 
+/** Threshold color stop — the stop with the highest `at ≤ ratio` wins. */
+export interface ColorStop {
+  /** Position along the track in [0, 1] (post-clamp ratio). */
+  at: number;
+  color: string;
+}
+
 /**
  * Shared pseudo-state overlays — the disabled/focus style blocks every
  * control bakes. Each helper layers the user's own override LAST so

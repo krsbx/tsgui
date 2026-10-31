@@ -17,10 +17,9 @@ import {
 } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
-import type { ColorStop } from "../paint/fill.ts";
+import type { ColorStop } from "../design.ts";
 import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export type { ColorStop };
 
 export interface ProgressProps extends BaseWidgetProps {
   value?: number;

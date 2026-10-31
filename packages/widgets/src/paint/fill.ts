@@ -5,16 +5,9 @@
 import type { Rect } from "@tsgui/gpu";
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
 import { valueToRatio } from "@tsgui/layout";
-import { Palette } from "../design.ts";
+import { type ColorStop, Palette } from "../design.ts";
 import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 import type { Painter } from "../paint.ts";
-
-/** Threshold color stops — the stop with the highest `at ≤ ratio` wins. */
-export interface ColorStop {
-  /** Position along the track in [0, 1] (post-clamp ratio). */
-  at: number;
-  color: ValidColor;
-}
 
 /**
  * One shape for both corner paths — square `fillRect` when no radius,

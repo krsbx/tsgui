@@ -5,6 +5,7 @@ export {
   type MetricKey,
   Metrics,
   Palette,
+  type ColorStop,
   type PaletteColor,
 } from "./design.ts";
 export { Reconciler } from "./reconciler.ts";
@@ -27,14 +28,12 @@ export {
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
+export { TextInput, type TextInputProps, type TextInputStyle } from "./widgets/text-input.ts";
 export {
-  TextInput,
-  textInputClipboard,
   editingStateOf,
-  type TextInputProps,
+  textInputClipboard,
   type TextInputState,
-  type TextInputStyle,
-} from "./widgets/text-input.ts";
+} from "./widgets/text-input-state.ts";
 export {
   isOnBarHandle,
   isOnCircularHandle,
@@ -92,7 +91,6 @@ export {
 
 // Paint modules — per-widget painters + shared fill/label helpers
 export {
-  type ColorStop,
   type ContinuousFillOptions,
   fillShape,
   paintBackground,

@@ -15,13 +15,18 @@ import {
   cut as cutText,
   deleteForward,
   insertText,
-  makeTextInputState,
   moveCaret,
   scrollXFor,
   selectAll,
   type TextInputState,
   xToCaret,
 } from "./text-input-core.ts";
+import {
+  deleteEditingState,
+  editingStateOf,
+  textInputClipboard,
+  writeEditingState,
+} from "./text-input-state.ts";
 
 export type { TextInputState };
 import type { BaseWidgetProps } from "../types.ts";
@@ -63,50 +68,9 @@ export interface TextInputProps extends BaseWidgetProps {
 /**
  * Editing state keyed by stableId — survives re-renders (every keystroke
  * rebuilds descriptors), released when the reconciler unmounts the widget
- * (onUnmount composes the user's hook).
+ * (onUnmount composes the user's hook). Lives in ./text-input-state.ts —
+ * this factory just reads and writes it through the accessors.
  */
-const editingStates = new Map<number, TextInputState>();
-
-/**
- * Editing state accessor — also what the painter reads to draw
- * caret/selection.
- *
- * Controlled reconciliation: when `props.value` differs from the stored
- * value, the app has re-rendered with new text — adopt it and clamp the
- * caret (the standard controlled-input contract).
- */
-export function editingStateOf(
-  stableId: number,
-  props: { value?: string }
-): TextInputState {
-  let state = editingStates.get(stableId);
-  if (!state) {
-    state = makeTextInputState({ value: props.value });
-    editingStates.set(stableId, state);
-  }
-
-  if (props.value !== undefined && props.value !== state.value) {
-    state = {
-      value: props.value,
-      caret: Math.min(state.caret, props.value.length),
-      anchor: Math.min(state.anchor, props.value.length),
-      scrollX: state.scrollX,
-    };
-    editingStates.set(stableId, state);
-  }
-
-  return state;
-}
-
-function writeEditingState(stableId: number, state: TextInputState): void {
-  editingStates.set(stableId, state);
-}
-
-/** Clipboard seam — defaults to the SDL API, overridable in tests. */
-export const textInputClipboard: { get(): string; set(text: string): void } = {
-  get: () => "",
-  set: () => {},
-};
 
 export function TextInput(props: TextInputProps): ReconcilableWidget {
   const {
@@ -181,7 +145,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     handlers: {
       ...handlers,
       onUnmount: (payload: { widget: ReconcilableWidget; stableId: number }) => {
-        editingStates.delete(payload.stableId);
+        deleteEditingState(payload.stableId);
         onUnmount?.(payload);
       },
       onChar: (payload) => {

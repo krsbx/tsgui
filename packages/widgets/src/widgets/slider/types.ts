@@ -5,7 +5,7 @@ import type {
   ViewStyle,
 } from "@tsgui/layout";
 import { CircularProgressDirection } from "@tsgui/layout";
-import type { ColorStop } from "../../paint/fill.ts";
+import type { ColorStop } from "../../design.ts";
 import type { BaseWidgetProps } from "../../types.ts";
 
 export interface SliderMark {
