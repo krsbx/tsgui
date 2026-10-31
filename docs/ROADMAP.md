@@ -166,7 +166,7 @@ the dispatcher exists to replace):
 |---|---|---|---|
 | 1 | `ProgressBar`, `CircularProgress`, `Meter` | paint only | ✅ Phase 3.5 (2026-10-31) |
 | 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | ✅ (2026-10-31) |
-| 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | phase 4, second milestone |
+| 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | ✅ (2026-10-31) |
 | 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | phase 4, last milestone |
 | 5 | `Canvas`, `Custom` painter | CanvasContext + Path2D/tessellation port | phase 5 |
 

@@ -34,6 +34,7 @@ import {
 import {
   Button,
   Checkbox,
+  CircularSlider,
   CircularProgress,
   Image,
   Label,
@@ -45,6 +46,7 @@ import {
   ProgressBar,
   Radio,
   RadioGroup,
+  SliderBar,
   Reconciler,
   StateStore,
   Toggle,
@@ -112,6 +114,8 @@ let clicks = 0;
 let agree = false;
 let wifi = true;
 let flavor = "mint";
+let volume = 65;
+let tone = 30;
 let dirty = true;
 
 function buildTree(): ReconcilableWidget {
@@ -152,7 +156,7 @@ function buildTree(): ReconcilableWidget {
       }),
 
       Label({
-        text: `clicked ${clicks} times · agree ${agree ? "✓" : "✗"} · wifi ${wifi ? "on" : "off"} · ${flavor}`,
+        text: `clicked ${clicks} times · agree ${agree ? "✓" : "✗"} · wifi ${wifi ? "on" : "off"} · ${flavor} · vol ${Math.round(volume)} · tone ${Math.round(tone)}`,
         style: { color: Palette.textMuted },
       }),
 
@@ -219,6 +223,38 @@ function buildTree(): ReconcilableWidget {
               Radio({ value: "berry", label: "Berry" }),
               Radio({ value: "lime", label: "Lime", disabled: true }),
             ],
+          }),
+        ],
+      }),
+
+      // sliders — drag through the dispatcher's press capture
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        children: [
+          SliderBar({
+            value: volume,
+            min: 0,
+            max: 100,
+            style: { width: 180, height: 24 },
+            marks: [
+              { value: 0, label: "0" },
+              { value: 50, label: "50" },
+              { value: 100, label: "100" },
+            ],
+            onChange: (next) => {
+              volume = next;
+              dirty = true;
+            },
+          }),
+          CircularSlider({
+            value: tone,
+            min: 0,
+            max: 100,
+            size: 48,
+            onChange: (next) => {
+              tone = next;
+              dirty = true;
+            },
           }),
         ],
       }),
