@@ -24,11 +24,10 @@ import {
 } from "./text-input-core.ts";
 
 export type { TextInputState };
-import type { InteractionProps } from "../types.ts";
+import type { BaseWidgetProps } from "../types.ts";
 import {
   KeyCode,
   KeyModifiers,
-  type Key,
   type ReconcilableWidget,
 } from "../types.ts";
 
@@ -51,14 +50,13 @@ export interface TextInputStateStyle extends ViewStyle {
   selectionColor?: string;
 }
 
-export interface TextInputProps extends InteractionProps {
+export interface TextInputProps extends BaseWidgetProps {
   /** Controlled text. */
   value?: string;
   onChange?(value: string): void;
   placeholder?: string;
   disabled?: boolean;
   style?: TextInputStyle;
-  key?: Key;
   onUnmount?(payload: { widget: ReconcilableWidget; stableId: number }): void;
 }
 

@@ -18,11 +18,11 @@ import {
 import { Palette } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
 import type { ColorStop } from "../paint/fill.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
 export type { ColorStop };
 
-export interface ProgressProps extends InteractionProps {
+export interface ProgressProps extends BaseWidgetProps {
   value?: number;
   /**
    * Optional secondary "buffer" fill rendered behind the main fill
@@ -46,7 +46,6 @@ export interface ProgressProps extends InteractionProps {
   style?: ViewStyle;
   fillStyle?: ViewStyle;
   bufferStyle?: ViewStyle;
-  key?: Key;
 }
 
 export interface ProgressBarProps extends ProgressProps {

@@ -109,6 +109,15 @@ export interface FocusPayload {
 }
 
 /**
+ * Common widget props — every factory's Props interface extends this
+ * instead of re-declaring the key.
+ */
+export interface BaseWidgetProps extends InteractionProps {
+  /** Keyed children match by key across sibling reorders. */
+  key?: Key;
+}
+
+/**
  * Interaction handlers carried on descriptors. The dispatchers (phase 4)
  * read them; factories forward them so consumers never re-attach.
  */

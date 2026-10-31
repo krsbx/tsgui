@@ -6,14 +6,14 @@ import type {
 } from "@tsgui/layout";
 import { CircularProgressDirection } from "@tsgui/layout";
 import type { ColorStop } from "../../paint/fill.ts";
-import type { InteractionProps, Key } from "../../types.ts";
+import type { BaseWidgetProps } from "../../types.ts";
 
 export interface SliderMark {
   value: number;
   label?: string;
 }
 
-export interface SliderProps extends InteractionProps {
+export interface SliderProps extends BaseWidgetProps {
   /** Controlled value — the parent re-renders on change. */
   value?: number;
   min?: number;
@@ -36,7 +36,6 @@ export interface SliderProps extends InteractionProps {
   trackStyle?: ViewStyle;
   filledStyle?: ViewStyle;
   handleStyle?: ViewStyle;
-  key?: Key;
 }
 
 export interface SliderBarProps extends SliderProps {

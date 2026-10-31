@@ -2,14 +2,13 @@
 import { WidgetType } from "@tsgui/layout";
 import type { ViewStyle } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export interface ImageProps extends InteractionProps {
+export interface ImageProps extends BaseWidgetProps {
   src: string;
   width?: number;
   height?: number;
   style?: ViewStyle;
-  key?: Key;
 }
 
 export function Image(props: ImageProps): ReconcilableWidget {

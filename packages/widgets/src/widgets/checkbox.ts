@@ -6,14 +6,9 @@
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
 import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
-import type {
-  InteractionProps,
-  Key,
-  PointerPayload,
-  ReconcilableWidget,
-} from "../types.ts";
+import type { BaseWidgetProps, PointerPayload, ReconcilableWidget } from "../types.ts";
 
-export interface CheckboxProps extends InteractionProps {
+export interface CheckboxProps extends BaseWidgetProps {
   /** Controlled checked state. */
   checked?: boolean;
   onCheckedChange?(checked: boolean, payload: PointerPayload): void;
@@ -22,7 +17,6 @@ export interface CheckboxProps extends InteractionProps {
   tickStyle?: ViewStyle;
   /** Tick size as a fraction of the box, in [0, 1]. */
   tickSize?: number;
-  key?: Key;
 }
 
 export function Checkbox(props: CheckboxProps): ReconcilableWidget {

@@ -10,9 +10,9 @@ import {
 } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export interface MeterProps extends InteractionProps {
+export interface MeterProps extends BaseWidgetProps {
   value?: number;
   min?: number;
   max?: number;
@@ -29,7 +29,6 @@ export interface MeterProps extends InteractionProps {
   showValue?: ProgressValueType;
   style?: ViewStyle;
   fillStyle?: ViewStyle;
-  key?: Key;
 }
 
 export function Meter(props: MeterProps): ReconcilableWidget {

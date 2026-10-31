@@ -5,21 +5,15 @@
 import { WidgetType, type ViewStyle } from "@tsgui/layout";
 import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
-import type {
-  InteractionProps,
-  Key,
-  PointerPayload,
-  ReconcilableWidget,
-} from "../types.ts";
+import type { BaseWidgetProps, PointerPayload, ReconcilableWidget } from "../types.ts";
 
-export interface ToggleProps extends InteractionProps {
+export interface ToggleProps extends BaseWidgetProps {
   /** Controlled checked state. */
   checked?: boolean;
   onCheckedChange?(checked: boolean, payload: PointerPayload): void;
   disabled?: boolean;
   style?: ViewStyle;
   knobStyle?: ViewStyle;
-  key?: Key;
 }
 
 export function Toggle(props: ToggleProps): ReconcilableWidget {

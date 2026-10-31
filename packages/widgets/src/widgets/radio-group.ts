@@ -13,9 +13,14 @@ import {
 import { createWidget } from "../create-widget.ts";
 import { Label } from "./label.ts";
 import type { RadioProps } from "./radio.ts";
-import { propsOf, type Key, type PointerPayload, type ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps } from "../types.ts";
+import {
+  propsOf,
+  type PointerPayload,
+  type ReconcilableWidget,
+} from "../types.ts";
 
-export interface RadioGroupProps {
+export interface RadioGroupProps extends BaseWidgetProps {
   /** Controlled selected value. */
   value?: string;
   onValueChange?(value: string): void;
@@ -23,7 +28,6 @@ export interface RadioGroupProps {
   gap?: number;
   style?: ViewStyle;
   children?: ReconcilableWidget[];
-  key?: Key;
 }
 
 export function RadioGroup(props: RadioGroupProps): ReconcilableWidget {

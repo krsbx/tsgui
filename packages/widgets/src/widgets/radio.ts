@@ -2,9 +2,9 @@
 import { WidgetType, type TextStyle, type ViewStyle } from "@tsgui/layout";
 import { Metrics, Palette, disabledStyle, focusStyle, focusableWhen } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export interface RadioProps extends InteractionProps {
+export interface RadioProps extends BaseWidgetProps {
   /** Group-unique value this radio represents. */
   value: string;
   /** Controlled selection — set by a RadioGroup; standalone is cosmetic. */
@@ -17,7 +17,6 @@ export interface RadioProps extends InteractionProps {
   dotStyle?: ViewStyle;
   /** Dot size as a fraction of the control, in [0, 1]. */
   dotSize?: number;
-  key?: Key;
 }
 
 export function Radio(props: RadioProps): ReconcilableWidget {

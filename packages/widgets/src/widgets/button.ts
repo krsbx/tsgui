@@ -12,13 +12,12 @@ import {
   Palette,
 } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export interface ButtonProps extends InteractionProps {
+export interface ButtonProps extends BaseWidgetProps {
   style?: ViewStyle;
   children?: ReconcilableWidget[];
   disabled?: boolean;
-  key?: Key;
 }
 
 export function Button(props: ButtonProps): ReconcilableWidget {

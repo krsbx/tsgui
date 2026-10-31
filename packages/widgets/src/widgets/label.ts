@@ -3,12 +3,11 @@ import { PointerEvents, WidgetType } from "@tsgui/layout";
 import type { TextStyle } from "@tsgui/layout";
 import { Palette } from "../design.ts";
 import { createWidget } from "../create-widget.ts";
-import type { InteractionProps, Key, ReconcilableWidget } from "../types.ts";
+import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
 
-export interface LabelProps extends InteractionProps {
+export interface LabelProps extends BaseWidgetProps {
   text: string;
   style?: TextStyle;
-  key?: Key;
 }
 
 export function Label(props: LabelProps): ReconcilableWidget {
