@@ -4,7 +4,7 @@
  * Opaque native pointer. Backend-shaped at runtime (bun:ffi Pointer /
  * node:ffi bigint) — branded here so handles are compile-checked.
  */
-export type Pointer = { readonly pointer: true };
+export type Pointer = bigint & { readonly pointer: true };
 
 export type SDL_AssertData = Pointer & { readonly handle: "SDL_AssertData" };
 export type SDL_AsyncIO = Pointer & { readonly handle: "SDL_AsyncIO" };

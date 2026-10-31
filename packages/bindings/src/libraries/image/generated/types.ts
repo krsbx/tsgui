@@ -4,7 +4,7 @@
  * Opaque native pointer. Backend-shaped at runtime (bun:ffi Pointer /
  * node:ffi bigint) — branded here so handles are compile-checked.
  */
-export type Pointer = { readonly pointer: true };
+export type Pointer = bigint & { readonly pointer: true };
 
 // Core handles from the sdl target.
 import type { SDL_Cursor, SDL_GPUCopyPass, SDL_GPUDevice, SDL_GPUTexture, SDL_IOStream, SDL_Renderer, SDL_Surface, SDL_Texture } from "../../sdl/generated/types.ts";
