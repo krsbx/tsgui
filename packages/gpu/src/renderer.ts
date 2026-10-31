@@ -1,9 +1,12 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
 import { SdlDefines, sdlRaw } from "@tsgui/bindings";
 import type {
+  Rect,
   RectOptions,
   RendererHandle,
+  RendererOptions,
   Rgba,
+  RoundedRectOptions,
   TextureDrawOptions,
   TextureHandle,
   WindowHandle,
@@ -39,7 +42,7 @@ export class GpuRenderer {
 
   clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
 
-  constructor(window: WindowHandle, options: { driver?: string } = {}) {
+  constructor(window: WindowHandle, options: RendererOptions = {}) {
     // Prefer the GPU backend; fall back to SDL's default choice. Tests pin
     // `driver` (e.g. "software") for deterministic pixel readback.
     const props = sdlRaw.SDL_CreateProperties();
@@ -102,7 +105,7 @@ export class GpuRenderer {
   }
 
   /** Intersect the scissor with the given rect. Flushes the open batch. */
-  pushClip(clip: { x: number; y: number; w: number; h: number }): void {
+  pushClip(clip: Rect): void {
     this.flushBatch();
     this.clipStack.push(clip);
     this.applyClip();
@@ -228,17 +231,7 @@ export class GpuRenderer {
     radius,
     color,
     segments = 8,
-  }: {
-    x: number;
-    y: number;
-    w: number;
-    h: number;
-    radius: number;
-    /** Packed color — see {@link rgba}. */
-    color: number;
-    /** Arc segments per corner (8 ≈ smooth at UI sizes). */
-    segments?: number;
-  }): void {
+  }: RoundedRectOptions): void {
     const r = Math.min(radius, w / 2, h / 2);
     const P = 4 * (segments + 1); // perimeter points
     this.ensureCapacity(1 + P, P * 3);

@@ -22,21 +22,36 @@ export interface Rgba {
   a: number;
 }
 
-export interface RectOptions {
+/** Channels for {@link rgba} — alpha defaults to opaque. */
+export interface RgbaChannels {
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+}
+
+/** Paint-space rectangle — positions and sizes in logical units. */
+export interface Rect {
   x: number;
   y: number;
   w: number;
   h: number;
+}
+
+export interface RectOptions extends Rect {
   /** Packed color — see {@link rgba}. */
   color: number;
 }
 
-export interface TextureDrawOptions {
+export interface RoundedRectOptions extends RectOptions {
+  /** Corner radius, clamped to half the shortest side at draw time. */
+  radius: number;
+  /** Arc segments per corner (8 ≈ smooth at UI sizes). */
+  segments?: number;
+}
+
+export interface TextureDrawOptions extends Rect {
   texture: TextureHandle;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
   /** Packed tint — defaults to opaque white. */
   tint?: number;
 }
@@ -51,18 +66,17 @@ export interface TextureFromPixelsOptions {
   format: number;
 }
 
+export interface RendererOptions {
+  /**
+   * Preferred SDL render driver ("gpu", "software", …). Defaults to "gpu"
+   * with SDL's default choice as fallback; tests pin "software" for
+   * deterministic pixel readback.
+   */
+  driver?: string;
+}
+
 /** Pack 0–255 channels into the u32 SDL_Color writes little-endian. */
-export function rgba({
-  r,
-  g,
-  b,
-  a = 255,
-}: {
-  r: number;
-  g: number;
-  b: number;
-  a?: number;
-}): number {
+export function rgba({ r, g, b, a = 255 }: RgbaChannels): number {
   return (
     (((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0
   );
