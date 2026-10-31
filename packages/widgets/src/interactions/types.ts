@@ -1,5 +1,5 @@
 /** Interaction contracts — ported from flying-pan's flying/interactions. */
-import type { MouseButton } from "../types.ts";
+import type { KeyModifiers, MouseButton } from "../types.ts";
 
 /** Decoded input-device pointer events, fed to the dispatcher per frame. */
 export const PointerInputKind = {
@@ -17,4 +17,26 @@ export interface PointerInputEvent {
   y: number;
   /** SDL button code — set on down/up, absent on moves. */
   button?: MouseButton;
+}
+
+/** Decoded keyboard events, fed to the focus dispatcher per frame. */
+export const KeyboardInputKind = {
+  KeyDown: "keydown",
+  KeyUp: "keyup",
+  /** SDL_EVENT_TEXT_INPUT — `text` carries the decoded UTF-8. */
+  Char: "char",
+} as const;
+
+export type KeyboardInputKind =
+  (typeof KeyboardInputKind)[keyof typeof KeyboardInputKind];
+
+export interface KeyboardInputEvent {
+  kind: KeyboardInputKind;
+  /** SDL keycode — see {@link KeyCode}. 0 for char events. */
+  key: number;
+  /** Decoded text — set on char events. */
+  text?: string;
+  modifiers: KeyModifiers;
+  /** SDL auto-repeat flag on key-down. */
+  repeat?: boolean;
 }

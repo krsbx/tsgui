@@ -52,9 +52,12 @@ export {
   type PointerDispatchOptions,
 } from "./interactions/pointer.ts";
 export {
+  type KeyboardInputEvent,
+  KeyboardInputKind,
   type PointerInputEvent,
   PointerInputKind,
 } from "./interactions/types.ts";
+export { FocusDispatcher, type FocusDispatchOptions } from "./interactions/focus.ts";
 
 // Paint bridge
 export {
