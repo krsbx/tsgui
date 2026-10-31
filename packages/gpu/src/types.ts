@@ -63,5 +63,7 @@ export function rgba({
   b: number;
   a?: number;
 }): number {
-  return ((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255);
+  return (
+    (((a & 255) << 24) | ((b & 255) << 16) | ((g & 255) << 8) | (r & 255)) >>> 0
+  );
 }

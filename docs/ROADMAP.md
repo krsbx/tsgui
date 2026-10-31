@@ -33,15 +33,27 @@ FFI (see PLATFORM.md).
       (`SDL_CreateRendererWithProperties`, "gpu" backend confirmed on
       macOS), batch accumulator into a reused 20-byte-SDL_Vertex buffer,
       flush = `SDL_RenderGeometry` per texture batch.
-- [ ] SDF shaders via `SDL_SetGPURenderState` — **moved to Phase 2** where
-      fancy shapes actually land (exit criteria don't need them); fallback
-      remains CPU tessellation (flying-pan's Path2D port).
 - [x] Texture path: procedural pixels → `SDL_CreateTextureWithProperties`
       + `SDL_UpdateTexture`, drawn through the textured batch. (Also fixed
       en route: the codegen dropped every enum-by-value param function —
       77 recovered — and node:ffi returns raw addresses for `'string'`
       returns, now converted in the node loaders.)
-- [x] Benchmark: `examples/benchmark.ts` — 10,000 rects + textured quad.
+- [x] **Phase 2 core (2026-10-31)** — `examples/showcase.ts` verified on
+      Bun + Node: scissor clip push/pop (`SDL_SetRenderClipRect`), rounded
+      rects via CPU tessellation (fan from center, 12-seg corners), real
+      PNG through the `image` tier (runtime-generated via surface +
+      `SDL_SavePNG` → `IMG_LoadTexture`), and text via the `ttf` tier
+      (`TTF_RenderText_Blended` with the SDL_Color-as-u32 ABI packing and
+      the SDL3 `length` param, per-run texture cache, white glyphs + tint).
+      Codegen hardened further: enum-tag stripping, returned-as-pointer
+      handle rule (`SDL_Texture`/`SDL_Surface`/`SDL_Rect` all typed
+      correctly), and the DATA_STRUCTS allowlist.
+- [ ] SDF shaders via `SDL_SetGPURenderState` — deferred to a Phase 2.5
+      spike. Everything needed is bound and confirmed: `SDL_CreateGPURenderState`,
+      the fragment-shader create-info, and the device via
+      `SDL_PROP_RENDERER_GPU_DEVICE_POINTER` ("SDL.renderer.gpu.device").
+      Requires the SDL_shadercross offline toolchain; CPU tessellation
+      ships meanwhile.
 
 **Exit (met):** 10k rects at 60fps with ≤ 10 FFI calls/frame, on Node and
 Bun — measured **avg 0.35ms/frame (≈2,850 fps), p99 < 1ms, 6 calls/frame,

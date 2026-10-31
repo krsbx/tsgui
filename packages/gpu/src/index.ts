@@ -8,6 +8,7 @@
  * Geometry accumulates into reused buffers (20-byte SDL_Vertex layout:
  * 2f position, 4×u8 color, 2f uv); switching texture starts a new batch.
  */
-export * from "./types.ts";
 export { GpuRenderer } from "./renderer.ts";
+export { type TextDrawOptions, TtfFont } from "./text.ts";
 export { createTextureFromPixels, destroyTexture } from "./textures.ts";
+export * from "./types.ts";

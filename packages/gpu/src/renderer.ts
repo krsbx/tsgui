@@ -31,6 +31,10 @@ export class GpuRenderer {
   /** Texture of the open batch; null = untextured batch. */
   private batchTexture: TextureHandle | null = null;
 
+  /** Scissor stack; empty = no clip. Applied at batch flush boundaries. */
+  private readonly clipStack: Array<{ x: number; y: number; w: number; h: number }> = [];
+  private readonly clipData = new Int32Array(4);
+
   clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
 
   constructor(window: WindowHandle) {
@@ -74,6 +78,36 @@ export class GpuRenderer {
     if (!sdlRaw.SDL_RenderClear(this.renderer)) {
       throw new Error(`SDL_RenderClear: ${sdlRaw.SDL_GetError()}`);
     }
+  }
+
+  private applyClip(): void {
+    const top = this.clipStack[this.clipStack.length - 1];
+    if (top) {
+      this.clipData[0] = top.x;
+      this.clipData[1] = top.y;
+      this.clipData[2] = top.w;
+      this.clipData[3] = top.h;
+      if (!sdlRaw.SDL_SetRenderClipRect(this.renderer, this.clipData)) {
+        throw new Error(`SDL_SetRenderClipRect: ${sdlRaw.SDL_GetError()}`);
+      }
+    } else if (!sdlRaw.SDL_SetRenderClipRect(this.renderer, null)) {
+      throw new Error(`SDL_SetRenderClipRect: ${sdlRaw.SDL_GetError()}`);
+    }
+  }
+
+  /** Intersect the scissor with the given rect. Flushes the open batch. */
+  pushClip(clip: { x: number; y: number; w: number; h: number }): void {
+    this.flushBatch();
+    this.clipStack.push(clip);
+    this.applyClip();
+  }
+
+  /** Restore the previous scissor (disables clipping when the stack empties). */
+  popClip(): void {
+    if (this.clipStack.length === 0) return;
+    this.flushBatch();
+    this.clipStack.pop();
+    this.applyClip();
   }
 
   private ensureCapacity(vertices: number, indices: number): void {
@@ -158,6 +192,73 @@ export class GpuRenderer {
     this.indexData[ii++] = base + 3;
 
     this.vertexCount += 4;
+    this.indexCount = ii;
+  }
+
+  /**
+   * Queue an axis-aligned rounded rectangle (CPU-tessellated triangle fan
+   * from the center — convex, so one fan covers the shape). Aliased edges;
+   * the SDF upgrade lands via SDL_SetGPURenderState later.
+   */
+  fillRoundedRect({
+    x,
+    y,
+    w,
+    h,
+    radius,
+    color,
+    segments = 8,
+  }: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    radius: number;
+    /** Packed color — see {@link rgba}. */
+    color: number;
+    /** Arc segments per corner (8 ≈ smooth at UI sizes). */
+    segments?: number;
+  }): void {
+    const r = Math.min(radius, w / 2, h / 2);
+    const P = 4 * (segments + 1); // perimeter points
+    this.ensureCapacity(1 + P, P * 3);
+
+    const base = this.vertexCount;
+    const f = this.vertexF32;
+    const u32 = this.vertexU32;
+
+    const cx = x + w / 2;
+    const cy = y + h / 2;
+    let vi = base * FLOATS_PER_VERTEX;
+    f[vi] = cx;
+    f[vi + 1] = cy;
+    u32[vi + 2] = color;
+    vi += FLOATS_PER_VERTEX;
+
+    const corners = [
+      { cx: x + w - r, cy: y + r, a0: -Math.PI / 2 }, // TR
+      { cx: x + w - r, cy: y + h - r, a0: 0 }, // BR
+      { cx: x + r, cy: y + h - r, a0: Math.PI / 2 }, // BL
+      { cx: x + r, cy: y + r, a0: Math.PI }, // TL
+    ];
+    for (const { cx: ccx, cy: ccy, a0 } of corners) {
+      for (let i = 0; i <= segments; i++) {
+        const a = a0 + (i / segments) * (Math.PI / 2);
+        f[vi] = ccx + r * Math.cos(a);
+        f[vi + 1] = ccy + r * Math.sin(a);
+        u32[vi + 2] = color;
+        vi += FLOATS_PER_VERTEX;
+      }
+    }
+
+    let ii = this.indexCount;
+    for (let i = 1; i <= P; i++) {
+      this.indexData[ii++] = base;
+      this.indexData[ii++] = base + i;
+      this.indexData[ii++] = base + (i === P ? 1 : i + 1);
+    }
+
+    this.vertexCount += 1 + P;
     this.indexCount = ii;
   }
 

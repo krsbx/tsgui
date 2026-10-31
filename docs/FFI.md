@@ -116,6 +116,26 @@ shim, not redesigning.
 - App distribution (phase 6): apps bundle the SDL dylibs; their users
   compile nothing.
 
+## The extension way (binding-level FFI-unsafe functions)
+
+Functions excluded from the generated tables (by-value structs like
+`SDL_Color`, variadics, callbacks) get back through a **hand-written
+extension file** per library: `libraries/<name>/extension.ts`. One place
+declares both halves:
+
+- `ttfExtensionDefs` — raw dlopen defs in the backend-neutral string
+  dialect (`arguments`/`return` as type names); the bun loader translates
+  names → FFIType, node consumes them natively.
+- `ttfExtension(symbols)` — object-param wrappers over the extended
+  symbol surface, merged into the primary export by both loaders:
+  `export const ttf = { ...createTtfFunctions(raw), ...ttfExtension(raw) }`.
+
+The loaders type their raw export as `<Lib>ExtensionSymbols` (the
+generated `<Lib>Symbols` plus the extension signatures), so extension
+wrappers and toolkit code both see real branded handles. Documented ABI
+shortcuts (e.g. SDL_Color-as-u32) live exactly here — visible, reviewed,
+one file per library.
+
 ## Historical notes (so we don't relitigate)
 
 1. **koffi everywhere** — unofficial, crash-prone on Bun
