@@ -1,0 +1,123 @@
+/** Single-line and wrap line layout — ported from flying-pan's layout/wrap. */
+import type { LayoutFlexFn, LayoutLineOptions } from "./types.ts";
+import { calculateMainContentSize, wrapMeasurements } from "./measurement.ts";
+import { positionFlowChildren } from "./flow.ts";
+import { updateChildMeasurements } from "./utility.ts";
+
+export function layoutSingleLine(
+  options: LayoutLineOptions,
+  layoutFlex: LayoutFlexFn
+): void {
+  const { flow, style, padding, isRow, gap, contentWidth, contentHeight } =
+    options;
+
+  const { crossAxisSize, mainAxisSize, totalGaps, totalMainSize } =
+    updateChildMeasurements({
+      measurements: flow,
+      contentHeight,
+      contentWidth,
+      isRow,
+      gap,
+    });
+
+  const {
+    alignItems,
+    justifyItems,
+    mainPos: calculatedMainPos,
+    spaceBetweenGap,
+    spaceEvenlyGap,
+  } = calculateMainContentSize({
+    crossAxisSize,
+    mainAxisSize,
+    measurements: flow,
+    totalGaps,
+    totalMainSize,
+    padding,
+    style,
+    isRow,
+  });
+
+  positionFlowChildren(
+    {
+      ...options,
+      measurements: flow,
+      alignItems,
+      crossAxisSize,
+      mainPos: calculatedMainPos,
+      spaceBetweenGap,
+      spaceEvenlyGap,
+      justifyItems,
+    },
+    layoutFlex
+  );
+}
+
+export function layoutWrap(
+  options: LayoutLineOptions,
+  layoutFlex: LayoutFlexFn
+): void {
+  const { flow, style, padding, isRow, gap, contentWidth, contentHeight } =
+    options;
+
+  const mainAxisSize = isRow ? contentWidth : contentHeight;
+
+  const lines = wrapMeasurements({
+    measurements: flow,
+    mainAxisSize,
+    gap,
+    isRow,
+  });
+
+  let crossPos = isRow ? padding.top : padding.left;
+
+  for (const line of lines) {
+    const { totalMainSize } = updateChildMeasurements({
+      measurements: line.measurements,
+      contentHeight,
+      contentWidth,
+      isRow,
+      gap,
+    });
+
+    const totalGaps =
+      line.measurements.length > 1 ? gap * (line.measurements.length - 1) : 0;
+
+    const {
+      alignItems,
+      justifyItems,
+      mainPos,
+      spaceBetweenGap,
+      spaceEvenlyGap,
+    } = calculateMainContentSize({
+      crossAxisSize: isRow ? contentHeight : contentWidth,
+      mainAxisSize,
+      measurements: line.measurements,
+      totalGaps,
+      totalMainSize,
+      padding,
+      style,
+      isRow,
+    });
+
+    positionFlowChildren(
+      {
+        ...options,
+        measurements: line.measurements,
+        alignItems,
+        padding: {
+          ...padding,
+          top: isRow ? crossPos : padding.top,
+          left: isRow ? padding.left : crossPos,
+        },
+        crossAxisSize: isRow ? contentHeight : contentWidth,
+        mainPos,
+        spaceBetweenGap,
+        spaceEvenlyGap,
+        justifyItems,
+      },
+      layoutFlex
+    );
+
+    crossPos += line.crossSize + gap;
+  }
+}
