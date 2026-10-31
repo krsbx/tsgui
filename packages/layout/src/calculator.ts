@@ -1,4 +1,5 @@
 /** Flex space distribution — ported verbatim from flying-pan's calculator. */
+import { mainMargin } from "./axis.ts";
 import type { DistributeChildOptions } from "./types.ts";
 
 export function distributeFreeSpace(options: DistributeChildOptions): void {
@@ -7,10 +8,7 @@ export function distributeFreeSpace(options: DistributeChildOptions): void {
   for (const m of options.measurements) {
     if (!m.flex) continue;
 
-    const mainMargin = options.isRow
-      ? m.margin.left + m.margin.right
-      : m.margin.top + m.margin.bottom;
-    const size = m.flex * flexUnit - mainMargin;
+    const size = m.flex * flexUnit - mainMargin(m, options.isRow);
 
     if (options.isRow) {
       m.width = size;
@@ -35,10 +33,8 @@ export function distributeShrinking(options: DistributeChildOptions): void {
     for (const m of options.measurements) {
       if (m.flexShrink <= 0) continue;
 
-      const mainMargin = options.isRow
-        ? m.margin.left + m.margin.right
-        : m.margin.top + m.margin.bottom;
-      const shrinkAmount = (m.flexShrink / totalShrink) * overflow - mainMargin;
+      const shrinkAmount =
+        (m.flexShrink / totalShrink) * overflow - mainMargin(m, options.isRow);
 
       if (options.isRow) {
         m.width = Math.max(0, m.width - shrinkAmount);

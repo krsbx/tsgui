@@ -1,7 +1,10 @@
 /** @tsgui/layout — CSS-like flexbox engine. Pure TypeScript, zero FFI. */
 export * from "./enums.ts";
+export { crossMargin, mainMargin, mainSize } from "./axis.ts";
 export {
+  clamp,
   layoutConstraints,
+  resolveConstraint,
   resolveSize,
   resolveSpacing,
   ROOT_FONT_SIZE,

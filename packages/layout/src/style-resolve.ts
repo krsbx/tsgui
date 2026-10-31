@@ -102,16 +102,27 @@ export function layoutConstraints(
   };
 }
 
-export function clamp({
-  value,
-  min,
-  max,
-}: {
+export interface ClampOptions {
   value: number;
+  /** null = unbounded. */
   min: number | null;
   max: number | null;
-}): number {
+}
+
+export function clamp(options: ClampOptions): number {
+  const { value, min, max } = options;
   if (min !== null && value < min) return min;
   if (max !== null && value > max) return max;
   return value;
+}
+
+/**
+ * Resolves an optional min/max constraint; `undefined` stays `null`
+ * (unbounded) so the result feeds {@link clamp} directly.
+ */
+export function resolveConstraint(
+  value: SizeInput | undefined,
+  percentBase: number
+): number | null {
+  return value != null ? resolveSize(value, percentBase) : null;
 }

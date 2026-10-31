@@ -159,8 +159,3 @@ export interface Size {
   width: number;
   height: number;
 }
-
-export interface TextMeasurements {
-  width: number;
-  height: number;
-}

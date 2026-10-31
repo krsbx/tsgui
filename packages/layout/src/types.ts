@@ -4,7 +4,8 @@
  * renderer's PaintContext, which is what made layout untestable without
  * a window + GPU).
  */
-import type { Coordinate2D, Size, WidgetDescriptor } from "./style.ts";
+import { FlexAlign, FlexJustify } from "./enums.ts";
+import type { Coordinate2D, ResolvedSpacing, Size, WidgetDescriptor } from "./style.ts";
 
 export interface LayoutNode extends Coordinate2D, Size {
   stableId: number;
@@ -52,7 +53,7 @@ export interface ChildMeasurements extends Size {
   widget: WidgetDescriptor;
   flex: number;
   flexShrink: number;
-  margin: { top: number; right: number; bottom: number; left: number };
+  margin: ResolvedSpacing;
 }
 
 export interface MeasureChildsComponentOptions {
@@ -101,7 +102,7 @@ export interface UpdateChildMeasurementsResult {
 export interface CalculateMainContentSizeOptions
   extends UpdateChildMeasurementsResult {
   measurements: ChildMeasurements[];
-  padding: { top: number; right: number; bottom: number; left: number };
+  padding: ResolvedSpacing;
   style: WidgetDescriptor["style"];
   isRow: boolean;
 }
@@ -109,8 +110,8 @@ export interface CalculateMainContentSizeOptions
 export interface CalculateMainContentSizeResult {
   spaceBetweenGap: number;
   spaceEvenlyGap: number;
-  alignItems: string;
-  justifyItems: string;
+  alignItems: FlexAlign;
+  justifyItems: FlexJustify;
   mainPos: number;
 }
 
@@ -124,7 +125,7 @@ export interface DistributeChildOptions {
 export interface LayoutLineOptions {
   flow: ChildMeasurements[];
   style: NonNullable<WidgetDescriptor["style"]>;
-  padding: { top: number; right: number; bottom: number; left: number };
+  padding: ResolvedSpacing;
   isRow: boolean;
   gap: number;
   contentWidth: number;
@@ -138,14 +139,14 @@ export interface LayoutLineOptions {
 
 export interface PositionFlowChildrenOptions {
   measurements: ChildMeasurements[];
-  alignItems: string;
+  alignItems: FlexAlign;
   isRow: boolean;
-  padding: { top: number; right: number; bottom: number; left: number };
+  padding: ResolvedSpacing;
   crossAxisSize: number;
   mainPos: number;
   spaceBetweenGap: number;
   spaceEvenlyGap: number;
-  justifyItems: string;
+  justifyItems: FlexJustify;
   x: number;
   y: number;
   gap: number;
@@ -156,7 +157,7 @@ export interface PositionFlowChildrenOptions {
 
 export interface PositionAbsoluteOptions {
   m: ChildMeasurements;
-  padding: { top: number; right: number; bottom: number; left: number };
+  padding: ResolvedSpacing;
   contentWidth: number;
   contentHeight: number;
   x: number;

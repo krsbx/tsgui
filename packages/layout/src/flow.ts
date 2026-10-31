@@ -1,4 +1,5 @@
 /** Flow-child positioning — ported from flying-pan's layout/flow. */
+import { crossMargin } from "./axis.ts";
 import { FlexAlign, FlexJustify, Position } from "./enums.ts";
 import { resolveSize } from "./style-resolve.ts";
 import type { LayoutFlexFn, PositionFlowChildrenOptions } from "./types.ts";
@@ -32,9 +33,7 @@ export function positionFlowChildren(
     const childMain = mainPos + (isRow ? m.margin.left : m.margin.top);
 
     const childCrossSize = isRow ? m.height : m.width;
-    const crossWithMargin = isRow
-      ? crossAxisSize - m.margin.top - m.margin.bottom
-      : crossAxisSize - m.margin.left - m.margin.right;
+    const crossWithMargin = crossAxisSize - crossMargin(m, isRow);
 
     let crossPos = childCrossStart;
 

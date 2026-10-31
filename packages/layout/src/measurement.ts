@@ -1,6 +1,7 @@
 /** Child measurement + wrap + justify calculation — ported from flying-pan. */
+import { crossMargin, mainMargin, mainSize } from "./axis.ts";
 import type { WidgetDescriptor } from "./style.ts";
-import { clamp, resolveSize, resolveSpacing } from "./style-resolve.ts";
+import { clamp, resolveConstraint, resolveSpacing } from "./style-resolve.ts";
 import { FlexAlign, FlexJustify, Position, SpacingType } from "./enums.ts";
 import type {
   CalculateMainContentSizeOptions,
@@ -42,13 +43,13 @@ export function measureChildsComponent(
 
     width = clamp({
       value: width,
-      min: child.style?.minWidth != null ? resolveSize(child.style.minWidth, parentWidth) : null,
-      max: child.style?.maxWidth != null ? resolveSize(child.style.maxWidth, parentWidth) : null,
+      min: resolveConstraint(child.style?.minWidth, parentWidth),
+      max: resolveConstraint(child.style?.maxWidth, parentWidth),
     });
     height = clamp({
       value: height,
-      min: child.style?.minHeight != null ? resolveSize(child.style.minHeight, parentHeight) : null,
-      max: child.style?.maxHeight != null ? resolveSize(child.style.maxHeight, parentHeight) : null,
+      min: resolveConstraint(child.style?.minHeight, parentHeight),
+      max: resolveConstraint(child.style?.maxHeight, parentHeight),
     });
 
     const measurement: ChildMeasurements = {
@@ -84,11 +85,7 @@ export function wrapMeasurements(options: WrapMeasurementsOptions): WrapLine[] {
   let currentMain = 0;
 
   for (const m of options.measurements) {
-    const mainSize = options.isRow ? m.width : m.height;
-    const mainMargin = options.isRow
-      ? m.margin.left + m.margin.right
-      : m.margin.top + m.margin.bottom;
-    const spaceRequired = mainSize + mainMargin;
+    const spaceRequired = mainSize(m, options.isRow) + mainMargin(m, options.isRow);
     const gapRequired = currentLine.length > 0 ? options.gap : 0;
 
     if (
@@ -110,13 +107,10 @@ export function wrapMeasurements(options: WrapMeasurementsOptions): WrapLine[] {
 
   for (const line of lines) {
     line.crossSize = Math.max(
-      ...line.measurements.map((m) => {
-        const margin = options.isRow
-          ? m.margin.top + m.margin.bottom
-          : m.margin.left + m.margin.right;
-
-        return options.isRow ? m.height + margin : m.width + margin;
-      })
+      ...line.measurements.map(
+        (m) =>
+          (options.isRow ? m.height : m.width) + crossMargin(m, options.isRow)
+      )
     );
   }
 
