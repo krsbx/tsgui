@@ -11,6 +11,7 @@ import type {
 import type {
   InteractionProps,
   Key,
+  PointerPayload,
   ReconcilableWidget,
 } from "./types.ts";
 
@@ -34,5 +35,23 @@ export function createWidget(options: CreateWidgetOptions): ReconcilableWidget {
     children,
     key,
     ...handlers,
+  };
+}
+
+/**
+ * Click handler shared by the checked controls (Checkbox, Toggle): the
+ * consumer's onClick fires first, a disabled control no-ops, then the
+ * checked state flips through onCheckedChange.
+ */
+export function createCheckedClickHandler(options: {
+  disabled?: boolean;
+  checked?: boolean;
+  onCheckedChange?(checked: boolean, payload: PointerPayload): void;
+  onClick?(payload: PointerPayload): void;
+}): (payload: PointerPayload) => void {
+  return (payload) => {
+    options.onClick?.(payload);
+    if (options.disabled) return;
+    options.onCheckedChange?.(!(options.checked ?? false), payload);
   };
 }

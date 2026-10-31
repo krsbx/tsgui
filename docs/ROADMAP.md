@@ -145,10 +145,13 @@ runtimes.
 
 Foundation work (each item unblocks a widget batch):
 
-- [ ] Event dispatch port — pointer/focus/scroll dispatchers + typed event
-      decode + the hit-test utility from flying-pan's
-      `flying/interactions` (~1.4k lines, already decoupled from GL);
-      replaces gallery.ts's hand-rolled hit-test.
+- [x] Pointer dispatch port (2026-10-31) — pointer dispatcher + hit-test
+      from flying-pan's `flying/interactions`, adapted from the GLFW input
+      manager to decoded event-fed input (headless-testable): hover
+      enter/leave with press cancellation on drag-off, opt-in press
+      capture (`payload.capturePointer`), click = down+up on the same
+      widget, double-click counting. Replaces gallery.ts's hand-rolled
+      hit-test. Focus/scroll dispatchers remain (batch 3/4).
 - [ ] AnimationManager port (transitions, easing) — also drives progress
       indeterminate motion.
 - [ ] Controlled/uncontrolled state, pseudo-states (`:hover` etc.) —
@@ -162,7 +165,7 @@ the dispatcher exists to replace):
 | Batch | Widgets | Needs | Status |
 |---|---|---|---|
 | 1 | `ProgressBar`, `CircularProgress`, `Meter` | paint only | ✅ Phase 3.5 (2026-10-31) |
-| 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | phase 4, first milestone |
+| 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | ✅ (2026-10-31) |
 | 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | phase 4, second milestone |
 | 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | phase 4, last milestone |
 | 5 | `Canvas`, `Custom` painter | CanvasContext + Path2D/tessellation port | phase 5 |

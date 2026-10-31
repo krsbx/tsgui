@@ -9,6 +9,7 @@ import {
 import { Palette } from "../design.ts";
 import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 import type { PaintContext } from "../paint.ts";
+import { propsOf } from "../types.ts";
 import type {
   CircularProgressProps,
   ProgressBarProps,
@@ -48,7 +49,7 @@ function paintIndeterminateBar(ctx: PaintContext, node: LayoutNode): void {
 }
 
 function paintIndeterminateRing(ctx: PaintContext, node: LayoutNode): void {
-  const props = node.widget.props as CircularProgressProps;
+  const props = propsOf<CircularProgressProps>(node.widget);
   const radius = Math.min(node.width, node.height) / 2;
   const thickness = props.thickness ?? 0.1;
 
@@ -64,7 +65,7 @@ function paintIndeterminateRing(ctx: PaintContext, node: LayoutNode): void {
 }
 
 export function paintProgressBar(ctx: PaintContext, node: LayoutNode): void {
-  const props = node.widget.props as ProgressBarProps;
+  const props = propsOf<ProgressBarProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
     paintIndeterminateBar(ctx, node);
@@ -162,7 +163,7 @@ export function paintProgressBar(ctx: PaintContext, node: LayoutNode): void {
 }
 
 export function paintCircularProgress(ctx: PaintContext, node: LayoutNode): void {
-  const props = node.widget.props as CircularProgressProps;
+  const props = propsOf<CircularProgressProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
     paintIndeterminateRing(ctx, node);

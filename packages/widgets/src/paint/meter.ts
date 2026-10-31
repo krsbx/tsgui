@@ -3,6 +3,7 @@ import type { LayoutNode } from "@tsgui/layout";
 import { ProgressDirection, ProgressBarOrientation } from "@tsgui/layout";
 import { MeterZone, Palette } from "../design.ts";
 import type { PaintContext } from "../paint.ts";
+import { propsOf } from "../types.ts";
 import type { MeterProps } from "../widgets/meter.ts";
 import { fillRatio, paintContinuousFill } from "./fill.ts";
 import { paintInlineValueLabel } from "./label.ts";
@@ -40,7 +41,7 @@ export function resolveMeterColor(options: {
 }
 
 export function paintMeter(ctx: PaintContext, node: LayoutNode): void {
-  const props = node.widget.props as MeterProps;
+  const props = propsOf<MeterProps>(node.widget);
 
   const min = props.min ?? 0;
   const max = props.max ?? 100;

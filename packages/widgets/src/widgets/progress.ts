@@ -59,35 +59,50 @@ export interface ProgressBarProps extends ProgressProps {
 }
 
 const DEFAULT_STEP_GAP = 2;
+const DEFAULT_SIZE = 48;
+const DEFAULT_THICKNESS = 0.1;
+const DEFAULT_START_ANGLE = -Math.PI / 2;
+
+/** The ProgressProps fields both factories carry into the descriptor. */
+function sharedProgressProps(props: ProgressProps): ProgressProps {
+  return {
+    value: props.value,
+    buffer: props.buffer,
+    min: props.min,
+    max: props.max,
+    type: props.type,
+    colorStops: props.colorStops,
+    label: props.label,
+    labelStyle: props.labelStyle,
+    showValue: props.showValue,
+    fillStyle: {
+      backgroundColor: Palette.accent,
+      ...props.fillStyle,
+    },
+    bufferStyle: props.bufferStyle,
+  };
+}
+
+/** Determinate when `value` is set; otherwise the requested type. */
+function resolveProgressType(props: ProgressProps): ProgressType {
+  return props.value !== undefined
+    ? ProgressType.Determinate
+    : (props.type ?? ProgressType.Indeterminate);
+}
 
 export function ProgressBar(props: ProgressBarProps): ReconcilableWidget {
-  const { style, fillStyle, key, ...handlers } = props;
+  const { style, key, ...handlers } = props;
 
   const orientation = props.orientation ?? ProgressBarOrientation.Horizontal;
   const direction = props.direction ?? ProgressDirection.Forward;
-  const type =
-    props.value !== undefined
-      ? ProgressType.Determinate
-      : (props.type ?? ProgressType.Indeterminate);
+  const type = resolveProgressType(props);
   const isHorizontal = orientation === ProgressBarOrientation.Horizontal;
 
   return createWidget({
     type: WidgetType.ProgressBar,
     props: {
-      value: props.value,
-      buffer: props.buffer,
-      min: props.min,
-      max: props.max,
+      ...sharedProgressProps(props),
       type,
-      colorStops: props.colorStops,
-      label: props.label,
-      labelStyle: props.labelStyle,
-      showValue: props.showValue,
-      fillStyle: {
-        backgroundColor: Palette.accent,
-        ...fillStyle,
-      },
-      bufferStyle: props.bufferStyle,
       steps: props.steps,
       stepGap: props.stepGap ?? DEFAULT_STEP_GAP,
       orientation,
@@ -118,39 +133,20 @@ export interface CircularProgressProps extends ProgressProps {
   direction?: CircularProgressDirection;
 }
 
-const DEFAULT_SIZE = 48;
-const DEFAULT_THICKNESS = 0.1;
-const DEFAULT_START_ANGLE = -Math.PI / 2;
-
 export function CircularProgress(props: CircularProgressProps): ReconcilableWidget {
-  const { style, fillStyle, key, ...handlers } = props;
+  const { style, key, ...handlers } = props;
 
   const size = props.size ?? DEFAULT_SIZE;
   const startAngle = props.startAngle ?? DEFAULT_START_ANGLE;
   const direction = props.direction ?? CircularProgressDirection.Clockwise;
-  const type =
-    props.value !== undefined
-      ? ProgressType.Determinate
-      : (props.type ?? ProgressType.Indeterminate);
+  const type = resolveProgressType(props);
   const thickness = props.thickness ?? DEFAULT_THICKNESS;
 
   return createWidget({
     type: WidgetType.CircularProgress,
     props: {
-      value: props.value,
-      buffer: props.buffer,
-      min: props.min,
-      max: props.max,
+      ...sharedProgressProps(props),
       type,
-      colorStops: props.colorStops,
-      label: props.label,
-      labelStyle: props.labelStyle,
-      showValue: props.showValue,
-      fillStyle: {
-        backgroundColor: Palette.accent,
-        ...fillStyle,
-      },
-      bufferStyle: props.bufferStyle,
       thickness,
       startAngle,
       direction,

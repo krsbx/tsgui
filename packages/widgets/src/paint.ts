@@ -6,25 +6,25 @@
  * The Painter surface is STRUCTURAL and reuses @tsgui/gpu's option types,
  * so GpuRenderer satisfies it while headless tests mock it.
  */
-import { WidgetType, type LayoutNode, type ViewStyle } from "@tsgui/layout";
 import type {
   ArcOptions,
   Rect,
   RectOptions,
   RingOptions,
+  TextDrawOptions,
   TextureDrawOptions,
 } from "@tsgui/gpu";
-import type { TextDrawOptions } from "@tsgui/gpu";
-import type { InteractionStates, } from "./style-resolve.ts";
-import { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
+import type { Size } from "@tsgui/layout";
+import { type LayoutNode, type ViewStyle, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
+import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintBackground, paintBorder } from "./paint/fill.ts";
 import { paintMeter } from "./paint/meter.ts";
-import {
-  paintCircularProgress,
-  paintProgressBar,
-} from "./paint/progress.ts";
-import type { Size } from "@tsgui/layout";
+import { paintCircularProgress, paintProgressBar } from "./paint/progress.ts";
+import { paintRadio } from "./paint/radio.ts";
+import { paintToggle } from "./paint/toggle.ts";
+import type { InteractionStates } from "./style-resolve.ts";
+import { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
@@ -49,7 +49,7 @@ export interface PaintContext {
   statesOf?(node: LayoutNode): InteractionStates;
 }
 
-export { parseColor, colorWithOpacity, resolveStyle } from "./style-resolve.ts";
+export { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
 export type { InteractionStates };
 
 /** Interaction states when no dispatch is wired — every flag off. */
@@ -74,7 +74,9 @@ function paintShadow(
 ): void {
   if (!style.boxShadow) return;
 
-  const shadows = Array.isArray(style.boxShadow) ? style.boxShadow : [style.boxShadow];
+  const shadows = Array.isArray(style.boxShadow)
+    ? style.boxShadow
+    : [style.boxShadow];
 
   for (const shadow of shadows) {
     const blur = shadow.blur ?? 0;
@@ -97,9 +99,24 @@ function paintShadow(
   }
 }
 
+/** Widgets whose checked flag comes from props (Radio uses `selected`). */
+const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([
+  [WidgetType.Checkbox, "checked"],
+  [WidgetType.Toggle, "checked"],
+  [WidgetType.Radio, "selected"],
+]);
+
 function paintNode(ctx: PaintContext, node: LayoutNode): void {
   const base = node.widget.style ?? {};
-  const style = resolveStyle(base, ctx.statesOf?.(node) ?? STATES_NONE);
+  const states = ctx.statesOf?.(node) ?? STATES_NONE;
+
+  // Controls carry their checked flag in props — fold it into the
+  // pseudo-state so `_checked` style overrides apply.
+  const checkedKey = CHECKED_PROP.get(node.widget.type);
+  const checked = checkedKey ? node.widget.props[checkedKey] === true : false;
+  const effectiveStates = checkedKey ? { ...states, checked } : states;
+
+  const style = resolveStyle(base, effectiveStates);
 
   const rect: Rect = {
     x: node.screenX,
@@ -130,7 +147,9 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
     case WidgetType.Image: {
       // Descriptors carry the texture as an opaque prop; the paint bridge
       // trusts the app layer to store a real texture handle there.
-      const texture = node.widget.props["texture"] as TextureDrawOptions["texture"];
+      const texture = node.widget.props[
+        "texture"
+      ] as TextureDrawOptions["texture"];
       if (texture) {
         ctx.gpu.drawTexture({ texture, ...rect });
       }
@@ -144,6 +163,15 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       break;
     case WidgetType.Meter:
       paintMeter(ctx, node);
+      break;
+    case WidgetType.Checkbox:
+      paintCheckbox(ctx, node, checked);
+      break;
+    case WidgetType.Toggle:
+      paintToggle(ctx, node, checked);
+      break;
+    case WidgetType.Radio:
+      paintRadio(ctx, node, checked);
       break;
     default:
       break;

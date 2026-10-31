@@ -27,23 +27,30 @@ import {
   FlexAlign,
   FlexDirection,
   layoutFlex,
-  PointerEvents,
   ProgressValueType,
   type LayoutContext,
   type LayoutNode,
 } from "@tsgui/layout";
 import {
   Button,
+  Checkbox,
   CircularProgress,
   Image,
   Label,
   Meter,
   paintTree,
   Palette,
+  PointerDispatcher,
+  PointerInputKind,
   ProgressBar,
+  Radio,
+  RadioGroup,
   Reconciler,
   StateStore,
+  Toggle,
   View,
+  type MouseButton,
+  type PointerInputEvent,
   type ReconcilableWidget,
 } from "@tsgui/widgets";
 
@@ -102,6 +109,9 @@ if (!photo) throw new Error(`IMG_LoadTexture: ${sdl.SDL_GetError()}`);
 // across rebuilds and short-circuits identical references entirely.
 
 let clicks = 0;
+let agree = false;
+let wifi = true;
+let flavor = "mint";
 let dirty = true;
 
 function buildTree(): ReconcilableWidget {
@@ -141,7 +151,10 @@ function buildTree(): ReconcilableWidget {
         ],
       }),
 
-      Label({ text: `clicked ${clicks} times`, style: { color: Palette.textMuted } }),
+      Label({
+        text: `clicked ${clicks} times · agree ${agree ? "✓" : "✗"} · wifi ${wifi ? "on" : "off"} · ${flavor}`,
+        style: { color: Palette.textMuted },
+      }),
 
       // buttons row — hover/press flow through the baked pseudo-states
       View({
@@ -165,6 +178,48 @@ function buildTree(): ReconcilableWidget {
             onClick: increment,
           }),
           Button({ children: [Label({ text: "Disabled" })], disabled: true }),
+        ],
+      }),
+
+      // controls — click dispatch through the pointer dispatcher
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        children: [
+          Checkbox({
+            checked: agree,
+            onCheckedChange: (next) => {
+              agree = next;
+              dirty = true;
+            },
+          }),
+          Checkbox({
+            checked: agree,
+            onCheckedChange: (next) => {
+              agree = next;
+              clicks++;
+              dirty = true;
+            },
+            disabled: true,
+          }),
+          Toggle({
+            checked: wifi,
+            onCheckedChange: (next) => {
+              wifi = next;
+              dirty = true;
+            },
+          }),
+          RadioGroup({
+            value: flavor,
+            onValueChange: (next) => {
+              flavor = next;
+              dirty = true;
+            },
+            children: [
+              Radio({ value: "mint", label: "Mint" }),
+              Radio({ value: "berry", label: "Berry" }),
+              Radio({ value: "lime", label: "Lime", disabled: true }),
+            ],
+          }),
         ],
       }),
 
@@ -259,34 +314,9 @@ const layoutCtx: LayoutContext = {
   getImageSize: () => null, // gallery images carry explicit dimensions
 };
 
-// --- pointer state (phase 4 generalizes this into the dispatch) -----------
-let hoverId = 0;
-let pressedId = 0;
-
-const interactionStatesOf = (node: LayoutNode) => ({
-  hovered: node.stableId === hoverId,
-  pressed: node.stableId === pressedId,
-  focused: false,
-  checked: false,
-  disabled: false,
-});
-
-/** Deepest non-pass-through node under the pointer. */
-function hitTest(x: number, y: number): number {
-  let hit = 0;
-  for (const node of layoutIndex.values()) {
-    if (node.widget.style?.pointerEvents === PointerEvents.None) continue;
-    if (
-      x >= node.screenX &&
-      x < node.screenX + node.width &&
-      y >= node.screenY &&
-      y < node.screenY + node.height
-    ) {
-      hit = node.stableId; // pre-order — the last match is the deepest
-    }
-  }
-  return hit;
-}
+// --- pointer dispatch (the phase 4 port) -----------------------------------
+const pointer = new PointerDispatcher();
+const pointerEvents: PointerInputEvent[] = [];
 
 // --- frame loop ------------------------------------------------------------
 const eventData = new Uint8Array(256);
@@ -309,21 +339,26 @@ while (running) {
       running = false;
     }
     if (type === EventType.SDL_EVENT_MOUSE_MOTION) {
-      hoverId = hitTest(eventView.getFloat32(28, true), eventView.getFloat32(32, true));
+      pointerEvents.push({
+        kind: PointerInputKind.Move,
+        x: eventView.getFloat32(28, true),
+        y: eventView.getFloat32(32, true),
+      });
     }
-    if (type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN && eventView.getUint8(24) === 1) {
-      pressedId = hoverId;
-    }
-    if (type === EventType.SDL_EVENT_MOUSE_BUTTON_UP && eventView.getUint8(24) === 1) {
-      if (pressedId !== 0 && hoverId === pressedId) {
-        // Layout nodes carry the reconciled descriptors.
-        const widget = layoutIndex.get(pressedId)!.widget as ReconcilableWidget;
-        widget.onClick?.({
-          x: eventView.getFloat32(28, true),
-          y: eventView.getFloat32(32, true),
-        });
-      }
-      pressedId = 0;
+    if (
+      (type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN ||
+        type === EventType.SDL_EVENT_MOUSE_BUTTON_UP) &&
+      eventView.getUint8(24) > 0
+    ) {
+      pointerEvents.push({
+        kind:
+          type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN
+            ? PointerInputKind.Down
+            : PointerInputKind.Up,
+        x: eventView.getFloat32(28, true),
+        y: eventView.getFloat32(32, true),
+        button: eventView.getUint8(24) as MouseButton,
+      });
     }
   }
 
@@ -344,8 +379,11 @@ while (running) {
     ctx: layoutCtx,
   });
 
+  pointer.dispatch({ events: pointerEvents, root, layoutIndex });
+  pointerEvents.length = 0;
+
   gpu.beginFrame();
-  paintTree({ gpu, font, statesOf: interactionStatesOf }, root);
+  paintTree({ gpu, font, statesOf: (node) => pointer.statesOf(node) }, root);
   gpu.present();
 
   frames++;
