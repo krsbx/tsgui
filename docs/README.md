@@ -19,6 +19,7 @@ restructured around three goals flying-pan lacked:
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Monorepo package layout, layering rules, frame loop, threading model |
 | [FFI.md](./FFI.md) | Runtime-split dlopen (bun:ffi / node:ffi), tables generated from SDL3 headers, FFI-safety filter |
 | [PLATFORM.md](./PLATFORM.md) | SDL3 platform, hardcore binding tiers, batched renderer on SDL_Renderer (zero C) |
+| [LAYOUT.md](./LAYOUT.md) | The flexbox engine: minimal injected LayoutContext, semantics, engine map, headless testing |
 | [RENDERING.md](./RENDERING.md) | Batched renderer, vertex format, SDF shapes, fonts, canvas/SVG strategy |
 | [ROADMAP.md](./ROADMAP.md) | Build phases with exit criteria |
 

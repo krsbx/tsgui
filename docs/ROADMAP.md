@@ -73,8 +73,11 @@ drawn with one render call, on Node and Bun.
 
 ## Phase 3 — Layout + reconciler
 
-- [ ] Port flying-pan's flexbox engine into `@tsgui/layout`, GL/coupling
-      stripped, single-object params kept.
+- [x] Port flying-pan's flexbox engine into `@tsgui/layout` (2026-10-31)
+      — GL coupling stripped, `LayoutContext` minimal + injected (was
+      aliased to the renderer's PaintContext), single-object params kept,
+      per-run text measurement via the `ttf` tier. 8 headless tests green
+      on the full semantic surface; see docs/LAYOUT.md.
 - [ ] Port reconciler + `stableId` + `StateStore` into `@tsgui/widgets`.
 - [ ] **Headless harness**: layout + encode with a null GPU backend;
       golden-snapshot tests over layout trees and encoded buffers.
