@@ -43,6 +43,23 @@ on:
         required: false
         default: ""
         type: string
+  # Same inputs, so build-sdl-family.yml can call this workflow.
+  workflow_call:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.2.4
+        required: true
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_image
+        required: true
+        default: "libsdl-org/SDL_image"
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = latest stable release)
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: read
@@ -87,7 +104,8 @@ jobs:
             sdl3_tag=$SDL3_TAG_INPUT
           else
             sdl3_tag=$(gh api "repos/$sdl3_repo/releases?per_page=30" \
-              --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name')
+              --jq '[.[] | select(.draft == false and .prerelease == false
+                and (.tag_name | startswith("release-3.")))][0].tag_name')
           fi
 
           version=${TAG#release-}
@@ -252,7 +270,8 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: asset-${{ matrix.platform }}
+          # Scoped by library: build-sdl-family.yml runs all four in one run.
+          name: asset-${{ env.LIB }}-${{ matrix.platform }}
           path: ${{ env.LIB }}_${{ matrix.platform }}.*
           if-no-files-found: error
           retention-days: 7
@@ -268,7 +287,7 @@ jobs:
       - name: Download platform artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: asset-*
+          pattern: asset-${{ env.LIB }}-*
           path: dist
           merge-multiple: true
 

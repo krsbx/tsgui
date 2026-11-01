@@ -33,6 +33,18 @@ on:
         required: true
         default: "libsdl-org/SDL"
         type: string
+  # Same inputs, so build-sdl-family.yml can call this workflow.
+  workflow_call:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.4.14
+        required: true
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL
+        required: true
+        default: "libsdl-org/SDL"
+        type: string
 
 permissions:
   contents: read
@@ -202,7 +214,8 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: asset-${{ matrix.platform }}
+          # Scoped by library: build-sdl-family.yml runs all four in one run.
+          name: asset-${{ env.LIB }}-${{ matrix.platform }}
           path: ${{ env.LIB }}_${{ matrix.platform }}.*
           if-no-files-found: error
           retention-days: 7
@@ -218,7 +231,7 @@ jobs:
       - name: Download platform artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: asset-*
+          pattern: asset-${{ env.LIB }}-*
           path: dist
           merge-multiple: true
 
