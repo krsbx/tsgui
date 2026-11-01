@@ -38,7 +38,17 @@ export type TtfExtensionSymbols = TtfSymbols &
   SymbolsFromDefs<typeof ttfExtensionDefs>;
 
 /** Object-param surface for the extension functions. */
-export function ttfExtension(symbols: TtfExtensionSymbols) {
+export interface TtfExtensionFunctions {
+  TTF_RenderText_Blended(opts: {
+    font: TTF_Font;
+    text: string;
+    /** 0 = null-terminated. */
+    length?: number;
+    color: number;
+  }): SDL_Surface | null;
+}
+
+export function ttfExtension(symbols: TtfExtensionSymbols): TtfExtensionFunctions {
   return {
     TTF_RenderText_Blended(opts: {
       font: TTF_Font;

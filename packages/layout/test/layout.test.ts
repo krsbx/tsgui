@@ -9,7 +9,7 @@ import {
   WidgetType,
 } from "../src/index.ts";
 
-function makeContext() {
+function makeContext(): LayoutContext {
   const idCounter = { value: 1 };
   const ctx: LayoutContext = {
     layoutIndex: new Map<number, LayoutNode>(),

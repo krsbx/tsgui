@@ -2,7 +2,7 @@
 import type { FfiTables } from "../model";
 
 /** Used by the pipeline report so missing capabilities are visible, not silent. */
-export function summarizeUnsafe(tables: FfiTables, limit = 20): string {
+export function summarizeUnsafe(tables: FfiTables, limit: number = 20): string {
   if (tables.unsafe.length === 0) return "";
   const samples = tables.unsafe
     .slice(0, limit)

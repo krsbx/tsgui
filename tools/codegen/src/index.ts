@@ -10,7 +10,7 @@
 import { generateTarget } from "./generate";
 import { TARGETS } from "./targets";
 
-async function main() {
+async function main(): Promise<void> {
   const check = process.argv.includes("--check");
   const targetName = process.argv[2];
 

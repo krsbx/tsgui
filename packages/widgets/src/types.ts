@@ -1,5 +1,6 @@
 /** Reconcilable widget trees + interaction contract. */
 import type { LayoutNode, WidgetDescriptor } from "@tsgui/layout";
+import type { StateStore } from "./state.ts";
 
 export type { LayoutNode };
 
@@ -74,6 +75,8 @@ export interface PointerPayload {
    * lets drag-off cancel a press.
    */
   capturePointer?(): void;
+  /** The app's state store — uncontrolled widgets persist here. */
+  stateStore?: StateStore;
 }
 
 export interface WidgetLifecyclePayload {
@@ -91,6 +94,8 @@ export interface KeyPayload {
   stableId: number;
   /** The laid-out focused node — geometry for edit scroll math. */
   node: LayoutNode;
+  /** The app's state store — uncontrolled widgets persist here. */
+  stateStore?: StateStore;
 }
 
 /** Payload for text (char) input — routed to the focused widget. */
@@ -99,6 +104,8 @@ export interface CharPayload {
   stableId: number;
   /** The laid-out focused node — geometry for edit scroll math. */
   node: LayoutNode;
+  /** The app's state store — uncontrolled widgets persist here. */
+  stateStore?: StateStore;
 }
 
 /** Payload for focus transitions. */

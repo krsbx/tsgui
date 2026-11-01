@@ -28,6 +28,20 @@ export class StateStore {
   private readonly store = new Map<number, any>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private readonly namedStore = new Map<string, any>();
+  private versionCounter = 0;
+
+  /**
+   * Bumped on every mutation (setState/destroy). The app loop compares
+   * it to decide when uncontrolled widgets need a repaint — controlled
+   * widgets rebuild through onChange instead.
+   */
+  public get version(): number {
+    return this.versionCounter;
+  }
+
+  private bump(): void {
+    this.versionCounter++;
+  }
 
   public stateFor<T>(options: StateForOptions<T | (() => T)>): T {
     const { stableId, initial } = options;
@@ -46,6 +60,7 @@ export class StateStore {
 
   public setState<T>(options: SetStateOptions<T>): void {
     this.store.set(options.stableId, options.value);
+    this.bump();
   }
 
   public stateForByName<T>(options: StateForByNameOptions<T | (() => T)>): T {
@@ -65,14 +80,15 @@ export class StateStore {
 
   public setStateByName<T>(options: SetStateByNameOptions<T>): void {
     this.namedStore.set(options.name, options.value);
+    this.bump();
   }
 
   public destroy(stableId: number): void {
-    this.store.delete(stableId);
+    if (this.store.delete(stableId)) this.bump();
   }
 
   public destroyByName(name: string): void {
-    this.namedStore.delete(name);
+    if (this.namedStore.delete(name)) this.bump();
   }
 
   public clear(): void {

@@ -11,6 +11,7 @@
 import type { LayoutNode } from "@tsgui/layout";
 import type { InteractionStates } from "../style-resolve.ts";
 import type { PointerPayload, ReconcilableWidget } from "../types.ts";
+import type { StateStore } from "../state.ts";
 import { MouseButton } from "../types.ts";
 import { hitTest } from "./hit-test.ts";
 import { type PointerInputEvent, PointerInputKind } from "./types.ts";
@@ -35,6 +36,8 @@ export interface PointerDispatchOptions {
   root: LayoutNode;
   /** stableId → node, populated pre-order during layoutFlex. */
   layoutIndex: Map<number, LayoutNode>;
+  /** The app's state store — stamped into payloads for uncontrolled widgets. */
+  stateStore?: StateStore;
 }
 
 export class PointerDispatcher {
@@ -55,7 +58,7 @@ export class PointerDispatcher {
     event: PointerInputEvent,
     options: PointerDispatchOptions
   ): void {
-    const { root, layoutIndex } = options;
+    const { root, layoutIndex, stateStore } = options;
     const hit = hitTest({ node: root, x: event.x, y: event.y });
     const hitId = hit?.stableId ?? null;
 
@@ -105,7 +108,8 @@ export class PointerDispatcher {
               moveTarget,
               event,
               0,
-              moveTarget.stableId === this.capturedId
+              moveTarget.stableId === this.capturedId,
+              stateStore
             )
           );
         }
@@ -120,7 +124,7 @@ export class PointerDispatcher {
 
           if (hit) {
             widget(hit).onPointerDown?.({
-              ...payload(hit, event, 0),
+              ...payload(hit, event, 0, false, stateStore),
               capturePointer: () => {
                 this.capturedId = hitId;
                 this.capturedButton = button;
@@ -148,7 +152,7 @@ export class PointerDispatcher {
 
           if (clickNode) {
             widget(clickNode).onPointerUp?.(
-              payload(clickNode, event, 0, isCaptured)
+              payload(clickNode, event, 0, isCaptured, stateStore)
             );
 
             // Click = down and up on the same widget with the same button.
@@ -158,7 +162,13 @@ export class PointerDispatcher {
               button === this.pressedButton
             ) {
               widget(clickNode).onClick?.(
-                payload(clickNode, event, this.nextClickCount(clickId, button))
+                payload(
+                  clickNode,
+                  event,
+                  this.nextClickCount(clickId, button),
+                  isCaptured,
+                  stateStore
+                )
               );
             }
           }
@@ -243,7 +253,8 @@ function payload(
   node: LayoutNode,
   event: PointerInputEvent,
   count: number,
-  captured = false
+  captured = false,
+  stateStore?: StateStore
 ): PointerPayload {
   return {
     x: event.x,
@@ -253,5 +264,6 @@ function payload(
     stableId: node.stableId,
     node,
     captured,
+    stateStore,
   };
 }
