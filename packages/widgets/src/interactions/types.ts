@@ -30,6 +30,17 @@ export const KeyboardInputKind = {
 export type KeyboardInputKind =
   (typeof KeyboardInputKind)[keyof typeof KeyboardInputKind];
 
+/** Decoded wheel events, fed to the scroll dispatcher per frame. */
+export interface WheelInputEvent {
+  /** Horizontal scroll delta, positive right. */
+  scrollX: number;
+  /** Vertical scroll delta — SDL: positive away from the user. */
+  scrollY: number;
+  /** Pointer position — selects the scroll container under the cursor. */
+  mouseX: number;
+  mouseY: number;
+}
+
 export interface KeyboardInputEvent {
   kind: KeyboardInputKind;
   /** SDL keycode — see {@link KeyCode}. 0 for char events. */

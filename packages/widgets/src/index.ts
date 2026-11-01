@@ -72,6 +72,12 @@ export {
   FocusDispatcher,
   type FocusDispatchOptions,
 } from "./interactions/focus.ts";
+export {
+  measureContent,
+  ScrollDispatcher,
+  type ScrollDispatchOptions,
+} from "./interactions/scroll.ts";
+export { type WheelInputEvent } from "./interactions/types.ts";
 
 // Paint bridge
 export {
