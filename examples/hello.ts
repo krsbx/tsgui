@@ -5,7 +5,7 @@
  *   bun run examples/hello.ts              # run until the window closes
  *   bun run examples/hello.ts --selftest   # exit after ~120 frames (CI)
  */
-import { EventType, SdlDefines, Scancode, sdl } from "@tsgui/bindings";
+import { EventType, Scancode, sdl, SdlDefines } from "@tsgui/bindings";
 
 const selftest = process.argv.includes("--selftest");
 

@@ -9,9 +9,9 @@
  * double/triple-click counting inside the 500 ms window.
  */
 import type { LayoutNode } from "@tsgui/layout";
+import type { StateStore } from "../state.ts";
 import type { InteractionStates } from "../style-resolve.ts";
 import type { PointerPayload, ReconcilableWidget } from "../types.ts";
-import type { StateStore } from "../state.ts";
 import { MouseButton } from "../types.ts";
 import { hitTest } from "./hit-test.ts";
 import { type PointerInputEvent, PointerInputKind } from "./types.ts";

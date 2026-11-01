@@ -13,7 +13,12 @@
  * threads them into `screenX`/`screenY` on the next pass (one-frame
  * latency, documented in LAYOUT.md).
  */
-import { Overflow, clamp, type Coordinate2D, type LayoutNode } from "@tsgui/layout";
+import {
+  clamp,
+  type Coordinate2D,
+  type LayoutNode,
+  Overflow,
+} from "@tsgui/layout";
 import { hitTest } from "./hit-test.ts";
 import type { WheelInputEvent } from "./types.ts";
 
@@ -37,7 +42,12 @@ export class ScrollDispatcher {
   private lastTime = 0;
 
   public dispatch(options: ScrollDispatchOptions): void {
-    const { wheelEvents, root, layoutIndex, time = this.lastTime + FRAME_MS } = options;
+    const {
+      wheelEvents,
+      root,
+      layoutIndex,
+      time = this.lastTime + FRAME_MS,
+    } = options;
 
     // Framerate-normalized delta time, clamped against stalls.
     const dt = this.lastTime > 0 ? time - this.lastTime : FRAME_MS;
@@ -90,7 +100,11 @@ export class ScrollDispatcher {
     return null;
   }
 
-  private findPath(node: LayoutNode, target: LayoutNode, path: LayoutNode[]): boolean {
+  private findPath(
+    node: LayoutNode,
+    target: LayoutNode,
+    path: LayoutNode[]
+  ): boolean {
     path.push(node);
 
     if (node === target) return true;
@@ -103,10 +117,7 @@ export class ScrollDispatcher {
     return false;
   }
 
-  private handleWheel(
-    event: WheelInputEvent,
-    root: LayoutNode
-  ): void {
+  private handleWheel(event: WheelInputEvent, root: LayoutNode): void {
     const hit = hitTest({ node: root, x: event.mouseX, y: event.mouseY });
     if (!hit) return;
 
@@ -120,8 +131,16 @@ export class ScrollDispatcher {
 
     // SDL: positive y = wheel up; browsers: positive = down. Negate so
     // wheel-down grows the offset — matches browser feel.
-    const nextX = clamp({ value: current.x + event.scrollX, min: 0, max: maxScrollX });
-    const nextY = clamp({ value: current.y - event.scrollY, min: 0, max: maxScrollY });
+    const nextX = clamp({
+      value: current.x + event.scrollX,
+      min: 0,
+      max: maxScrollX,
+    });
+    const nextY = clamp({
+      value: current.y - event.scrollY,
+      min: 0,
+      max: maxScrollY,
+    });
 
     this.offsetsById.set(target.stableId, { x: nextX, y: nextY });
 
@@ -155,8 +174,16 @@ export class ScrollDispatcher {
       const maxScrollX = Math.max(0, contentWidth - target.width);
       const maxScrollY = Math.max(0, contentHeight - target.height);
 
-      const nextX = clamp({ value: current.x + vel.x * dtNorm, min: 0, max: maxScrollX });
-      const nextY = clamp({ value: current.y + vel.y * dtNorm, min: 0, max: maxScrollY });
+      const nextX = clamp({
+        value: current.x + vel.x * dtNorm,
+        min: 0,
+        max: maxScrollX,
+      });
+      const nextY = clamp({
+        value: current.y + vel.y * dtNorm,
+        min: 0,
+        max: maxScrollY,
+      });
 
       this.offsetsById.set(stableId, { x: nextX, y: nextY });
 

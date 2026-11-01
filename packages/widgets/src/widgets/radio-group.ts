@@ -49,7 +49,11 @@ export function RadioGroup(props: RadioGroupProps): ReconcilableWidget {
   // groups resolve from the `value` prop.
   const isControlled = value !== undefined;
   const groupName =
-    props.name ?? `__radio::${(children ?? []).filter((c) => c.type === WidgetType.Radio).map((c) => propsOf<RadioProps>(c).value).join("|")}`;
+    props.name ??
+    `__radio::${(children ?? [])
+      .filter((c) => c.type === WidgetType.Radio)
+      .map((c) => propsOf<RadioProps>(c).value)
+      .join("|")}`;
   const groupDefault = props.defaultValue ?? "";
 
   const augmented = (children ?? []).map((child) => {

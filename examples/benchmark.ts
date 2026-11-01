@@ -10,8 +10,19 @@
  * (SetRenderDrawColor, RenderClear, RenderGeometry ×2, RenderPresent) —
  * asserted at the end so the number can't silently drift.
  */
-import { EventType, PixelFormat, Scancode, SdlDefines, sdl } from "@tsgui/bindings";
-import { GpuRenderer, createTextureFromPixels, destroyTexture, rgba } from "@tsgui/gpu";
+import {
+  EventType,
+  PixelFormat,
+  Scancode,
+  sdl,
+  SdlDefines,
+} from "@tsgui/bindings";
+import {
+  createTextureFromPixels,
+  destroyTexture,
+  GpuRenderer,
+  rgba,
+} from "@tsgui/gpu";
 
 function checkerboardPixels(size: number): Uint8Array {
   const pixels = new Uint8Array(size * size * 4);
@@ -30,7 +41,9 @@ function checkerboardPixels(size: number): Uint8Array {
 
 function arg(name: string, fallback: number): number {
   const i = process.argv.indexOf(`--${name}`);
-  return i >= 0 ? parseInt(process.argv[i + 1] ?? "", 10) || fallback : fallback;
+  return i >= 0
+    ? parseInt(process.argv[i + 1] ?? "", 10) || fallback
+    : fallback;
 }
 
 const RECTS = arg("rects", 10_000);
@@ -64,7 +77,9 @@ const texture = createTextureFromPixels({
 // Deterministic pseudo-random rects (stable across runs and runtimes).
 let seed = 0x2f6e2b1;
 const rand = () => {
-  seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
+  seed ^= seed << 13;
+  seed ^= seed >>> 17;
+  seed ^= seed << 5;
   return (seed >>> 0) / 0xffffffff;
 };
 
@@ -94,7 +109,10 @@ while (running && frame < FRAMES) {
     const type = eventView.getUint32(0, true);
     if (type === EventType.SDL_EVENT_QUIT) running = false;
     if (type === EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
-    if (type === EventType.SDL_EVENT_KEY_DOWN && eventView.getUint32(24, true) === Scancode.SDL_SCANCODE_ESCAPE) {
+    if (
+      type === EventType.SDL_EVENT_KEY_DOWN &&
+      eventView.getUint32(24, true) === Scancode.SDL_SCANCODE_ESCAPE
+    ) {
       running = false;
     }
   }

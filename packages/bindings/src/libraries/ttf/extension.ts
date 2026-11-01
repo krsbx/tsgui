@@ -48,7 +48,9 @@ export interface TtfExtensionFunctions {
   }): SDL_Surface | null;
 }
 
-export function ttfExtension(symbols: TtfExtensionSymbols): TtfExtensionFunctions {
+export function ttfExtension(
+  symbols: TtfExtensionSymbols
+): TtfExtensionFunctions {
   return {
     TTF_RenderText_Blended(opts: {
       font: TTF_Font;

@@ -283,17 +283,25 @@ describe("TextInput editing", () => {
     const changes: string[] = [];
     let value = "";
     const h = setup(
-      field(value, (next) => {
-        changes.push(next);
-        value = next;
-      }, { disabled: true })
+      field(
+        value,
+        (next) => {
+          changes.push(next);
+          value = next;
+        },
+        { disabled: true }
+      )
     );
     const render = (): void =>
       h.render(
-        field(value, (next) => {
-          changes.push(next);
-          value = next;
-        }, { disabled: true })
+        field(
+          value,
+          (next) => {
+            changes.push(next);
+            value = next;
+          },
+          { disabled: true }
+        )
       );
 
     h.click(100, 12);

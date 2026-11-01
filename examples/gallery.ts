@@ -255,7 +255,11 @@ function buildTree(): ReconcilableWidget {
       // uncontrolled controls — zero app state: the store + painter
       // handle everything (the version counter drives repaints)
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 24,
+          alignItems: FlexAlign.Center,
+        },
         children: [
           Checkbox({ defaultChecked: true }),
           Toggle({ defaultChecked: false }),

@@ -3,20 +3,20 @@
  * content bounds, velocity EMA + friction coasting, offset exposure for
  * LayoutContext.scrollOffsetOf.
  */
-import { describe, expect, test } from "bun:test";
 import {
   FlexDirection,
-  layoutFlex,
-  Overflow,
   type LayoutContext,
+  layoutFlex,
   type LayoutNode,
+  Overflow,
 } from "@tsgui/layout";
+import { describe, expect, test } from "bun:test";
 import {
+  type ReconcilableWidget,
   Reconciler,
   ScrollDispatcher,
   StateStore,
   View,
-  type ReconcilableWidget,
 } from "../src/index.ts";
 
 interface Harness {
@@ -117,9 +117,19 @@ function view(
   childrenOrKey?: ReconcilableWidget[] | string
 ): ReconcilableWidget {
   if (typeof childrenOrKey === "string") {
-    return { type: "View", props: {}, style, key: childrenOrKey } as ReconcilableWidget;
+    return {
+      type: "View",
+      props: {},
+      style,
+      key: childrenOrKey,
+    } as ReconcilableWidget;
   }
-  return { type: "View", props: {}, style, children: childrenOrKey } as ReconcilableWidget;
+  return {
+    type: "View",
+    props: {},
+    style,
+    children: childrenOrKey,
+  } as ReconcilableWidget;
 }
 
 describe("ScrollDispatcher", () => {

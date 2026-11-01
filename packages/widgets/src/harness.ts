@@ -141,7 +141,10 @@ export function renderHeadless(
         tint: o.tint ?? 0xffffffff,
       }),
   };
-  paintTree({ gpu, font, statesOf: options.statesOf, stateStore: stateStore }, root);
+  paintTree(
+    { gpu, font, statesOf: options.statesOf, stateStore: stateStore },
+    root
+  );
 
   return { root, ops, layoutIndex, reconciler, changed: reconciler.changed };
 }

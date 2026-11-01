@@ -15,7 +15,7 @@ import type {
   TextureDrawOptions,
 } from "@tsgui/gpu";
 import type { Size } from "@tsgui/layout";
-import { Overflow, type LayoutNode, WidgetType } from "@tsgui/layout";
+import { type LayoutNode, Overflow, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
@@ -26,11 +26,11 @@ import {
 } from "./paint/progress/index.ts";
 import { paintRadio } from "./paint/radio.ts";
 import { paintShadow } from "./paint/shadow.ts";
-import type { StateStore } from "./state.ts";
 import { paintBackground, paintBorder } from "./paint/shape.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintTextInput } from "./paint/text-input.ts";
 import { paintToggle } from "./paint/toggle.ts";
+import type { StateStore } from "./state.ts";
 import type { InteractionStates } from "./style-resolve.ts";
 import { parseColor, resolveStyle } from "./style-resolve.ts";
 
@@ -97,13 +97,17 @@ function resolveChecked(
   if (!ctx.stateStore) return false;
 
   if (checkedKey === "selected") {
-    const name = typeof props["name"] === "string" ? (props["name"] as string) : "";
+    const name =
+      typeof props["name"] === "string" ? (props["name"] as string) : "";
     if (!name) return false;
     const groupDefault =
       typeof props["groupDefaultValue"] === "string"
         ? (props["groupDefaultValue"] as string)
         : "";
-    return ctx.stateStore.stateForByName({ name, initial: groupDefault }) === props["value"];
+    return (
+      ctx.stateStore.stateForByName({ name, initial: groupDefault }) ===
+      props["value"]
+    );
   }
 
   return ctx.stateStore.stateFor<boolean>({

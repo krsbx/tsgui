@@ -370,7 +370,10 @@ describe("controlled checked widgets", () => {
   test("uncontrolled checkbox persists via the payload state store", () => {
     const changes: boolean[] = [];
     const h = setup(
-      Checkbox({ defaultChecked: true, onCheckedChange: (next) => changes.push(next) })
+      Checkbox({
+        defaultChecked: true,
+        onCheckedChange: (next) => changes.push(next),
+      })
     );
 
     h.fire([
