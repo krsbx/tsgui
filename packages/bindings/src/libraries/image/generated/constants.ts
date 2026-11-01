@@ -7,3 +7,10 @@ export const AnimationDecoderStatus = {
   IMG_DECODER_STATUS_FAILED: 1,
   IMG_DECODER_STATUS_COMPLETE: 2,
 } as const;
+
+/** Numeric #define constants (invisible to the AST). */
+export const ImageDefines = {
+  SDL_IMAGE_MAJOR_VERSION: 3,
+  SDL_IMAGE_MICRO_VERSION: 8,
+  SDL_IMAGE_MINOR_VERSION: 4,
+} as const;
