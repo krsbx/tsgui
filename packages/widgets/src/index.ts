@@ -35,6 +35,7 @@ export {
 } from "./widgets/text-input/index.ts";
 export {
   editingStateOf,
+  resetTextInputEditingStates,
   textInputClipboard,
   type TextInputState,
 } from "./widgets/text-input/state.ts";

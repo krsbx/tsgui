@@ -52,6 +52,11 @@ export function deleteEditingState(stableId: number): void {
   editingStates.delete(stableId);
 }
 
+/** Test isolation — clears every field's editing state. */
+export function resetTextInputEditingStates(): void {
+  editingStates.clear();
+}
+
 /** Clipboard seam — defaults to a no-op; overridden by the app shell. */
 export const textInputClipboard: { get(): string; set(text: string): void } = {
   get: () => "",

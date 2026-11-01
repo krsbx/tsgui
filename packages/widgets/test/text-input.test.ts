@@ -23,6 +23,7 @@ import {
   type ReconcilableWidget,
   Reconciler,
   renderHeadless,
+  resetTextInputEditingStates,
   StateStore,
   TextInput,
   textInputClipboard,
@@ -42,6 +43,7 @@ interface Harness {
 }
 
 function setup(widget: ReconcilableWidget): Harness {
+  resetTextInputEditingStates();
   const stateStore = new StateStore();
   const reconciler = new Reconciler(stateStore);
   const focus = new FocusDispatcher();
@@ -246,6 +248,61 @@ describe("TextInput editing", () => {
 
     h.click(8 + 24, 12); // 24px in = 3 chars
     expect(h.state().caret).toBe(3);
+  });
+
+  test("scroll-x engages when the caret passes the visible width", () => {
+    // 200px field, 16px padding → 184px visible. measure = 8px/char:
+    // caretX passes 184 at char 23+ — scroll = caretX - 184.
+    let value = "";
+    const field = (): ReconcilableWidget =>
+      TextInput({
+        value,
+        style: { width: 200, height: 24 },
+        measureText: (text) => text.length * 8,
+        onChange: (next) => {
+          value = next;
+        },
+      });
+    const h = setup(field());
+    const render = (): void => h.render(field());
+
+    h.click(100, 12); // focus, caret 0
+    for (let i = 0; i < 30; i++) {
+      h.type("a");
+      render();
+    }
+
+    expect(value.length).toBe(30);
+    const state = h.state();
+    expect(state.caret).toBe(30);
+    // 30 chars × 8px = 240px caretX; scroll = 240 - 184 = 56.
+    expect(state.scrollX).toBe(56);
+  });
+
+  test("disabled field ignores editing", () => {
+    const changes: string[] = [];
+    let value = "";
+    const h = setup(
+      field(value, (next) => {
+        changes.push(next);
+        value = next;
+      }, { disabled: true })
+    );
+    const render = (): void =>
+      h.render(
+        field(value, (next) => {
+          changes.push(next);
+          value = next;
+        }, { disabled: true })
+      );
+
+    h.click(100, 12);
+    h.type("x");
+    h.key(KeyCode.Backspace);
+    render();
+
+    expect(changes).toEqual([]);
+    expect(h.state().value).toBe("");
   });
 
   test("clipboard seam: cut and paste through the modifier path", () => {

@@ -40,17 +40,15 @@ import {
   CircularSlider,
   FocusDispatcher,
   Image,
-  ScrollDispatcher,
-  type WheelInputEvent,
-  KeyModifiers,
+  type KeyboardInputEvent,
   KeyboardInputKind,
+  KeyModifiers,
   Label,
   Meter,
   type MouseButton,
   paintTree,
   Palette,
   PointerDispatcher,
-  type KeyboardInputEvent,
   type PointerInputEvent,
   PointerInputKind,
   ProgressBar,
@@ -58,11 +56,13 @@ import {
   RadioGroup,
   type ReconcilableWidget,
   Reconciler,
+  ScrollDispatcher,
   SliderBar,
   StateStore,
   TextInput,
   Toggle,
   View,
+  type WheelInputEvent,
 } from "@tsgui/widgets";
 
 const selftest = process.argv.includes("--selftest");
@@ -144,6 +144,7 @@ function buildTree(): ReconcilableWidget {
       width: "100%",
       height: "100%",
       flexDirection: FlexDirection.Column,
+      overflow: Overflow.Auto,
       padding: 24,
       gap: 16,
     },
@@ -289,11 +290,16 @@ function buildTree(): ReconcilableWidget {
 
       // text input — focus via click, edit through the keyboard dispatch
       View({
-        style: { flexDirection: FlexDirection.Row, gap: 12, alignItems: FlexAlign.Center },
+        style: {
+          flexDirection: FlexDirection.Row,
+          gap: 12,
+          alignItems: FlexAlign.Center,
+        },
         children: [
           TextInput({
             value: name,
             placeholder: "Type your name…",
+            measureText: (text) => font.measure(text).width,
             style: { width: 220, height: 28 },
             onChange: (next) => {
               name = next;
@@ -468,7 +474,10 @@ while (running) {
     ) {
       running = false;
     }
-    if (type === EventType.SDL_EVENT_KEY_DOWN || type === EventType.SDL_EVENT_KEY_UP) {
+    if (
+      type === EventType.SDL_EVENT_KEY_DOWN ||
+      type === EventType.SDL_EVENT_KEY_UP
+    ) {
       // SDL_KeyboardEvent: scancode@24, keycode@28, mod@32, repeat@39.
       const mod = eventView.getUint32(32, true);
       keyboardEvents.push({
@@ -478,17 +487,17 @@ while (running) {
             : KeyboardInputKind.KeyUp,
         key: eventView.getUint32(28, true),
         // SDL_KMOD shift/ctrl/gui variants collapse to the toolkit bits.
-        modifiers: ((
-          ((mod & (SdlDefines.SDL_KMOD_LSHIFT | SdlDefines.SDL_KMOD_RSHIFT)) !== 0
-            ? KeyModifiers.Shift
-            : 0) |
+        modifiers: (((mod &
+          (SdlDefines.SDL_KMOD_LSHIFT | SdlDefines.SDL_KMOD_RSHIFT)) !==
+        0
+          ? KeyModifiers.Shift
+          : 0) |
           ((mod & (SdlDefines.SDL_KMOD_LCTRL | SdlDefines.SDL_KMOD_RCTRL)) !== 0
             ? KeyModifiers.Control
             : 0) |
           ((mod & (SdlDefines.SDL_KMOD_LGUI | SdlDefines.SDL_KMOD_RGUI)) !== 0
             ? KeyModifiers.Meta
-            : 0)
-        ) as KeyModifiers),
+            : 0)) as KeyModifiers,
         repeat: eventView.getUint8(39) !== 0,
       });
     }
@@ -573,14 +582,17 @@ while (running) {
   wheelEvents.length = 0;
 
   gpu.beginFrame();
-  paintTree({
-    gpu,
-    font,
-    statesOf: (node) => ({
-      ...pointer.statesOf(node),
-      ...focusDispatcher.statesOf(node),
-    }),
-  }, root);
+  paintTree(
+    {
+      gpu,
+      font,
+      statesOf: (node) => ({
+        ...pointer.statesOf(node),
+        ...focusDispatcher.statesOf(node),
+      }),
+    },
+    root
+  );
   gpu.present();
 
   frames++;

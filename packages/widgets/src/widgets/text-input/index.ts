@@ -63,6 +63,12 @@ export interface TextInputProps extends BaseWidgetProps {
   onChange?(value: string): void;
   placeholder?: string;
   disabled?: boolean;
+  /**
+   * Glyph-accurate text width in px — drives scroll-x recompute and
+   * click→caret mapping. Defaults to an 8px-per-char estimate; inject
+   * the font's measure for pixel-correct behavior.
+   */
+  measureText?(text: string): number;
   style?: TextInputStyle;
   onUnmount?(payload: { widget: ReconcilableWidget; stableId: number }): void;
 }
@@ -80,6 +86,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     onChange,
     placeholder,
     disabled,
+    measureText,
     style,
     key,
     onPointerDown,
@@ -98,6 +105,10 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
   const stateOf = (payload: { stableId: number }): TextInputState =>
     editingStateOf(payload.stableId, { value });
 
+  /** Glyph-accurate width (injected) or the 8px-per-char estimate. */
+  const measureWidth = (text: string): number =>
+    measureText?.(text) ?? text.length * 8;
+
   const applyEdit = (
     payload: { stableId: number },
     node: { width: number },
@@ -105,9 +116,8 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     valueChanged: boolean
   ): void => {
     const visibleWidth = Math.max(0, node.width - Metrics.defaultPadding * 2);
-    const measure = (text: string): number => text.length * 8;
     const scrollX = scrollXFor({
-      caretX: measure(next.value.slice(0, next.caret)),
+      caretX: measureWidth(next.value.slice(0, next.caret)),
       currentScrollX: next.scrollX,
       visibleWidth,
     });
@@ -256,7 +266,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
             payload.node.screenX -
             Metrics.defaultPadding +
             state.scrollX,
-          measure: (text) => text.length * 8,
+          measure: measureWidth,
         });
         const next = { ...state, caret, anchor: caret };
         writeEditingState(payload.stableId, next);
@@ -275,7 +285,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
             payload.node.screenX -
             Metrics.defaultPadding +
             state.scrollX,
-          measure: (text) => text.length * 8,
+          measure: measureWidth,
         });
         writeEditingState(payload.stableId, { ...state, caret });
       },
