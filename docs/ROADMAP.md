@@ -181,8 +181,11 @@ Foundation work (each item unblocks a widget batch):
       keyed by stableId (radio groups by `name`), painted through
       `PaintContext.stateStore`; pseudo-states (`_hover`/`_focus`/
       `_pressed`/`_checked`/`_disabled`) ride the dispatchers' `statesOf`.
-- [ ] AnimationManager port (transitions, easing) — also drives progress
-      indeterminate motion.
+- [x] AnimationManager port (2026-11-01) — `@tsgui/animation`: the
+      transition engine (applyOverlay with mid-flight retargeting and
+      parse-normalized color settling), easings, and the clock that
+      drives indeterminate progress motion, the caret blink, and
+      ViewStyle transitions. Injected through PaintContext.animationManager.
 - [ ] Multi-window (deferred from the ABI work — handles already flow).
 
 Widget parity batches — each batch lands when its capability exists, not

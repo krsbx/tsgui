@@ -112,6 +112,20 @@ clipped to the field: placeholder when empty, selection highlight, text,
 static caret. Focus comes from the focus dispatcher through
 `PaintContext.statesOf`.
 
+## Animation
+
+`@tsgui/animation` owns the clock: `AnimationManager.tick(t)` runs each
+frame, and the paint walk applies its overlay to any style declaring
+`transition` — changed properties fade from the displayed value
+(easing curves: linear/ease/ease-in/ease-out/ease-in-out; colors
+interpolate in the packed u32 and re-format as `#rrggbbaa`, with
+parse-normalized comparison so an interpolated color settles against a
+differently-written target). The same clock drives the indeterminate
+progress phases (bar 1500ms ease-in-out cycle, circular 2000ms sweep)
+and the TextInput caret blink (500ms cadence). Without a manager in the
+PaintContext everything paints static — headless tests stay
+deterministic; `tick(now)` takes the time so tests drive it.
+
 ## Images
 
 The SDL3_image tier: `IMG_LoadTexture` for files, runtime PNG via

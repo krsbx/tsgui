@@ -394,7 +394,6 @@ function buildTree(): ReconcilableWidget {
             max: 100,
             style: { width: 160, height: 6, borderRadius: 3 },
             showValue: ProgressValueType.Percent,
-            type: ProgressType.Indeterminate,
           }),
           ProgressBar({
             value: 6,
@@ -403,9 +402,13 @@ function buildTree(): ReconcilableWidget {
             steps: 10,
             stepGap: 3,
             style: { width: 100, height: 8 },
+          }),
+          ProgressBar({
             type: ProgressType.Indeterminate,
+            style: { width: 120, height: 6, borderRadius: 3 },
           }),
           CircularProgress({ value: 0.66, min: 0, max: 1, size: 40 }),
+          CircularProgress({ type: ProgressType.Indeterminate, size: 40 }),
         ],
       }),
       View({
@@ -612,6 +615,7 @@ while (running) {
     layoutIndex,
     time: performance.now(),
   });
+  animationManager.tick(performance.now());
   pointerEvents.length = 0;
   keyboardEvents.length = 0;
   wheelEvents.length = 0;

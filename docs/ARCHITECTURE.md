@@ -16,6 +16,9 @@ packages/
                                      InteractionStates. Pure TS.
   interactions/ @tsgui/interactions  Event-fed dispatchers (pointer, focus,
                                      scroll) + hit-test. Pure TS.
+  animation/    @tsgui/animation     Style animation engine: AnimationManager
+                                     (transitions), easings, packed-color
+                                     interpolation. Pure TS.
   paint/        @tsgui/paint         Generic rendering engine: paintTree walk,
                                      Painter/TextPainter surfaces, style
                                      resolution, fill/shape/shadow primitives.
@@ -80,7 +83,8 @@ while (running):
   root = layoutFlex(reconciled)        # pure TS → LayoutNode tree
   pointer.dispatch(events)             # hover/press/click + drag capture
   focus.dispatch(events)               # focus, key/char routing
-  paintTree(ctx, root)                 # queues batches into the renderer
+  animations.tick(t)                   # the transition clock (@tsgui/animation)
+  paintTree(ctx, root)                 # queues batches; overlay + phases
   gpu.present()
 ```
 
