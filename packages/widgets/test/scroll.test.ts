@@ -17,7 +17,6 @@ import {
   StateStore,
   View,
   type ReconcilableWidget,
-  type WheelInputEvent,
 } from "../src/index.ts";
 
 interface Harness {

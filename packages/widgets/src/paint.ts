@@ -15,7 +15,7 @@ import type {
   TextureDrawOptions,
 } from "@tsgui/gpu";
 import type { Size } from "@tsgui/layout";
-import { type LayoutNode, WidgetType } from "@tsgui/layout";
+import { Overflow, type LayoutNode, WidgetType } from "@tsgui/layout";
 import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
@@ -158,8 +158,20 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
       break;
   }
 
+  // Scrollable containers clip their children — layout already shifted
+  // them by the committed scroll offset (screenX/screenY), so clipping
+  // this box is what makes the offset visible.
+  const scrollable =
+    style.overflow === Overflow.Scroll || style.overflow === Overflow.Auto;
+
+  if (scrollable) {
+    ctx.gpu.pushClip?.(rect);
+  }
   for (const child of node.children) {
     paintNode(ctx, child);
+  }
+  if (scrollable) {
+    ctx.gpu.popClip?.();
   }
 }
 

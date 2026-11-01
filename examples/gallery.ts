@@ -30,6 +30,7 @@ import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
+  Overflow,
   ProgressValueType,
 } from "@tsgui/layout";
 import {
@@ -39,6 +40,8 @@ import {
   CircularSlider,
   FocusDispatcher,
   Image,
+  ScrollDispatcher,
+  type WheelInputEvent,
   KeyModifiers,
   KeyboardInputKind,
   Label,
@@ -304,6 +307,22 @@ function buildTree(): ReconcilableWidget {
         ],
       }),
 
+      // scrollable box — wheel scrolls, content clips at the box
+      View({
+        style: {
+          width: 320,
+          height: 120,
+          overflow: Overflow.Scroll,
+          borderRadius: 8,
+          backgroundColor: Palette.surface,
+          gap: 4,
+          padding: 8,
+        },
+        children: Array.from({ length: 12 }, (_, i) =>
+          Label({ text: `scrollable line ${i + 1}` })
+        ),
+      }),
+
       // card with layered shadow
       View({
         style: {
@@ -415,7 +434,7 @@ const layoutIndex = new Map<number, LayoutNode>();
 const layoutCtx: LayoutContext = {
   layoutIndex,
   focusableNodes: [],
-  scrollOffsetOf: () => ({ x: 0, y: 0 }),
+  scrollOffsetOf: (node) => scrollDispatcher.offset(node),
   getStableId: reconciler.getStableId,
   measureText: (text) => font.measure(text),
   getImageSize: () => null, // gallery images carry explicit dimensions
@@ -424,8 +443,10 @@ const layoutCtx: LayoutContext = {
 // --- dispatchers (the phase 4 port) ----------------------------------------
 const pointer = new PointerDispatcher();
 const focusDispatcher = new FocusDispatcher();
+const scrollDispatcher = new ScrollDispatcher();
 const pointerEvents: PointerInputEvent[] = [];
 const keyboardEvents: KeyboardInputEvent[] = [];
+const wheelEvents: WheelInputEvent[] = [];
 
 // --- frame loop ------------------------------------------------------------
 const eventData = new Uint8Array(256);
@@ -484,6 +505,14 @@ while (running) {
         });
       }
     }
+    if (type === EventType.SDL_EVENT_MOUSE_WHEEL) {
+      wheelEvents.push({
+        scrollX: eventView.getFloat32(24, true),
+        scrollY: eventView.getFloat32(28, true),
+        mouseX: eventView.getFloat32(36, true),
+        mouseY: eventView.getFloat32(40, true),
+      });
+    }
     if (type === EventType.SDL_EVENT_MOUSE_MOTION) {
       pointerEvents.push({
         kind: PointerInputKind.Move,
@@ -533,8 +562,15 @@ while (running) {
     layoutIndex,
     focusableNodes: layoutCtx.focusableNodes,
   });
+  scrollDispatcher.dispatch({
+    wheelEvents,
+    root,
+    layoutIndex,
+    time: performance.now(),
+  });
   pointerEvents.length = 0;
   keyboardEvents.length = 0;
+  wheelEvents.length = 0;
 
   gpu.beginFrame();
   paintTree({
