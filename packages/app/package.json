@@ -1,0 +1,23 @@
+{
+  "name": "@tsgui/app",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@tsgui/animation": "workspace:*",
+    "@tsgui/bindings": "workspace:*",
+    "@tsgui/core": "workspace:*",
+    "@tsgui/gpu": "workspace:*",
+    "@tsgui/interactions": "workspace:*",
+    "@tsgui/layout": "workspace:*",
+    "@tsgui/paint": "workspace:*",
+    "@tsgui/widgets": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.6.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

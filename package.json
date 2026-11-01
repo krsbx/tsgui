@@ -5,6 +5,7 @@
   "private": true,
   "packageManager": "bun@1.4.4",
   "devDependencies": {
+    "@tsgui/app": "workspace:*",
     "@tsgui/animation": "workspace:*",
     "@tsgui/gpu": "workspace:*",
     "@tsgui/layout": "workspace:*",
