@@ -1,6 +1,8 @@
 /** Style model + size/spacing resolution — ported from flying-pan's widget styles. */
 import type {
+  AnimatableProperty,
   BackgroundType,
+  EasingName,
   FlexAlign,
   FlexDirection,
   FlexJustify,
@@ -116,6 +118,9 @@ export interface ViewStyle {
   overflow?: Overflow;
 
   boxShadow?: BoxShadow | BoxShadow[];
+
+  /** Animated style transitions — sampled by @tsgui/animation each frame. */
+  transition?: Transition;
 }
 
 export interface PseudoStateStyle {
@@ -129,6 +134,19 @@ export interface PseudoStateStyle {
   letterSpacing?: number;
   lineHeight?: number;
 }
+
+/** One animated property's timing. */
+export interface TransitionConfig {
+  /** Which style field to animate — default animates every present one. */
+  property?: AnimatableProperty | "all";
+  /** Duration in milliseconds. */
+  duration: number;
+  /** Easing curve — default `ease`. */
+  easing?: EasingName;
+}
+
+/** A style may transition one or several properties. */
+export type Transition = TransitionConfig | TransitionConfig[];
 
 export interface TextStyle extends ViewStyle {
   fontSize?: number;

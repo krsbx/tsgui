@@ -3,10 +3,10 @@
  * falloff with the existing primitive (flying-pan's documented approach;
  * a Renderer-level blur lands with the SDF spike).
  */
+import { colorWithOpacity, parseColor } from "@tsgui/animation";
 import type { Rect } from "@tsgui/gpu";
 import type { ViewStyle } from "@tsgui/layout";
 import type { Painter } from "../paint.ts";
-import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 
 /**
  * Stacked rounded-rect layers approximate the Gaussian falloff with the

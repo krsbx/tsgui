@@ -10,6 +10,7 @@
         "@eslint/eslintrc": "^3.3.6",
         "@eslint/js": "^10.0.1",
         "@trivago/prettier-plugin-sort-imports": "^6.0.2",
+        "@tsgui/animation": "workspace:*",
         "@tsgui/bindings": "workspace:*",
         "@tsgui/core": "workspace:*",
         "@tsgui/gpu": "workspace:*",
@@ -30,6 +31,17 @@
         "prettier": "^3.9.10",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
         "typescript-eslint": "^8.68.0",
+      },
+    },
+    "packages/animation": {
+      "name": "@tsgui/animation",
+      "version": "0.0.1",
+      "dependencies": {
+        "@tsgui/layout": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
       },
     },
     "packages/bindings": {
@@ -86,6 +98,7 @@
       "name": "@tsgui/paint",
       "version": "0.0.1",
       "dependencies": {
+        "@tsgui/animation": "workspace:*",
         "@tsgui/core": "workspace:*",
         "@tsgui/gpu": "workspace:*",
         "@tsgui/layout": "workspace:*",
@@ -244,6 +257,8 @@
     "@simple-libs/stream-utils": ["@simple-libs/stream-utils@2.0.0", "", {}, "sha512-fCTuZK4QBa+39Oz9l4OGfJfz+GpwCp3AqO7Zch3to99xHPgstVsRFpeQ8LNd2o1Gv8raL2mCFwiaHh7bFSp5DQ=="],
 
     "@trivago/prettier-plugin-sort-imports": ["@trivago/prettier-plugin-sort-imports@6.0.2", "", { "dependencies": { "@babel/generator": "^7.28.0", "@babel/parser": "^7.28.0", "@babel/traverse": "^7.28.0", "@babel/types": "^7.28.0", "javascript-natural-sort": "^0.7.1", "lodash-es": "^4.17.21", "minimatch": "^9.0.0", "parse-imports-exports": "^0.2.4" }, "peerDependencies": { "@vue/compiler-sfc": "3.x", "prettier": "2.x - 3.x", "prettier-plugin-ember-template-tag": ">= 2.0.0", "prettier-plugin-svelte": "3.x", "svelte": "4.x || 5.x" }, "optionalPeers": ["@vue/compiler-sfc", "prettier-plugin-ember-template-tag", "prettier-plugin-svelte", "svelte"] }, "sha512-3DgfkukFyC/sE/VuYjaUUWoFfuVjPK55vOFDsxD56XXynFMCZDYFogH2l/hDfOsQAm1myoU/1xByJ3tWqtulXA=="],
+
+    "@tsgui/animation": ["@tsgui/animation@workspace:packages/animation"],
 
     "@tsgui/bindings": ["@tsgui/bindings@workspace:packages/bindings"],
 

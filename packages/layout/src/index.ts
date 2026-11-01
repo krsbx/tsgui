@@ -20,6 +20,8 @@ export type {
   Spacing,
   SpacingInput,
   TextStyle,
+  Transition,
+  TransitionConfig,
   ValidColor,
   ViewStyle,
   WidgetDescriptor,

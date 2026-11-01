@@ -1,0 +1,16 @@
+{
+  "name": "@tsgui/animation",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@tsgui/layout": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.6.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

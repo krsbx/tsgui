@@ -37,10 +37,7 @@ function view(
   return { type: WidgetType.View, props: {}, style, children };
 }
 
-function label(
-  text: string,
-  style: TextStyle = {}
-): WidgetDescriptor {
+function label(text: string, style: TextStyle = {}): WidgetDescriptor {
   return { type: WidgetType.Label, props: { text }, style };
 }
 

@@ -3,10 +3,10 @@
  * composes, flying-pan's renderer/paint/utility. Border first, then the
  * background over its inner half: net stroke = borderWidth/2.
  */
+import { colorWithOpacity, parseColor } from "@tsgui/animation";
 import type { Rect } from "@tsgui/gpu";
 import type { ViewStyle } from "@tsgui/layout";
 import type { Painter } from "../paint.ts";
-import { colorWithOpacity, parseColor } from "../style-resolve.ts";
 
 /**
  * One shape for both corner paths — square `fillRect` when no radius,
