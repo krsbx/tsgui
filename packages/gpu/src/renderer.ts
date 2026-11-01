@@ -26,8 +26,8 @@ const BYTES_PER_VERTEX = 32;
 const INITIAL_VERTICES = 1 << 16;
 
 export class GpuRenderer {
-  readonly renderer: RendererHandle;
-  readonly name: string;
+  public readonly renderer: RendererHandle;
+  public readonly name: string;
 
   private vertexData: Uint8Array;
   private vertexF32: Float32Array;
@@ -42,9 +42,9 @@ export class GpuRenderer {
   private readonly clipStack: Array<Rect> = [];
   private readonly clipData = new Int32Array(4);
 
-  clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
+  public clearColor: Rgba = { r: 32, g: 36, b: 48, a: 255 };
 
-  constructor(window: WindowHandle, options: RendererOptions = {}) {
+  public constructor(window: WindowHandle, options: RendererOptions = {}) {
     // Prefer the GPU backend; fall back to SDL's default choice. Tests pin
     // `driver` (e.g. "software") for deterministic pixel readback.
     const props = sdl.SDL_CreateProperties();
@@ -88,7 +88,7 @@ export class GpuRenderer {
    * Start a frame: clear to the clear color and discard last frame's
    * geometry. SDL queues the clear before anything drawn this frame.
    */
-  beginFrame(): void {
+  public beginFrame(): void {
     this.vertexCount = 0;
     this.indexCount = 0;
     this.batchTexture = null;
@@ -128,14 +128,14 @@ export class GpuRenderer {
   }
 
   /** Intersect the scissor with the given rect. Flushes the open batch. */
-  pushClip(clip: Rect): void {
+  public pushClip(clip: Rect): void {
     this.flushBatch();
     this.clipStack.push(clip);
     this.applyClip();
   }
 
   /** Restore the previous scissor (disables clipping when the stack empties). */
-  popClip(): void {
+  public popClip(): void {
     if (this.clipStack.length === 0) return;
     this.flushBatch();
     this.clipStack.pop();
@@ -187,7 +187,7 @@ export class GpuRenderer {
    * Queue an axis-aligned solid-color rectangle for the current frame.
    * Single-object params per the toolkit convention (docs/ARCHITECTURE.md).
    */
-  fillRect({ x, y, w, h, color }: RectOptions): void {
+  public fillRect({ x, y, w, h, color }: RectOptions): void {
     // Untextured geometry can't join an open textured batch.
     if (this.batchTexture !== null) this.flushBatch();
     this.ensureCapacity(4, 6);
@@ -216,7 +216,7 @@ export class GpuRenderer {
    * Queue a textured quad (uv 0..1, white tint). Starts a new batch when the
    * texture differs from the open batch's texture.
    */
-  drawTexture({
+  public drawTexture({
     texture,
     x,
     y,
@@ -256,7 +256,7 @@ export class GpuRenderer {
    * from the center — convex, so one fan covers the shape). Aliased edges;
    * the SDF upgrade lands via SDL_SetGPURenderState later.
    */
-  fillRoundedRect({
+  public fillRoundedRect({
     x,
     y,
     w,
@@ -316,7 +316,7 @@ export class GpuRenderer {
    * Queue a filled circular sector (pie slice) — tessellated fan from the
    * center. A zero sweep draws nothing; negative sweeps run backwards.
    */
-  fillArc({
+  public fillArc({
     cx,
     cy,
     radius,
@@ -370,7 +370,7 @@ export class GpuRenderer {
    * the outer and inner radii. `innerRadius: 0` degenerates to a pie; use
    * {@link fillArc} for that.
    */
-  fillRing({
+  public fillRing({
     cx,
     cy,
     innerRadius,
@@ -454,19 +454,19 @@ export class GpuRenderer {
   }
 
   /** Send all queued geometry to SDL without presenting. */
-  flush(): void {
+  public flush(): void {
     this.flushBatch();
   }
 
   /** Flush remaining batches and present the frame. */
-  present(): void {
+  public present(): void {
     this.flushBatch();
     if (!sdl.SDL_RenderPresent({ renderer: this.renderer })) {
       throw new Error(`SDL_RenderPresent: ${sdl.SDL_GetError()}`);
     }
   }
 
-  destroy(): void {
+  public destroy(): void {
     sdl.SDL_DestroyRenderer({ renderer: this.renderer });
   }
 }

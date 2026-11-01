@@ -50,6 +50,10 @@ export default [
         },
       ],
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/explicit-member-accessibility": [
+        "error",
+        { accessibility: "explicit" },
+      ],
     },
   },
   ...PURE_LAYERS.map((layer) => ({

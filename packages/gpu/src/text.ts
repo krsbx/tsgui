@@ -25,11 +25,11 @@ interface CachedRun {
 }
 
 export class TtfFont {
-  readonly font: FontHandle;
+  public readonly font: FontHandle;
   private readonly renderer: RendererHandle;
   private readonly cache = new Map<string, CachedRun>();
 
-  constructor(
+  public constructor(
     renderer: RendererHandle,
     fontPath: string,
     /** Point size. */
@@ -47,7 +47,7 @@ export class TtfFont {
   }
 
   /** Rendered size of a string at this font's size. */
-  measure(text: string): { width: number; height: number } {
+  public measure(text: string): { width: number; height: number } {
     const w = new Int32Array(1);
     const h = new Int32Array(1);
     if (!ttf.TTF_GetStringSize({ font: this.font, text, length: 0, w, h })) {
@@ -61,7 +61,7 @@ export class TtfFont {
    * uploaded as a texture, and tinted per draw — UI strings repeat every
    * frame, so the cache absorbs nearly all of the cost after frame one.
    */
-  draw(
+  public draw(
     gpu: { drawTexture(opts: TextureDrawOptions): void },
     opts: TextDrawOptions
   ): void {
@@ -96,7 +96,7 @@ export class TtfFont {
     return { texture, w: measured.width, h: measured.height };
   }
 
-  destroy(): void {
+  public destroy(): void {
     for (const run of this.cache.values()) {
       sdl.SDL_DestroyTexture({ texture: run.texture });
     }
