@@ -13,6 +13,7 @@
         "@tsgui/bindings": "workspace:*",
         "@tsgui/core": "workspace:*",
         "@tsgui/gpu": "workspace:*",
+        "@tsgui/interactions": "workspace:*",
         "@tsgui/layout": "workspace:*",
         "@tsgui/widgets": "workspace:*",
         "@types/bun": "latest",
@@ -60,6 +61,18 @@
         "@types/node": "^26.6.6",
       },
     },
+    "packages/interactions": {
+      "name": "@tsgui/interactions",
+      "version": "0.0.1",
+      "dependencies": {
+        "@tsgui/core": "workspace:*",
+        "@tsgui/layout": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
     "packages/layout": {
       "name": "@tsgui/layout",
       "version": "0.0.1",
@@ -74,6 +87,7 @@
       "dependencies": {
         "@tsgui/core": "workspace:*",
         "@tsgui/gpu": "workspace:*",
+        "@tsgui/interactions": "workspace:*",
         "@tsgui/layout": "workspace:*",
       },
       "devDependencies": {
@@ -223,6 +237,8 @@
     "@tsgui/core": ["@tsgui/core@workspace:packages/core"],
 
     "@tsgui/gpu": ["@tsgui/gpu@workspace:packages/gpu"],
+
+    "@tsgui/interactions": ["@tsgui/interactions@workspace:packages/interactions"],
 
     "@tsgui/layout": ["@tsgui/layout@workspace:packages/layout"],
 

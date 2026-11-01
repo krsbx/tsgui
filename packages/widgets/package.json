@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@tsgui/core": "workspace:*",
+    "@tsgui/interactions": "workspace:*",
     "@tsgui/layout": "workspace:*",
     "@tsgui/gpu": "workspace:*"
   },

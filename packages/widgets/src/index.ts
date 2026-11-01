@@ -57,28 +57,23 @@ export { Radio, type RadioProps } from "./widgets/radio.ts";
 export { Toggle, type ToggleProps } from "./widgets/toggle.ts";
 export { View, type ViewProps } from "./widgets/view.ts";
 
-// Interaction dispatch — pointer events, hit-testing
-export { hitTest, type HitTestOptions } from "./interactions/hit-test.ts";
-export {
-  PointerDispatcher,
-  type PointerDispatchOptions,
-} from "./interactions/pointer.ts";
-export {
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  type PointerInputEvent,
-  PointerInputKind,
-} from "./interactions/types.ts";
+// Interaction dispatch — pointer events, hit-testing (@tsgui/interactions)
 export {
   FocusDispatcher,
   type FocusDispatchOptions,
-} from "./interactions/focus.ts";
-export {
+  hitTest,
+  type HitTestOptions,
+  type KeyboardInputEvent,
+  KeyboardInputKind,
   measureContent,
+  PointerDispatcher,
+  type PointerDispatchOptions,
+  type PointerInputEvent,
+  PointerInputKind,
   ScrollDispatcher,
   type ScrollDispatchOptions,
-} from "./interactions/scroll.ts";
-export { type WheelInputEvent } from "./interactions/types.ts";
+  type WheelInputEvent,
+} from "@tsgui/interactions";
 
 // Paint bridge
 export {

@@ -10,7 +10,7 @@
  */
 import type { LayoutNode } from "@tsgui/layout";
 import type { StateStore } from "@tsgui/core";
-import type { InteractionStates } from "../style-resolve.ts";
+import type { InteractionStates } from "@tsgui/core";
 import type { PointerPayload, ReconcilableWidget } from "@tsgui/core";
 import { MouseButton } from "@tsgui/core";
 import { hitTest } from "./hit-test.ts";
