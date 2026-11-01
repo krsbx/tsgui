@@ -186,7 +186,13 @@ Foundation work (each item unblocks a widget batch):
       parse-normalized color settling), easings, and the clock that
       drives indeterminate progress motion, the caret blink, and
       ViewStyle transitions. Injected through PaintContext.animationManager.
-- [ ] Multi-window (deferred from the ABI work — handles already flow).
+- [x] Multi-window (2026-11-01) — `@tsgui/app`, the application shell:
+      App with a window registry (create/destroy keyed by SDL windowID),
+      event decode + routing, and a run loop that reconciles → lays out →
+      dispatches → paints every window each frame. Per-window renderer +
+      font + reconciler + state + dispatchers (SDL textures are
+      renderer-scoped; stableIds and hover/focus state are per-tree).
+      flying-pan's dashboard flow is restored in examples/dashboard.ts.
 
 Widget parity batches — each batch lands when its capability exists, not
 before (a widget painted without its input path is the hand-wired glue
@@ -212,9 +218,10 @@ complete, interactive at 60fps.
       sections and palette, controlled widgets with live readouts, the
       animated indeterminate progress, slider-linked circular progress,
       and flying-pan's exact text-field focus transition. Selftested at
-      240 frames on Bun and Node 26. Its multi-window, Canvas 2D,
-      tessellation, and virtual-list sections land with the deferred
-      window work and phase 5 (Canvas/Path2D/List factories).
+      240 frames on Bun and Node 26. Its multi-window
+      section is restored (real second window through @tsgui/app);
+      Canvas 2D, tessellation, and virtual-list sections land with
+      phase 5 (Canvas/Path2D/List factories).
 
 ## Phase 5 — Devtools (the debuggability payoff)
 

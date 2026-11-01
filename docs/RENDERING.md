@@ -22,6 +22,10 @@ count (one per distinct texture); untextured geometry shares one batch.
 
 ## Backend
 
+`GpuRenderer` is constructed per window (`@tsgui/app` builds one per
+AppWindow) — SDL textures are renderer-scoped, so fonts and image
+textures are per-window too; nothing shares them across windows.
+
 SDL_Renderer with the **GPU driver** (`SDL.renderer.create.name = "gpu"`,
 SDL's Metal/D3D12/Vulkan abstraction), created through the properties API —
 `SDL.renderer.create.window` must be set or the attempt silently fails and

@@ -26,7 +26,12 @@ packages/
   widgets/      @tsgui/widgets       Widget factories, reconciler, per-widget
                                      painters (co-located with each widget),
                                      painter registry, headless harness. Pure TS.
-examples/                            Sample apps (hello, showcase, gallery).
+  app/          @tsgui/app           The application shell: multi-window App
+                                     (SDL init, window registry, event decode
+                                     + window routing, the run loop) and the
+                                     per-window toolkit stack.
+examples/                            Sample apps (hello, showcase, gallery,
+                                     dashboard).
 tools/codegen/                       Clang AST → FFI tables (bun:ffi / node:ffi)
                                      + constants, from real C headers
                                      (parser ported from flying-pan).
@@ -54,6 +59,7 @@ Concretely:
 | `interactions`       | `layout`, `core`                                                              | `paint`, `widgets`, `bindings`                       |
 | `paint`              | `layout`, `core`, `gpu` types                                                 | `interactions`, `widgets`, `bindings`                |
 | `widgets`            | `layout`, `core`, `interactions`, `paint`, injectable seams (clipboard)       | `bindings`                                           |
+| `app`                | everything (the application layer: bindings, gpu, and the toolkit)           | nothing — it is the top                              |
 | `platform` (planned) | `bindings`                                                                    | `gpu`, `layout`, and the toolkit layers              |
 | `devtools` (planned) | any package (it's tooling)                                                    | — but is optional at runtime                         |
 
@@ -71,8 +77,13 @@ flying-pan lacks and it is the foundation of headless snapshot testing.
 
 ## Frame loop
 
-JS-driven; SDL3 requires the main thread for video/events. The gallery
-(`examples/gallery.ts`) is the reference implementation:
+JS-driven; SDL3 requires the main thread for video/events. The shell
+lives in `@tsgui/app` — `App.run(frameBody)` polls + decodes events,
+routes them by `windowID`, runs the app body (which assigns each
+window's widget), then per window reconciles → lays out → dispatches →
+ticks the animation clock → paints. The gallery and dashboard run
+through it; the gallery remains the reference for the widget/paint
+side:
 
 ```
 while (running):
