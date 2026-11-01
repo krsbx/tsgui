@@ -207,6 +207,15 @@ enums); `List` (virtualized — `listLayoutFlex` already ported) and a
 **Exit:** the flying-pan example apps rebuilt on tsgui — batches 1–4
 complete, interactive at 60fps.
 
+- [x] `examples/dashboard.ts` (2026-11-01) — flying-pan's
+      `simple-dashboard.ts` rebuilt on tsgui: the same scrollable
+      sections and palette, controlled widgets with live readouts, the
+      animated indeterminate progress, slider-linked circular progress,
+      and flying-pan's exact text-field focus transition. Selftested at
+      240 frames on Bun and Node 26. Its multi-window, Canvas 2D,
+      tessellation, and virtual-list sections land with the deferred
+      window work and phase 5 (Canvas/Path2D/List factories).
+
 ## Phase 5 — Devtools (the debuggability payoff)
 
 - [ ] `@tsgui/devtools`: Bun.serve inspector — live widget tree over
