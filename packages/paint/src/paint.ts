@@ -9,6 +9,7 @@
  * reuses @tsgui/gpu's option types, so GpuRenderer satisfies it while
  * headless tests mock it.
  */
+import type { AnimationManager } from "@tsgui/animation";
 import {
   type InteractionStates,
   STATES_NONE,
@@ -74,6 +75,13 @@ export interface PaintContext {
   stateStore?: StateStore;
   /** Per-widget painters — widget-specific content painting. */
   painters: WidgetPainters;
+  /**
+   * The transition engine — when present, styles declaring `transition`
+   * get their changed properties animated through applyOverlay, and the
+   * clock (`animationManager.time`) drives caret blink + indeterminate
+   * progress phases.
+   */
+  animationManager?: AnimationManager;
 }
 
 export { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
@@ -132,7 +140,20 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
   const checked = resolveChecked(ctx, node, checkedKey);
   const effectiveStates = checkedKey ? { ...states, checked } : states;
 
-  const style = resolveStyle(base, effectiveStates);
+  const resolved = resolveStyle(base, effectiveStates);
+
+  // Styles declaring `transition` animate their changes: the manager
+  // compares this frame's resolved values against the displayed ones
+  // and overrides in-flight properties (flying-pan's paint/index call
+  // site, adapted to the injected manager).
+  const style =
+    base.transition && ctx.animationManager
+      ? ctx.animationManager.applyOverlay(
+          node.stableId,
+          resolved,
+          base.transition
+        )
+      : resolved;
 
   const rect: Rect = {
     x: node.screenX,

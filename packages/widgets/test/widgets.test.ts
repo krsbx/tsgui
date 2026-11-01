@@ -1,3 +1,4 @@
+import { AnimationManager } from "@tsgui/animation";
 import { StateStore } from "@tsgui/core";
 import type {
   ArcOptions,
@@ -281,5 +282,91 @@ describe("box shadow paint", () => {
           op.op === "rrect" && (op as { color: number }).color === expected
       ).length
     ).toBe(0);
+  });
+});
+
+describe("transition overlay", () => {
+  const idCounter = { value: 1 };
+  const layoutCtx: LayoutContext = {
+    layoutIndex: new Map<number, LayoutNode>(),
+    focusableNodes: [],
+    scrollOffsetOf: () => ({ x: 0, y: 0 }),
+    getStableId: () => idCounter.value++,
+    measureText: (text: string) => ({ width: text.length * 10, height: 20 }),
+    getImageSize: () => null,
+  };
+
+  test("a transitioning background animates between old and new", () => {
+    const animations = new AnimationManager();
+    const recorded: Array<Record<string, unknown>> = [];
+    const gpu = {
+      fillRect: (o: RectOptions) => recorded.push({ op: "rect", ...o }),
+      fillRoundedRect: (o: RectOptions & { radius: number }) =>
+        recorded.push({ op: "rrect", ...o }),
+      drawTexture: () => {},
+      fillArc: () => {},
+      fillRing: () => {},
+    };
+    const font = { draw: () => {} };
+
+    const box = View({
+      style: {
+        width: 100,
+        height: 50,
+        backgroundColor: "#000000",
+        transition: { duration: 100 },
+      },
+    });
+    const root = layoutFlex({
+      node: box,
+      x: 0,
+      y: 0,
+      availableWidth: 100,
+      availableHeight: 50,
+      ctx: layoutCtx,
+    });
+    const ctx = {
+      gpu,
+      font,
+      painters: widgetPainters,
+      animationManager: animations,
+    };
+
+    const backgroundOf = (): number => {
+      recorded.length = 0;
+      paintTree(ctx, root);
+      const bg = recorded.find(
+        (op) =>
+          (op.op === "rect" || op.op === "rrect") && op.w === 100 && op.h === 50
+      ) as { color: number };
+      return bg.color;
+    };
+
+    // Frame 1 — first sighting snaps to the initial color.
+    animations.tick(1000);
+    expect(backgroundOf()).toBe(parseColor("#000000"));
+
+    // The style retargets; the change registers on the frame it appears
+    // (first paint after a change still shows the old color, like CSS),
+    // then mid-flight the paint lands between the two.
+    box.style!.backgroundColor = "#ffffff";
+    animations.tick(1050);
+    expect(backgroundOf()).toBe(parseColor("#000000"));
+
+    animations.tick(1100);
+    const mid = backgroundOf();
+    expect(mid).not.toBe(parseColor("#000000"));
+    expect(mid).not.toBe(parseColor("#ffffff"));
+
+    // Long after the duration the overlay settles: the first frame after
+    // the gap re-anchors from the displayed value (the resumed tail),
+    // the next lands the parsed-exact white, then the overlay stops and
+    // the resolved style passes through untouched.
+    animations.tick(2100);
+    backgroundOf(); // resumed tail re-anchors from the displayed value
+    animations.tick(2200);
+    expect(backgroundOf()).toBe(parseColor("#ffffff"));
+    animations.tick(2300);
+    expect(backgroundOf()).toBe(parseColor("#ffffff"));
   });
 });

@@ -14,6 +14,7 @@
  *   bun run examples/gallery.ts --selftest   # exit after 240 frames
  *   node examples/gallery.ts --selftest
  */
+import { AnimationManager } from "@tsgui/animation";
 import {
   EventType,
   image,
@@ -457,6 +458,7 @@ function buildTree(): ReconcilableWidget {
 // --- reconciler + layout context -------------------------------------------
 const stateStore = new StateStore();
 const reconciler = new Reconciler(stateStore);
+const animationManager = new AnimationManager();
 
 let tree = buildTree();
 
@@ -617,6 +619,7 @@ while (running) {
       }),
       stateStore,
       painters: widgetPainters,
+      animationManager,
     },
     root
   );
