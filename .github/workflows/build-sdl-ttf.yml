@@ -157,29 +157,65 @@ jobs:
       - name: Build + install SDL3 into a local prefix
         run: |
           set -euo pipefail
+          # This SDL3 is only linked against, never shipped — skip SDL's
+          # "no X11/Wayland" configure error on Linux instead of installing
+          # the display dev packages (build-sdl.yml builds the real one).
+          console_flags=""
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            console_flags=-DSDL_UNIX_CONSOLE_BUILD=ON
+          fi
           cmake -S sdl3-src -B sdl3-build \
             -DCMAKE_BUILD_TYPE=Release \
             -DSDL_SHARED=ON -DSDL_STATIC=OFF \
-            $OSX_FLAGS
+            $OSX_FLAGS $console_flags
           cmake --build sdl3-build --config Release --parallel
           cmake --install sdl3-build --config Release --prefix "$PWD/sdl3-prefix"
           ls sdl3-prefix/lib
 
+      # macOS builds each arch separately and lipo-merges them: vendored
+      # deps (e.g. libwebp) probe SIMD once for the host arch, which breaks
+      # a single-pass CMAKE_OSX_ARCHITECTURES=arm64;x86_64 build.
       - name: Configure SDL3_ttf
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          cmake -S lib-src -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_SHARED_LIBS=ON \
-            -DSDLTTF_VENDORED=ON \
-            -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
-            $OSX_FLAGS
+          archs=native
+          [[ "$PLATFORM" == macos ]] && archs="arm64 x86_64"
+          for arch in $archs; do
+            arch_flags=""
+            [[ "$arch" != native ]] && arch_flags="-DCMAKE_OSX_ARCHITECTURES=$arch"
+            cmake -S lib-src -B "build-$arch" \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS=ON \
+              -DSDLTTF_VENDORED=ON \
+              -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
+              $arch_flags
+          done
 
       - name: Build + install SDL3_ttf
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          cmake --build build --config Release --parallel
-          cmake --install build --config Release --prefix "$PWD/dist"
+          archs=native
+          [[ "$PLATFORM" == macos ]] && archs="arm64 x86_64"
+          for arch in $archs; do
+            cmake --build "build-$arch" --config Release --parallel
+            cmake --install "build-$arch" --config Release --prefix "$PWD/dist-$arch"
+          done
+
+          if [[ "$PLATFORM" == macos ]]; then
+            # Merge each real dylib into a universal2 one under dist/lib.
+            mkdir -p dist/lib
+            find dist-arm64 -name "*.dylib" -type f | while read -r a; do
+              name=$(basename "$a")
+              x=$(find dist-x86_64 -name "$name" -type f | head -n1)
+              lipo -create "$a" "$x" -output "dist/lib/$name"
+            done
+          else
+            mv dist-native dist
+          fi
 
       - name: Collect shared libraries
         env:
