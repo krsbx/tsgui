@@ -39,12 +39,21 @@ function fontPath(): string {
   return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
 }
 
+export interface RGBA {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
 export interface AppWindowOptions {
   title: string;
   width: number;
   height: number;
   /** Resizable — the root usually; child windows stay fixed-size. */
   resizable?: boolean;
+  /** Frame clear color (flying-pan's window backgroundColor). */
+  backgroundColor?: RGBA;
 }
 
 export class AppWindow {
@@ -74,6 +83,8 @@ export class AppWindow {
 
   private readonly sizeW = new Int32Array(1);
   private readonly sizeH = new Int32Array(1);
+  private readonly posX = new Int32Array(1);
+  private readonly posY = new Int32Array(1);
 
   public constructor(options: AppWindowOptions, handle: WindowHandle) {
     this.handle = handle;
@@ -81,6 +92,8 @@ export class AppWindow {
     this.id = sdl.SDL_GetWindowID({ window: handle });
 
     this.renderer = new GpuRenderer(handle);
+    if (options.backgroundColor)
+      this.renderer.clearColor = options.backgroundColor;
     this.font = new TtfFont(
       this.renderer.renderer,
       fontPath(),
@@ -108,6 +121,21 @@ export class AppWindow {
       h: this.sizeH,
     });
     return { width: this.sizeW[0]!, height: this.sizeH[0]! };
+  }
+
+  /** Move the window (placing child windows beside the root). */
+  public move(to: { x: number; y: number }): void {
+    sdl.SDL_SetWindowPosition({ window: this.handle, x: to.x, y: to.y });
+  }
+
+  /** Current window position in points — for placing child windows. */
+  public get position(): { x: number; y: number } {
+    sdl.SDL_GetWindowPosition({
+      window: this.handle,
+      x: this.posX,
+      y: this.posY,
+    });
+    return { x: this.posX[0]!, y: this.posY[0]! };
   }
 
   /** Reconcile the assigned widget (identity short-circuit included). */

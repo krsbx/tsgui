@@ -8,7 +8,7 @@
  */
 import { sdl, SdlDefines } from "@tsgui/bindings";
 import { type DecodedEvents, EventDecoder } from "./events.ts";
-import { AppWindow, type AppWindowOptions } from "./window.ts";
+import { AppWindow, type AppWindowOptions, type RGBA } from "./window.ts";
 
 const FRAME_MS = 16; // ~60fps frame limiter
 
@@ -16,6 +16,8 @@ export interface AppOptions {
   title: string;
   width: number;
   height: number;
+  /** Root window frame clear color. */
+  backgroundColor?: RGBA;
   /** Esc closes the app. Default true (the examples' behavior). */
   quitOnEscape?: boolean;
 }
@@ -42,6 +44,7 @@ export class App {
       width: options.width,
       height: options.height,
       resizable: true,
+      backgroundColor: options.backgroundColor,
     });
   }
 

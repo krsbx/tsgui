@@ -1,60 +1,30 @@
 /**
- * tsgui Dashboard — the Phase 4 exit gate: flying-pan's
- * `examples/simple-dashboard.ts` rebuilt on tsgui, interactive at 60fps.
+ * tsgui Dashboard — flying-pan's `examples/simple-dashboard.ts` rebuilt
+ * on tsgui, multi-window restored. The main window is the scrollable
+ * controls/visuals dashboard; the button opens a real second Details
+ * window (live state readouts + window info) exactly like the original —
+ * opened by the button, closed by its Close button or the window's ✕.
  *
- * Same app shape as the original: a scrollable dashboard of sections
- * (Controls → Visuals → Live State) with the shared state read back
- * inline — flying-pan showed the readouts in a second window, which is
- * deferred here (multi-window), so the details panel renders below the
- * controls instead. Tessellation/Canvas/List sections land with phase 5.
+ * The app shell (@tsgui/app) owns SDL, the window registry, event
+ * decode + routing, and the run loop; this file only builds widget
+ * trees and mutates shared state — the phase 4 exit gate in its final
+ * shape.
  *
- * Everything on display exercises the phase 4 stack end to end:
- * controlled widgets → re-render → reconcile → layout, the pointer /
- * focus / scroll dispatchers, the transition engine (the text field
- * fades its border on focus, buttons fade their hover), and the
- * animation clock (indeterminate progress + spinner).
- *
- *   bun run examples/dashboard.ts --selftest   # exit after 240 frames
+ *   bun run examples/dashboard.ts --selftest   # lifecycle selftest
  *   node examples/dashboard.ts --selftest
+ *
+ * The selftest drives the window lifecycle: Details opens at frame 30,
+ * closes at 120, reopens at 180, exits at 240.
  */
-import { AnimationManager } from "@tsgui/animation";
-import {
-  EventType,
-  image,
-  PixelFormat,
-  readCString,
-  Scancode,
-  sdl,
-  SdlDefines,
-} from "@tsgui/bindings";
-import {
-  KeyModifiers,
-  type MouseButton,
-  type ReconcilableWidget,
-  StateStore,
-} from "@tsgui/core";
-import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@tsgui/gpu";
-import {
-  FocusDispatcher,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  PointerDispatcher,
-  type PointerInputEvent,
-  PointerInputKind,
-  ScrollDispatcher,
-  type WheelInputEvent,
-} from "@tsgui/interactions";
+import { App, type AppWindow } from "@tsgui/app";
+import { type ReconcilableWidget } from "@tsgui/core";
 import {
   FlexAlign,
   FlexDirection,
-  type LayoutContext,
-  layoutFlex,
-  type LayoutNode,
   Overflow,
   ProgressType,
   ProgressValueType,
 } from "@tsgui/layout";
-import { paintTree } from "@tsgui/paint";
 import {
   Button,
   Checkbox,
@@ -64,12 +34,10 @@ import {
   ProgressBar,
   Radio,
   RadioGroup,
-  Reconciler,
   SliderBar,
   TextInput,
   Toggle,
   View,
-  widgetPainters,
 } from "@tsgui/widgets";
 
 const selftest = process.argv.includes("--selftest");
@@ -81,8 +49,10 @@ const SURFACE_HOVER = "#1a4a7a";
 const TEXT = "#ffffff";
 const MUTED = "#888888";
 const DIVIDER = "#333333";
+const DETAILS_BG = { r: 22, g: 33, b: 62, a: 255 }; // #16213e
+const BACKDROP = { r: 13, g: 19, b: 33, a: 255 };
 
-// --- shared state — mutated by handlers, read by buildTree ----------------
+// --- shared state — mutated by handlers, read by both trees ---------------
 const state = {
   sliderValue: 50,
   checkboxChecked: false,
@@ -91,70 +61,7 @@ const state = {
   flavor: "mint",
 };
 
-let dirty = true;
-
-// --- window + renderer ----------------------------------------------------
-if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
-  throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
-}
-
-const window = sdl.SDL_CreateWindow({
-  title: "tsgui — dashboard",
-  w: 800,
-  h: 600,
-  flags: SdlDefines.SDL_WINDOW_RESIZABLE,
-});
-if (!window) throw new Error(`SDL_CreateWindow: ${sdl.SDL_GetError()}`);
-
-if (!sdl.SDL_StartTextInput({ window })) {
-  throw new Error(`SDL_StartTextInput: ${sdl.SDL_GetError()}`);
-}
-
-const gpu = new GpuRenderer(window);
-gpu.clearColor = { r: 13, g: 19, b: 33, a: 255 }; // BACKDROP
-
-const FONT_PATHS = [
-  process.env.TSGUI_FONT_PATH,
-  "/System/Library/Fonts/Supplemental/Arial.ttf",
-  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-].filter((p): p is string => !!p);
-const font = new TtfFont(gpu.renderer, FONT_PATHS[0]!, 18);
-
-// --- a header image, generated at runtime through SDL surfaces -----------
-const PNG_PATH = "/tmp/tsgui-dashboard.png";
-{
-  const surface = sdl.SDL_CreateSurface({
-    width: 220,
-    height: 64,
-    format: PixelFormat.SDL_PIXELFORMAT_RGBA32,
-  });
-  if (!surface) throw new Error(`SDL_CreateSurface: ${sdl.SDL_GetError()}`);
-  sdl.SDL_FillSurfaceRect({
-    dst: surface,
-    rect: null,
-    color: rgba({ r: 22, g: 33, b: 62 }),
-  });
-  for (let i = 0; i < 5; i++) {
-    const rect = new Int32Array([12 + i * 42, 12, 26, 40]);
-    sdl.SDL_FillSurfaceRect({
-      dst: surface,
-      rect,
-      color: rgba({ r: 233, g: 69, b: 96 }),
-    });
-  }
-  if (!sdl.SDL_SavePNG({ surface, file: PNG_PATH })) {
-    throw new Error(`SDL_SavePNG: ${sdl.SDL_GetError()}`);
-  }
-  sdl.SDL_DestroySurface({ surface });
-}
-
-const headerTexture = image.IMG_LoadTexture({
-  renderer: gpu.renderer,
-  file: PNG_PATH,
-});
-if (!headerTexture) throw new Error(`IMG_LoadTexture: ${sdl.SDL_GetError()}`);
-
-// --- widget tree ----------------------------------------------------------
+let details: AppWindow | null = null;
 
 function divider(): ReconcilableWidget {
   return View({
@@ -171,7 +78,9 @@ function sectionTitle(text: string): ReconcilableWidget {
   return Label({ text, style: { color: ACCENT, width: "100%" } });
 }
 
-function buildTree(): ReconcilableWidget {
+// --- the dashboard window --------------------------------------------------
+
+function buildDashboard(app: App): ReconcilableWidget {
   return View({
     style: {
       width: "100%",
@@ -194,10 +103,6 @@ function buildTree(): ReconcilableWidget {
             text: "tsgui Dashboard",
             style: { color: ACCENT, width: "100%" },
           }),
-          Label({
-            text: "flying-pan's simple-dashboard, rebuilt",
-            style: { color: MUTED, width: "100%" },
-          }),
         ],
       }),
 
@@ -211,7 +116,6 @@ function buildTree(): ReconcilableWidget {
         max: 100,
         onChange: (value) => {
           state.sliderValue = value;
-          dirty = true;
         },
         style: { width: "100%", height: 24 },
         colorStops: [
@@ -226,7 +130,6 @@ function buildTree(): ReconcilableWidget {
         placeholder: "Type something...",
         onChange: (text) => {
           state.textInputValue = text;
-          dirty = true;
         },
         style: {
           width: "100%",
@@ -253,7 +156,6 @@ function buildTree(): ReconcilableWidget {
             checked: state.checkboxChecked,
             onCheckedChange: (next) => {
               state.checkboxChecked = next;
-              dirty = true;
             },
           }),
           Label({ text: "Checkbox", style: { color: TEXT } }),
@@ -261,7 +163,6 @@ function buildTree(): ReconcilableWidget {
             checked: state.toggleOn,
             onCheckedChange: (next) => {
               state.toggleOn = next;
-              dirty = true;
             },
           }),
           Label({ text: "Toggle", style: { color: TEXT } }),
@@ -272,7 +173,6 @@ function buildTree(): ReconcilableWidget {
         value: state.flavor,
         onValueChange: (next) => {
           state.flavor = next;
-          dirty = true;
         },
         children: [
           Radio({ value: "mint", label: "Mint" }),
@@ -315,249 +215,188 @@ function buildTree(): ReconcilableWidget {
         showValue: ProgressValueType.Percent,
       }),
 
-      // live state (flying-pan's details window, inline) ------------------
+      // multi-window ------------------------------------------------------
       divider(),
-      sectionTitle("Live State"),
+      sectionTitle("Multi-Window"),
 
-      View({
-        style: {
-          width: "100%",
-          flexDirection: FlexDirection.Column,
-          gap: 6,
-          padding: 12,
-          borderRadius: 8,
-          backgroundColor: SURFACE,
-        },
+      Button({
         children: [
           Label({
-            text: `Text: ${state.textInputValue || "(empty)"}`,
+            text:
+              details !== null
+                ? "Details window is open"
+                : "Open Details Window",
             style: { color: TEXT },
-          }),
-          Label({
-            text: `Checkbox: ${state.checkboxChecked ? "on" : "off"}`,
-            style: { color: TEXT },
-          }),
-          Label({
-            text: `Toggle: ${state.toggleOn ? "on" : "off"}`,
-            style: { color: TEXT },
-          }),
-          Label({ text: `Flavor: ${state.flavor}`, style: { color: TEXT } }),
-          Label({
-            text: `Slider: ${state.sliderValue}`,
-            style: { color: MUTED },
           }),
         ],
+        onClick: () => {
+          if (details !== null) {
+            app.destroyWindow(details);
+            details = null;
+          } else {
+            details = app.createWindow({
+              title: "Details",
+              width: 400,
+              height: 500,
+              backgroundColor: DETAILS_BG,
+            });
+            const root = app.root.position;
+            details.move({ x: root.x + 820, y: root.y });
+          }
+        },
+        style: {
+          width: "100%",
+          height: 40,
+          backgroundColor: SURFACE,
+          borderRadius: 8,
+          alignItems: FlexAlign.Center,
+          justifyContent: FlexAlign.Center,
+          opacity: details !== null ? 0.5 : 1,
+          _hover: { backgroundColor: SURFACE_HOVER },
+          _active: { backgroundColor: ACCENT },
+          transition: { property: "backgroundColor", duration: 200 },
+        },
       }),
 
-      View({
-        style: {
-          width: "100%",
-          flexDirection: FlexDirection.Row,
-          gap: 12,
-          alignItems: FlexAlign.Center,
-        },
-        children: [
-          Button({
-            children: [Label({ text: "No-op (hover fades)" })],
-            onClick: () => {
-              dirty = true;
-            },
-            style: {
-              height: 40,
-              backgroundColor: SURFACE,
-              borderRadius: 8,
-              _hover: { backgroundColor: SURFACE_HOVER },
-              _active: { backgroundColor: ACCENT },
-              transition: { property: "backgroundColor", duration: 200 },
-            },
-          }),
-          Label({
-            text: "Multi-window lands with the deferred window work",
-            style: { color: MUTED },
-          }),
-        ],
+      Label({
+        text: "flying-pan's simple-dashboard, rebuilt",
+        style: { color: MUTED, width: "100%" },
       }),
     ],
   });
 }
 
-// --- reconciler + layout context -------------------------------------------
-const stateStore = new StateStore();
-const reconciler = new Reconciler(stateStore);
-const animationManager = new AnimationManager();
+// --- the details window ----------------------------------------------------
 
-let tree = buildTree();
+function buildDetails(win: AppWindow): ReconcilableWidget {
+  const pos = win.position;
+  const size = win.size;
+  const input = state.textInputValue || "(empty)";
 
-const layoutIndex = new Map<number, LayoutNode>();
-const layoutCtx: LayoutContext = {
-  layoutIndex,
-  focusableNodes: [],
-  scrollOffsetOf: (node) => scrollDispatcher.offset(node),
-  getStableId: reconciler.getStableId,
-  measureText: (text) => font.measure(text),
-  getImageSize: () => null,
-};
-
-// --- dispatchers -----------------------------------------------------------
-const pointer = new PointerDispatcher();
-const focusDispatcher = new FocusDispatcher();
-const scrollDispatcher = new ScrollDispatcher();
-const pointerEvents: PointerInputEvent[] = [];
-const keyboardEvents: KeyboardInputEvent[] = [];
-const wheelEvents: WheelInputEvent[] = [];
-
-// --- frame loop ------------------------------------------------------------
-const eventData = new Uint8Array(256);
-const eventView = new DataView(eventData.buffer);
-const sizeW = new Int32Array(1);
-const sizeH = new Int32Array(1);
-
-let running = true;
-let frames = 0;
-
-while (running) {
-  while (sdl.SDL_PollEvent({ event: eventData })) {
-    const type = eventView.getUint32(0, true);
-    if (type === EventType.SDL_EVENT_QUIT) running = false;
-    if (type === EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
-    if (
-      type === EventType.SDL_EVENT_KEY_DOWN &&
-      eventView.getUint32(24, true) === Scancode.SDL_SCANCODE_ESCAPE
-    ) {
-      running = false;
-    }
-    if (
-      type === EventType.SDL_EVENT_KEY_DOWN ||
-      type === EventType.SDL_EVENT_KEY_UP
-    ) {
-      const mod = eventView.getUint32(32, true);
-      keyboardEvents.push({
-        kind:
-          type === EventType.SDL_EVENT_KEY_DOWN
-            ? KeyboardInputKind.KeyDown
-            : KeyboardInputKind.KeyUp,
-        key: eventView.getUint32(28, true),
-        modifiers: (((mod &
-          (SdlDefines.SDL_KMOD_LSHIFT | SdlDefines.SDL_KMOD_RSHIFT)) !==
-        0
-          ? KeyModifiers.Shift
-          : 0) |
-          ((mod & (SdlDefines.SDL_KMOD_LCTRL | SdlDefines.SDL_KMOD_RCTRL)) !== 0
-            ? KeyModifiers.Control
-            : 0) |
-          ((mod & (SdlDefines.SDL_KMOD_LGUI | SdlDefines.SDL_KMOD_RGUI)) !== 0
-            ? KeyModifiers.Meta
-            : 0)) as KeyModifiers,
-        repeat: eventView.getUint8(39) !== 0,
-      });
-    }
-    if (type === EventType.SDL_EVENT_TEXT_INPUT) {
-      const textPtr = eventView.getBigUint64(24, true);
-      const text = readCString(textPtr);
-      if (text) {
-        keyboardEvents.push({
-          kind: KeyboardInputKind.Char,
-          key: 0,
-          text,
-          modifiers: 0,
-        });
-      }
-    }
-    if (type === EventType.SDL_EVENT_MOUSE_WHEEL) {
-      wheelEvents.push({
-        scrollX: eventView.getFloat32(24, true),
-        scrollY: eventView.getFloat32(28, true),
-        mouseX: eventView.getFloat32(36, true),
-        mouseY: eventView.getFloat32(40, true),
-      });
-    }
-    if (type === EventType.SDL_EVENT_MOUSE_MOTION) {
-      pointerEvents.push({
-        kind: PointerInputKind.Move,
-        x: eventView.getFloat32(28, true),
-        y: eventView.getFloat32(32, true),
-      });
-    }
-    if (
-      (type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN ||
-        type === EventType.SDL_EVENT_MOUSE_BUTTON_UP) &&
-      eventView.getUint8(24) > 0
-    ) {
-      pointerEvents.push({
-        kind:
-          type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN
-            ? PointerInputKind.Down
-            : PointerInputKind.Up,
-        x: eventView.getFloat32(28, true),
-        y: eventView.getFloat32(32, true),
-        button: eventView.getUint8(24) as MouseButton,
-      });
-    }
-  }
-
-  if (dirty) {
-    tree = buildTree(); // new descriptors — identity survives via reconcile
-    dirty = false;
-  }
-  const reconciled = reconciler.reconcile(tree);
-
-  sdl.SDL_GetWindowSize({ window, w: sizeW, h: sizeH });
-  layoutIndex.clear();
-  const root = layoutFlex({
-    node: reconciled.widget,
-    x: 0,
-    y: 0,
-    availableWidth: sizeW[0]!,
-    availableHeight: sizeH[0]!,
-    ctx: layoutCtx,
-  });
-
-  pointer.dispatch({ events: pointerEvents, root, layoutIndex, stateStore });
-  focusDispatcher.dispatch({
-    pointerEvents,
-    keyboardEvents,
-    root,
-    layoutIndex,
-    focusableNodes: layoutCtx.focusableNodes,
-    stateStore,
-  });
-  scrollDispatcher.dispatch({
-    wheelEvents,
-    root,
-    layoutIndex,
-    time: performance.now(),
-  });
-  animationManager.tick(performance.now());
-  pointerEvents.length = 0;
-  keyboardEvents.length = 0;
-  wheelEvents.length = 0;
-
-  gpu.beginFrame();
-  paintTree(
-    {
-      gpu,
-      font,
-      statesOf: (node) => ({
-        ...pointer.statesOf(node),
-        ...focusDispatcher.statesOf(node),
-      }),
-      stateStore,
-      painters: widgetPainters,
-      animationManager,
+  return View({
+    style: {
+      width: "100%",
+      height: "100%",
+      flexDirection: FlexDirection.Column,
+      overflow: Overflow.Auto,
+      padding: 16,
+      gap: 12,
     },
-    root
-  );
-  gpu.present();
+    children: [
+      View({
+        style: {
+          width: "100%",
+          flexDirection: FlexDirection.Row,
+          gap: 8,
+          alignItems: FlexAlign.Center,
+        },
+        children: [
+          Label({ text: "Details", style: { color: ACCENT } }),
+          Button({
+            children: [Label({ text: "Close", style: { color: TEXT } })],
+            onClick: () => {
+              app.destroyWindow(win);
+              details = null;
+            },
+            style: {
+              width: 80,
+              height: 32,
+              backgroundColor: SURFACE,
+              borderRadius: 6,
+              _hover: { backgroundColor: SURFACE_HOVER },
+              _active: { backgroundColor: ACCENT },
+              transition: { property: "backgroundColor", duration: 150 },
+            },
+          }),
+        ],
+      }),
 
-  frames++;
-  if (selftest && frames >= 240) running = false;
-  sdl.SDL_Delay({ ms: 16 });
+      divider(),
+      sectionTitle("Live State"),
+
+      CircularProgress({
+        value: state.sliderValue,
+        min: 0,
+        max: 100,
+        size: 96,
+        thickness: 0.15,
+        label: `${state.sliderValue}%`,
+        style: { backgroundColor: "transparent" },
+      }),
+
+      Label({ text: `Text: ${input}`, style: { color: TEXT } }),
+      Label({
+        text: `Checkbox: ${state.checkboxChecked ? "on" : "off"}`,
+        style: { color: TEXT },
+      }),
+      Label({
+        text: `Toggle: ${state.toggleOn ? "on" : "off"}`,
+        style: { color: TEXT },
+      }),
+      Label({ text: `Flavor: ${state.flavor}`, style: { color: TEXT } }),
+
+      divider(),
+      sectionTitle("Window Info"),
+
+      Label({
+        text: `Position: ${pos.x.toFixed(0)}, ${pos.y.toFixed(0)}`,
+        style: { color: MUTED },
+      }),
+      Label({
+        text: `Size: ${size.width} × ${size.height}`,
+        style: { color: MUTED },
+      }),
+    ],
+  });
 }
 
-destroyTexture(headerTexture);
-font.destroy();
-gpu.destroy();
-sdl.SDL_DestroyWindow({ window });
-sdl.SDL_Quit();
+// --- the app ---------------------------------------------------------------
 
-console.log(`dashboard: ${frames} frames, ${layoutIndex.size} nodes, ok`);
+const app = new App({
+  title: "tsgui — dashboard",
+  width: 800,
+  height: 600,
+  backgroundColor: BACKDROP,
+});
+
+let lastNodes = 0;
+
+app.run((a) => {
+  // The trees rebuild every frame; the reconciler short-circuits
+  // identical references, so unchanged frames cost a diff walk only.
+  a.root.widget = buildDashboard(a);
+  if (details !== null) {
+    details.widget = buildDetails(details);
+  }
+
+  lastNodes = a.root.layoutIndex.size;
+
+  if (selftest) {
+    // Lifecycle: open → render → close → reopen → exit.
+    if (a.frames === 30 && details === null) {
+      details = a.createWindow({
+        title: "Details",
+        width: 400,
+        height: 500,
+        backgroundColor: DETAILS_BG,
+      });
+      const root = a.root.position;
+      details.move({ x: root.x + 820, y: root.y });
+    }
+    if (a.frames === 120 && details !== null) {
+      a.destroyWindow(details);
+      details = null;
+    }
+    if (a.frames === 180 && details === null) {
+      details = a.createWindow({
+        title: "Details",
+        width: 400,
+        height: 500,
+        backgroundColor: DETAILS_BG,
+      });
+    }
+    if (a.frames >= 240) a.quit();
+  }
+});
+
+console.log(`dashboard: ${app.frames} frames, ${lastNodes} nodes (root), ok`);
