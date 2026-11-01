@@ -1,3 +1,4 @@
+# dependencies (bun install)
 node_modules/
 
 package.json
@@ -8,5 +9,5 @@ tsconfig.json
 
 routeTree.gen.ts
 
-# drizzle-kit owns these (snapshot.json / migration.sql); keep its formatting
-packages/core/src/db/migrations/
+# generated code — the generators own the formatting
+packages/bindings/src/libraries/*/generated/
