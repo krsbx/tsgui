@@ -8,7 +8,7 @@
  */
 import type { FFITypeStringToType } from "bun:ffi";
 import type { ReturnType as FFIReturnType } from "node:ffi";
-import type { FfiType } from "../model";
+import type { FfiType } from "../model/index.ts";
 
 /** Shared helper for generated-file headers. */
 export function banner(origin: string): string[] {

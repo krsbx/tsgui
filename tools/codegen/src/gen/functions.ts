@@ -2,8 +2,8 @@
  * Generator for the single-object-param wrapper surface
  * (`<Lib>Functions` + the `create<Lib>Functions()` factory).
  */
-import type { FfiTables } from "../model";
-import { banner } from "./shared";
+import type { FfiTables } from "../model/index.ts";
+import { banner } from "./shared.ts";
 
 export function generateFunctions(
   tables: FfiTables,

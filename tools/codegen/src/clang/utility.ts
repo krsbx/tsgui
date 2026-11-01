@@ -2,8 +2,8 @@
  * Clang AST JSON parsing helpers.
  * Ported from flying-pan (src/ffi/parser/utility.ts).
  */
-import type { CFunctionParam, ClangNode, CTypeDecl } from "./types";
-import { CDeclarationKind } from "./types";
+import type { CFunctionParam, ClangNode, CTypeDecl } from "./types.ts";
+import { CDeclarationKind } from "./types.ts";
 
 export function parseCTypeDeclFromString(qualType: string): CTypeDecl {
   let name = qualType.trim();

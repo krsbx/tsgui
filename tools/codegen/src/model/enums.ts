@@ -1,8 +1,8 @@
 /** Two-pass enum-constant collection and alias resolution. */
-import type { CEnumDecl, CHeaderDecl, CTypedefDecl } from "../clang/types";
-import { DeclarationKind } from "../clang/types";
-import type { FfiEnum, FfiFilterOptions } from "./interfaces";
-import { pascalCase, stripPrefix } from "./names";
+import type { CEnumDecl, CHeaderDecl, CTypedefDecl } from "../clang/types.ts";
+import { DeclarationKind } from "../clang/types.ts";
+import type { FfiEnum, FfiFilterOptions } from "./interfaces.ts";
+import { pascalCase, stripPrefix } from "./names.ts";
 
 /**
  * Two-pass enum-constant resolution: aliases of other constants

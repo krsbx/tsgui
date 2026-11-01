@@ -5,8 +5,8 @@
  * names to FFIType at load time (see @tsgui/bindings bun-dialect.ts).
  */
 import type { ReturnType as FFIReturnType } from "node:ffi";
-import type { FfiTables } from "../model";
-import { banner } from "./shared";
+import type { FfiTables } from "../model/index.ts";
+import { banner } from "./shared.ts";
 
 /** C kind → node:ffi type string (the neutral dialect). */
 const NEUTRAL_TYPE = {

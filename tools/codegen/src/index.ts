@@ -7,8 +7,8 @@
  *
  * Targets live in targets.ts; the pipeline lives in generate.ts.
  */
-import { generateTarget } from "./generate";
-import { TARGETS } from "./targets";
+import { generateTarget } from "./generate.ts";
+import { TARGETS } from "./targets.ts";
 
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");

@@ -16,7 +16,7 @@ import {
   type CUnionDecl,
   type CVarDecl,
   DeclarationKind,
-} from "./types";
+} from "./types.ts";
 import {
   extractDoc,
   extractNodeLocation,
@@ -25,7 +25,7 @@ import {
   parseFunctionPointerParams,
   parseParams,
   parseReturnTypeFromQualType,
-} from "./utility";
+} from "./utility.ts";
 
 export function parseFunctionDecl(node: ClangNode): CFunctionDecl | null {
   if (!node.name) return null;

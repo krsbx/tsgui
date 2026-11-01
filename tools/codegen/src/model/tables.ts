@@ -6,18 +6,18 @@ import type {
   CStructDecl,
   CTypeDecl,
   CTypedefDecl,
-} from "../clang/types";
-import { DeclarationKind } from "../clang/types";
-import { collectEnums } from "./enums";
+} from "../clang/types.ts";
+import { DeclarationKind } from "../clang/types.ts";
+import { collectEnums } from "./enums.ts";
 import type {
   FfiArg,
   FfiFilterOptions,
   FfiFunction,
   FfiTables,
   UnsafeFunction,
-} from "./interfaces";
-import { classifyFfiType, PRIMITIVES, scalarTs } from "./kinds";
-import { classifyPointerTs } from "./pointers";
+} from "./interfaces.ts";
+import { classifyFfiType, PRIMITIVES, scalarTs } from "./kinds.ts";
+import { classifyPointerTs } from "./pointers.ts";
 
 const JS_RESERVED = new Set([
   "arguments",

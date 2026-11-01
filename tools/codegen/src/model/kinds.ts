@@ -1,5 +1,5 @@
 /** Normalized C argument/return kinds and their classification. */
-import type { CTypeDecl } from "../clang/types";
+import type { CTypeDecl } from "../clang/types.ts";
 
 /** Normalized C argument/return kinds, backend-mappable. */
 export type FfiType =

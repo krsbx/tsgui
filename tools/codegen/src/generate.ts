@@ -7,9 +7,9 @@
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { dumpAst } from "./ast-dump";
-import { ClangNodeParser } from "./clang/parser";
-import { scanNumericDefines } from "./defines";
+import { dumpAst } from "./ast-dump.ts";
+import { ClangNodeParser } from "./clang/parser.ts";
+import { scanNumericDefines } from "./defines.ts";
 import {
   generateDefs,
   generateFfiConstants,
@@ -17,9 +17,9 @@ import {
   generateTypes,
   summarizeUnsafe,
 } from "./gen/index.ts";
-import { buildFfiTables } from "./model";
-import { pascalCase } from "./model";
-import { includeDir, type TargetSpec } from "./targets";
+import { buildFfiTables } from "./model/index.ts";
+import { pascalCase } from "./model/index.ts";
+import { includeDir, type TargetSpec } from "./targets.ts";
 
 const bindingsSrcDir = join(
   import.meta.dir,

@@ -1,6 +1,6 @@
 /** Pointer-to-type classification: branded handles vs caller memory. */
-import type { CTypeDecl } from "../clang/types";
-import { PRIMITIVES } from "./kinds";
+import type { CTypeDecl } from "../clang/types.ts";
+import { PRIMITIVES } from "./kinds.ts";
 
 /**
  * Complete 2D data structs that SDL both returns AND accepts as

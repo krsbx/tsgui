@@ -13,9 +13,9 @@ import {
   parseRecordDecl,
   parseTypedefDecl,
   parseVarDecl,
-} from "./parsers";
-import type { CASTNode, CHeaderDecl, ClangNode } from "./types";
-import { CDeclarationKind, DeclarationKind } from "./types";
+} from "./parsers.ts";
+import type { CASTNode, CHeaderDecl, ClangNode } from "./types.ts";
+import { CDeclarationKind, DeclarationKind } from "./types.ts";
 
 export class ClangNodeParser {
   public readonly path: string | null;

@@ -1,5 +1,5 @@
 /** CLI report formatting for FFI-safety exclusions. */
-import type { FfiTables } from "../model";
+import type { FfiTables } from "../model/index.ts";
 
 /** Used by the pipeline report so missing capabilities are visible, not silent. */
 export function summarizeUnsafe(tables: FfiTables, limit: number = 20): string {

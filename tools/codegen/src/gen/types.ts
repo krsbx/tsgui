@@ -2,8 +2,8 @@
  * Generator for the per-library types file: pointer brands, the
  * `<Lib>Symbols` positional surface, and cross-library brand imports.
  */
-import type { FfiTables } from "../model";
-import { banner } from "./shared";
+import type { FfiTables } from "../model/index.ts";
+import { banner } from "./shared.ts";
 
 export function generateTypes(
   tables: FfiTables,

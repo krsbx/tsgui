@@ -7,7 +7,7 @@
  * of a dlopen table so behavior matches the bun:ffi backend.
  */
 import { toString as ffiToString } from "node:ffi";
-import type { FnDef } from "./resolve-defs";
+import type { FnDef } from "./resolve-defs.ts";
 
 export function wrapStringReturns<
   T extends Record<string, FnDef>,

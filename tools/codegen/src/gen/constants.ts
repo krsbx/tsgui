@@ -1,6 +1,6 @@
 /** Generator for the per-library constants file (enums + numeric defines). */
-import type { FfiTables } from "../model";
-import { banner } from "./shared";
+import type { FfiTables } from "../model/index.ts";
+import { banner } from "./shared.ts";
 
 export function generateFfiConstants(
   tables: FfiTables,
