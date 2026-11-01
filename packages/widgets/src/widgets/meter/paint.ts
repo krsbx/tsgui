@@ -1,12 +1,14 @@
 /** Meter painter — HTML-`<meter>` low/high/optimum zones as palette colors. */
-import type { LayoutNode } from "@tsgui/layout";
-import { ProgressBarOrientation, ProgressDirection } from "@tsgui/layout";
 import { MeterZone, Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
 import { propsOf } from "@tsgui/core";
-import type { MeterProps } from "../widgets/meter.ts";
-import { fillRatio, paintContinuousFill } from "./fill.ts";
-import { paintInlineValueLabel } from "./label.ts";
+import { ProgressBarOrientation, ProgressDirection } from "@tsgui/layout";
+import {
+  fillRatio,
+  paintContinuousFill,
+  type WidgetPainter,
+} from "@tsgui/paint";
+import { paintInlineValueLabel } from "../label/paint.ts";
+import type { MeterProps } from "../meter.ts";
 
 /** Which palette zone the value sits in, given the optimum's position. */
 export function resolveMeterColor(options: {
@@ -40,7 +42,7 @@ export function resolveMeterColor(options: {
   return MeterZone.Warning;
 }
 
-export function paintMeter(ctx: PaintContext, node: LayoutNode): void {
+export const paintMeter: WidgetPainter = (ctx, node) => {
   const props = propsOf<MeterProps>(node.widget);
 
   const min = props.min ?? 0;
@@ -82,4 +84,4 @@ export function paintMeter(ctx: PaintContext, node: LayoutNode): void {
     max,
     showValue: props.showValue,
   });
-}
+};

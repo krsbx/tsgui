@@ -75,17 +75,39 @@ export {
   type WheelInputEvent,
 } from "@tsgui/interactions";
 
-// Paint bridge
+// Paint engine (generic) + the per-widget painter registry
 export {
+  type ContinuousFillOptions,
   colorWithOpacity,
+  fillRatio,
+  fillShape,
   type InteractionStates,
+  paintContinuousFill,
+  paintBackground,
+  paintBorder,
+  paintShadow,
+  paintSteppedFill,
   type PaintContext,
   type Painter,
   paintTree,
   parseColor,
+  resolveFillColor,
+  resolveFillColorClamped,
   resolveStyle,
   type TextPainter,
-} from "./paint.ts";
+  type WidgetPainter,
+  type WidgetPainters,
+} from "@tsgui/paint";
+export { widgetPainters } from "./painters.ts";
+export {
+  formatValueLabel,
+  paintInlineValueLabel,
+} from "./widgets/label/paint.ts";
+export { paintMeter, resolveMeterColor } from "./widgets/meter/paint.ts";
+export {
+  paintCircularProgress,
+  paintProgressBar,
+} from "./widgets/progress/paint/index.ts";
 
 // Headless harness — tree → reconcile → layout → recorded ops
 export {
@@ -97,22 +119,3 @@ export {
   type SerializedLayoutNode,
   serializeLayoutTree,
 } from "./harness.ts";
-
-// Paint modules — per-widget painters + shared fill/label helpers
-export {
-  type ContinuousFillOptions,
-  fillRatio,
-  paintContinuousFill,
-  paintSteppedFill,
-} from "./paint/fill.ts";
-export { fillShape, paintBackground, paintBorder } from "./paint/shape.ts";
-export {
-  resolveFillColor,
-  resolveFillColorClamped,
-} from "./paint/color-stops.ts";
-export { formatValueLabel, paintInlineValueLabel } from "./paint/label.ts";
-export { paintMeter, resolveMeterColor } from "./paint/meter.ts";
-export {
-  paintCircularProgress,
-  paintProgressBar,
-} from "./paint/progress/index.ts";

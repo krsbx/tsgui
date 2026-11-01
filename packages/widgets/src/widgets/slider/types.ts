@@ -1,12 +1,12 @@
 /** Slider contracts — ported from flying-pan's widget/slider/types. */
+import type { ColorStop } from "@tsgui/core";
+import type { BaseWidgetProps } from "@tsgui/core";
 import type {
   ProgressBarOrientation,
   TextStyle,
   ViewStyle,
 } from "@tsgui/layout";
 import { CircularProgressDirection } from "@tsgui/layout";
-import type { ColorStop } from "@tsgui/core";
-import type { BaseWidgetProps } from "@tsgui/core";
 
 export interface SliderMark {
   value: number;

@@ -6,8 +6,6 @@
  * convention. The uncontrolled StateStore variant lands with the state
  * milestone.
  */
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
-import { createWidget } from "../../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -17,6 +15,8 @@ import {
 } from "@tsgui/core";
 import type { BaseWidgetProps } from "@tsgui/core";
 import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@tsgui/core";
+import { type ViewStyle, WidgetType } from "@tsgui/layout";
+import { createWidget } from "../../create-widget.ts";
 import {
   backspace,
   CaretDirection,

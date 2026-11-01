@@ -1,14 +1,13 @@
 /** Slider tick marks — border ticks at values, optional labels under. */
-import { valueToRatio } from "@tsgui/layout";
 import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
-import { parseColor } from "../style-resolve.ts";
+import { valueToRatio } from "@tsgui/layout";
+import { type PaintContext, parseColor } from "@tsgui/paint";
 import {
   TICK_LABEL_FONT_SIZE,
   TICK_SIZE,
   TRACK_THICKNESS,
-} from "../widgets/slider/geometry.ts";
-import type { SliderMark } from "../widgets/slider/types.ts";
+} from "./geometry.ts";
+import type { SliderMark } from "./types.ts";
 
 export interface PaintSliderMarksOptions {
   marks: SliderMark[];

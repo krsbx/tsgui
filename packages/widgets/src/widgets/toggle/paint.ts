@@ -1,18 +1,13 @@
 /** Toggle painter — the sliding knob sub-mark, ported from flying-pan. */
-import type { LayoutNode } from "@tsgui/layout";
 import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
 import { propsOf } from "@tsgui/core";
-import type { ToggleProps } from "../widgets/toggle.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
+import { paintBackground, paintBorder, type WidgetPainter } from "@tsgui/paint";
+import type { ToggleProps } from "../toggle.ts";
 
 const KNOB_INSET = 1;
 
-export function paintToggle(
-  ctx: PaintContext,
-  node: LayoutNode,
-  checked: boolean
-): void {
+export const paintToggle: WidgetPainter = (ctx, node, _style, states) => {
+  const checked = states.checked;
   const props = propsOf<ToggleProps>(node.widget);
   const half = node.width / 2;
   const knobWidth = half - KNOB_INSET;
@@ -39,4 +34,4 @@ export function paintToggle(
     },
     knobRadius
   );
-}
+};

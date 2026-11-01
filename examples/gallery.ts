@@ -63,6 +63,7 @@ import {
   Toggle,
   View,
   type WheelInputEvent,
+  widgetPainters,
 } from "@tsgui/widgets";
 
 const selftest = process.argv.includes("--selftest");
@@ -610,6 +611,7 @@ while (running) {
         ...focusDispatcher.statesOf(node),
       }),
       stateStore,
+      painters: widgetPainters,
     },
     root
   );

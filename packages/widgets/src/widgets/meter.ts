@@ -1,4 +1,6 @@
 /** Meter — HTML-`<meter>` zone semantics over the shared fill painter. */
+import { Palette } from "@tsgui/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 import {
   PointerEvents,
   ProgressBarOrientation,
@@ -9,8 +11,6 @@ import {
   WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import { Palette } from "@tsgui/core";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface MeterProps extends BaseWidgetProps {
   value?: number;

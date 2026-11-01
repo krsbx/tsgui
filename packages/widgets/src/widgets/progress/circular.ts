@@ -1,12 +1,12 @@
 /** CircularProgress — ring (thickness < 1) or pie (thickness ≥ 1). */
+import { Palette } from "@tsgui/core";
+import type { ReconcilableWidget } from "@tsgui/core";
 import {
   CircularProgressDirection,
   PointerEvents,
   WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../../create-widget.ts";
-import { Palette } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { CircularProgressProps } from "./types.ts";
 

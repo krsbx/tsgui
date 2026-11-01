@@ -1,9 +1,8 @@
 /** Slider handle — the bordered disc both slider painters share. */
-import type { ViewStyle } from "@tsgui/layout";
 import { Metrics, Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
-import { parseColor } from "../style-resolve.ts";
-import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
+import type { ViewStyle } from "@tsgui/layout";
+import { type PaintContext, parseColor } from "@tsgui/paint";
+import { HANDLE_SIZE } from "./geometry.ts";
 
 /** Handle style hints a slider's `handleStyle` may carry. */
 export interface SliderHandleStyle extends ViewStyle {

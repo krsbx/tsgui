@@ -29,6 +29,7 @@ import {
   StateStore,
   Toggle,
   View,
+  widgetPainters,
 } from "../src/index.ts";
 
 interface Harness {
@@ -226,6 +227,7 @@ describe("PointerDispatcher", () => {
           },
           font: { draw: () => {} },
           statesOf: (node) => dispatcher.statesOf(node),
+          painters: widgetPainters,
         },
         root
       );

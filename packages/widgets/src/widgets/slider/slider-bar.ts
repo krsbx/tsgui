@@ -1,22 +1,23 @@
 /** SliderBar painter — track, fill, marks, handle; ported from flying-pan. */
+import { Palette } from "@tsgui/core";
+import { propsOf } from "@tsgui/core";
 import {
-  type LayoutNode,
   ProgressBarOrientation,
   ProgressValueType,
   valueToRatio,
 } from "@tsgui/layout";
-import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
-import { propsOf } from "@tsgui/core";
-import { HANDLE_SIZE, TRACK_THICKNESS } from "../widgets/slider/geometry.ts";
-import type { SliderBarProps } from "../widgets/slider/types.ts";
-import { resolveFillColorClamped } from "./color-stops.ts";
-import { paintInlineValueLabel } from "./label.ts";
-import { paintBackground } from "./shape.ts";
+import {
+  paintBackground,
+  resolveFillColorClamped,
+  type WidgetPainter,
+} from "@tsgui/paint";
+import { paintInlineValueLabel } from "../label/paint.ts";
+import { HANDLE_SIZE, TRACK_THICKNESS } from "./geometry.ts";
 import { paintSliderHandle } from "./slider-handle.ts";
 import { paintSliderMarks } from "./slider-marks.ts";
+import type { SliderBarProps } from "./types.ts";
 
-export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
+export const paintSliderBar: WidgetPainter = (ctx, node) => {
   const props = propsOf<SliderBarProps>(node.widget);
   const min = props.min ?? 0;
   const max = props.max ?? 100;
@@ -111,4 +112,4 @@ export function paintSliderBar(ctx: PaintContext, node: LayoutNode): void {
     max,
     showValue: props.showValue ? ProgressValueType.Percent : undefined,
   });
-}
+};

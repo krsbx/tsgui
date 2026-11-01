@@ -1,6 +1,4 @@
 /** Radio — the dot control; selection logic lives in RadioGroup. */
-import { type TextStyle, type ViewStyle, WidgetType } from "@tsgui/layout";
-import { createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -9,6 +7,8 @@ import {
   Palette,
 } from "@tsgui/core";
 import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
+import { type TextStyle, type ViewStyle, WidgetType } from "@tsgui/layout";
+import { createWidget } from "../create-widget.ts";
 
 export interface RadioProps extends BaseWidgetProps {
   /** Group-unique value this radio represents. */

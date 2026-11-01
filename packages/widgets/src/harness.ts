@@ -8,17 +8,18 @@
  * captured as a plain op object. That is what golden-snapshot tests diff,
  * and what phase 5's devtools can replay.
  */
+import { StateStore } from "@tsgui/core";
+import type { ReconcilableWidget } from "@tsgui/core";
 import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   type Size,
 } from "@tsgui/layout";
-import type { InteractionStates, Painter, TextPainter } from "./paint.ts";
-import { paintTree } from "./paint.ts";
+import type { InteractionStates, Painter, TextPainter } from "@tsgui/paint";
+import { paintTree } from "@tsgui/paint";
+import { widgetPainters } from "./painters.ts";
 import { Reconciler } from "./reconciler.ts";
-import { StateStore } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
 
 /** Recorded draw-call discriminators. */
 export const PaintOpKind = {
@@ -142,7 +143,13 @@ export function renderHeadless(
       }),
   };
   paintTree(
-    { gpu, font, statesOf: options.statesOf, stateStore: stateStore },
+    {
+      gpu,
+      font,
+      statesOf: options.statesOf,
+      stateStore: stateStore,
+      painters: widgetPainters,
+    },
     root
   );
 

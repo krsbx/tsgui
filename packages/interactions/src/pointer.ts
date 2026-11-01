@@ -8,11 +8,11 @@
  * target), click = down+up on the same widget with the same button, and
  * double/triple-click counting inside the 500 ms window.
  */
-import type { LayoutNode } from "@tsgui/layout";
 import type { StateStore } from "@tsgui/core";
 import type { InteractionStates } from "@tsgui/core";
 import type { PointerPayload, ReconcilableWidget } from "@tsgui/core";
 import { MouseButton } from "@tsgui/core";
+import type { LayoutNode } from "@tsgui/layout";
 import { hitTest } from "./hit-test.ts";
 import { type PointerInputEvent, PointerInputKind } from "./types.ts";
 

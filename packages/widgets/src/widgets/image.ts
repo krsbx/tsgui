@@ -1,8 +1,8 @@
 /** Image — texture-backed widget. */
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 import { WidgetType } from "@tsgui/layout";
 import type { ViewStyle } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface ImageProps extends BaseWidgetProps {
   src: string;

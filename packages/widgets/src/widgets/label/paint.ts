@@ -1,8 +1,12 @@
 /** Inline value labels — flying-pan's renderer/paint/text value branch. */
-import { ProgressValueType, type TextStyle } from "@tsgui/layout";
 import { Palette } from "@tsgui/core";
-import type { Painter, TextPainter } from "../paint.ts";
-import { parseColor } from "../style-resolve.ts";
+import { ProgressValueType, type TextStyle } from "@tsgui/layout";
+import {
+  type Painter,
+  parseColor,
+  type TextPainter,
+  type WidgetPainter,
+} from "@tsgui/paint";
 
 /** Auto label from a value; `null` when there's nothing to show. */
 export function formatValueLabel(options: {
@@ -62,3 +66,16 @@ export function paintInlineValueLabel(
     tint: parseColor(options.labelStyle?.color ?? Palette.text),
   });
 }
+
+/** Label painter — the walk's text case, registered per widget type. */
+export const paintLabel: WidgetPainter = (ctx, node, style) => {
+  const text = node.widget.props["text"];
+  if (typeof text !== "string") return;
+
+  ctx.font.draw(ctx.gpu, {
+    x: node.screenX,
+    y: node.screenY,
+    text,
+    tint: parseColor((style as { color?: string }).color ?? Palette.text),
+  });
+};

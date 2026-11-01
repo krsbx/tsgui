@@ -1,21 +1,22 @@
 /** CircularSlider painter — track arc, filled arc, handle dot. */
+import { Palette } from "@tsgui/core";
+import { propsOf } from "@tsgui/core";
 import {
   CircularProgressDirection,
-  type LayoutNode,
   ProgressValueType,
   valueToRatio,
 } from "@tsgui/layout";
-import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
-import { parseColor } from "../style-resolve.ts";
-import { propsOf } from "@tsgui/core";
-import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
-import type { CircularSliderProps } from "../widgets/slider/types.ts";
-import { resolveFillColorClamped } from "./fill.ts";
-import { paintInlineValueLabel } from "./label.ts";
+import {
+  parseColor,
+  resolveFillColorClamped,
+  type WidgetPainter,
+} from "@tsgui/paint";
+import { paintInlineValueLabel } from "../label/paint.ts";
+import { HANDLE_SIZE } from "./geometry.ts";
 import { paintSliderHandle } from "./slider-handle.ts";
+import type { CircularSliderProps } from "./types.ts";
 
-export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
+export const paintCircularSlider: WidgetPainter = (ctx, node) => {
   const props = propsOf<CircularSliderProps>(node.widget);
   const min = props.min ?? 0;
   const max = props.max ?? 100;
@@ -89,4 +90,4 @@ export function paintCircularSlider(ctx: PaintContext, node: LayoutNode): void {
     max,
     showValue: props.showValue ? ProgressValueType.Percent : undefined,
   });
-}
+};

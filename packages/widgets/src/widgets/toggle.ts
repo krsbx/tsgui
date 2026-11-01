@@ -2,8 +2,6 @@
  * Toggle — on/off switch, controlled checked state in batch 2 (same
  * contract as Checkbox; uncontrolled lands with the state milestone).
  */
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
-import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -16,6 +14,8 @@ import type {
   PointerPayload,
   ReconcilableWidget,
 } from "@tsgui/core";
+import { type ViewStyle, WidgetType } from "@tsgui/layout";
+import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 
 export interface ToggleProps extends BaseWidgetProps {
   /** Controlled checked state — wins over defaultChecked. */

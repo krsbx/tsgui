@@ -5,13 +5,6 @@
  * Uncontrolled StateStore mode is deferred to the state milestone.
  */
 import {
-  PointerEvents,
-  ProgressBarOrientation,
-  valueToRatio,
-  WidgetType,
-} from "@tsgui/layout";
-import { createWidget } from "../create-widget.ts";
-import {
   disabledStyle,
   focusableWhen,
   focusStyle,
@@ -19,6 +12,13 @@ import {
   Palette,
 } from "@tsgui/core";
 import type { ReconcilableWidget } from "@tsgui/core";
+import {
+  PointerEvents,
+  ProgressBarOrientation,
+  valueToRatio,
+  WidgetType,
+} from "@tsgui/layout";
+import { createWidget } from "../create-widget.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {
   HANDLE_SIZE,

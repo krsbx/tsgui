@@ -3,8 +3,6 @@
  * `onCheckedChange`; the uncontrolled StateStore variant (defaultChecked)
  * lands with the state foundation milestone.
  */
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
-import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -17,6 +15,8 @@ import type {
   PointerPayload,
   ReconcilableWidget,
 } from "@tsgui/core";
+import { type ViewStyle, WidgetType } from "@tsgui/layout";
+import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 
 export interface CheckboxProps extends BaseWidgetProps {
   /** Controlled checked state — wins over defaultChecked. */

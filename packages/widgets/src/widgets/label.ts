@@ -1,9 +1,9 @@
 /** Label — non-interactive text. */
+import { Palette } from "@tsgui/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 import { PointerEvents, WidgetType } from "@tsgui/layout";
 import type { TextStyle } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import { Palette } from "@tsgui/core";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface LabelProps extends BaseWidgetProps {
   text: string;

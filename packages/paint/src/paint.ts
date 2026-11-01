@@ -1,11 +1,19 @@
 /**
- * Paint bridge — walks a LayoutNode tree and issues draw calls in
- * flying-pan's proven order: shadow → border → background → per-widget
- * painter → children. Per-widget painters live in ./paint/*.ts.
+ * @tsgui/paint — the generic rendering engine. Walks a LayoutNode tree
+ * and issues draw calls in flying-pan's proven order: shadow → border →
+ * background → per-widget painter → children.
  *
- * The Painter surface is STRUCTURAL and reuses @tsgui/gpu's option types,
- * so GpuRenderer satisfies it while headless tests mock it.
+ * The engine is widget-agnostic: per-widget painters are injected through
+ * `PaintContext.painters` (assembled by @tsgui/widgets, which co-locates
+ * each painter with its widget). The Painter surface is STRUCTURAL and
+ * reuses @tsgui/gpu's option types, so GpuRenderer satisfies it while
+ * headless tests mock it.
  */
+import {
+  type InteractionStates,
+  STATES_NONE,
+  type StateStore,
+} from "@tsgui/core";
 import type {
   ArcOptions,
   Rect,
@@ -14,28 +22,11 @@ import type {
   TextDrawOptions,
   TextureDrawOptions,
 } from "@tsgui/gpu";
-import {
-  type InteractionStates,
-  Palette,
-  STATES_NONE,
-  type StateStore,
-} from "@tsgui/core";
-import type { Size } from "@tsgui/layout";
+import type { Size, ViewStyle } from "@tsgui/layout";
 import { type LayoutNode, Overflow, WidgetType } from "@tsgui/layout";
-import { paintCheckbox } from "./paint/checkbox.ts";
-import { paintCircularSlider } from "./paint/circular-slider.ts";
-import { paintMeter } from "./paint/meter.ts";
-import {
-  paintCircularProgress,
-  paintProgressBar,
-} from "./paint/progress/index.ts";
-import { paintRadio } from "./paint/radio.ts";
-import { paintShadow } from "./paint/shadow.ts";
-import { paintBackground, paintBorder } from "./paint/shape.ts";
-import { paintSliderBar } from "./paint/slider-bar.ts";
-import { paintTextInput } from "./paint/text-input.ts";
-import { paintToggle } from "./paint/toggle.ts";
-import { parseColor, resolveStyle } from "./style-resolve.ts";
+import { paintShadow } from "./primitives/shadow.ts";
+import { paintBackground, paintBorder } from "./primitives/shape.ts";
+import { resolveStyle } from "./style-resolve.ts";
 
 /** The subset of GpuRenderer the paint walk consumes. */
 export interface Painter {
@@ -56,13 +47,33 @@ export interface TextPainter {
   measure?(text: string): Size;
 }
 
+/**
+ * A widget's painter — runs after the decoration layers with the
+ * walk-resolved style (pseudo-state overrides applied) and the effective
+ * states (checked folded in for checked controls).
+ */
+export type WidgetPainter = (
+  ctx: PaintContext,
+  node: LayoutNode,
+  style: ViewStyle,
+  states: InteractionStates
+) => void;
+
+/** Per-widget painter registry — assembled by @tsgui/widgets. */
+export type WidgetPainters = ReadonlyMap<
+  WidgetType | (string & {}),
+  WidgetPainter
+>;
+
 export interface PaintContext {
   gpu: Painter;
   font: TextPainter;
-  /** Per-node interaction flags — production wires the dispatch (phase 4). */
+  /** Per-node interaction flags — production wires the dispatchers. */
   statesOf?(node: LayoutNode): InteractionStates;
   /** The app's state store — uncontrolled widgets resolve values here. */
   stateStore?: StateStore;
+  /** Per-widget painters — widget-specific content painting. */
+  painters: WidgetPainters;
 }
 
 export { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
@@ -135,61 +146,7 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
   paintBorder(ctx.gpu, rect, style, radius);
   paintBackground(ctx.gpu, rect, style, radius);
 
-  switch (node.widget.type) {
-    case WidgetType.Label: {
-      const text = node.widget.props["text"];
-      if (typeof text === "string") {
-        const ts = style as { color?: string };
-        ctx.font.draw(ctx.gpu, {
-          x: node.screenX,
-          y: node.screenY,
-          text,
-          tint: parseColor(ts.color ?? Palette.text),
-        });
-      }
-      break;
-    }
-    case WidgetType.Image: {
-      // Descriptors carry the texture as an opaque prop; the paint bridge
-      // trusts the app layer to store a real texture handle there.
-      const texture = node.widget.props[
-        "texture"
-      ] as TextureDrawOptions["texture"];
-      if (texture) {
-        ctx.gpu.drawTexture({ texture, ...rect });
-      }
-      break;
-    }
-    case WidgetType.ProgressBar:
-      paintProgressBar(ctx, node);
-      break;
-    case WidgetType.CircularProgress:
-      paintCircularProgress(ctx, node);
-      break;
-    case WidgetType.Meter:
-      paintMeter(ctx, node);
-      break;
-    case WidgetType.Checkbox:
-      paintCheckbox(ctx, node, checked);
-      break;
-    case WidgetType.Toggle:
-      paintToggle(ctx, node, checked);
-      break;
-    case WidgetType.Radio:
-      paintRadio(ctx, node, checked);
-      break;
-    case WidgetType.SliderBar:
-      paintSliderBar(ctx, node);
-      break;
-    case WidgetType.CircularSlider:
-      paintCircularSlider(ctx, node);
-      break;
-    case WidgetType.TextInput:
-      paintTextInput(ctx, node);
-      break;
-    default:
-      break;
-  }
+  ctx.painters.get(node.widget.type)?.(ctx, node, style, effectiveStates);
 
   // Scrollable containers clip their children — layout already shifted
   // them by the committed scroll offset (screenX/screenY), so clipping

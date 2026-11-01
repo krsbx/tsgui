@@ -4,6 +4,12 @@
  * child's value; a child's own onClick fires first. Children carrying a
  * `label` render as a row with the text beside the dot.
  */
+import type { BaseWidgetProps } from "@tsgui/core";
+import {
+  type PointerPayload,
+  propsOf,
+  type ReconcilableWidget,
+} from "@tsgui/core";
 import {
   FlexAlign,
   FlexDirection,
@@ -11,12 +17,6 @@ import {
   WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import type { BaseWidgetProps } from "@tsgui/core";
-import {
-  type PointerPayload,
-  propsOf,
-  type ReconcilableWidget,
-} from "@tsgui/core";
 import { Label } from "./label.ts";
 import type { RadioProps } from "./radio.ts";
 

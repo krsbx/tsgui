@@ -3,9 +3,9 @@
  * (stableId) and dispatch lifecycle hooks. Ported from flying-pan with
  * the `window` parameter dropped; hooks receive a plain payload.
  */
-import type { WidgetDescriptor } from "@tsgui/layout";
 import type { StateStore } from "@tsgui/core";
 import type { Key, ReconcilableWidget, ReconciledNode } from "@tsgui/core";
+import type { WidgetDescriptor } from "@tsgui/layout";
 
 export class Reconciler {
   private prevTree: ReconciledNode | null = null;

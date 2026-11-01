@@ -7,10 +7,7 @@
  * testable, never touch SDL; contracts come from @tsgui/core.
  */
 export { hitTest, type HitTestOptions } from "./hit-test.ts";
-export {
-  PointerDispatcher,
-  type PointerDispatchOptions,
-} from "./pointer.ts";
+export { PointerDispatcher, type PointerDispatchOptions } from "./pointer.ts";
 export {
   type KeyboardInputEvent,
   KeyboardInputKind,

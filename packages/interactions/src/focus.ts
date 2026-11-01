@@ -8,7 +8,6 @@
  * Key and char events route to the focused widget; Enter / Space
  * synthesize a click on activable widgets (fresh press only).
  */
-import { type LayoutNode, WidgetType } from "@tsgui/layout";
 import type { StateStore } from "@tsgui/core";
 import {
   KeyCode,
@@ -16,6 +15,7 @@ import {
   MouseButton,
   type ReconcilableWidget,
 } from "@tsgui/core";
+import { type LayoutNode, WidgetType } from "@tsgui/layout";
 import { hitTest } from "./hit-test.ts";
 import {
   type KeyboardInputEvent,

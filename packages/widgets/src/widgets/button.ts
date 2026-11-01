@@ -2,9 +2,6 @@
  * Button — chrome box with baked defaults and pseudo-states. The label is
  * a child (usually a Label widget), matching flying-pan's composition.
  */
-import { WidgetType } from "@tsgui/layout";
-import type { ViewStyle } from "@tsgui/layout";
-import { createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -13,6 +10,9 @@ import {
   Palette,
 } from "@tsgui/core";
 import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
+import { WidgetType } from "@tsgui/layout";
+import type { ViewStyle } from "@tsgui/layout";
+import { createWidget } from "../create-widget.ts";
 
 export interface ButtonProps extends BaseWidgetProps {
   style?: ViewStyle;

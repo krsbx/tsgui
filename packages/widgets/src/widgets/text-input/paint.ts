@@ -1,15 +1,12 @@
 /** TextInput painter — selection, text/placeholder, caret. */
-import type { LayoutNode } from "@tsgui/layout";
 import { Metrics, Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
-import { parseColor } from "../style-resolve.ts";
 import { propsOf } from "@tsgui/core";
-import type { TextInputProps } from "../widgets/text-input/index.ts";
-import { peekEditingState } from "../widgets/text-input/state.ts";
+import { parseColor, type WidgetPainter } from "@tsgui/paint";
+import type { TextInputProps } from "./index.ts";
+import { peekEditingState } from "./state.ts";
 
-export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
+export const paintTextInput: WidgetPainter = (ctx, node, style) => {
   const props = propsOf<TextInputProps>(node.widget);
-  const style = node.widget.style ?? {};
   const focused = ctx.statesOf?.(node)?.focused ?? false;
 
   // Live editing state — NOT the controlled resync. The paint pass runs
@@ -86,4 +83,4 @@ export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
   }
 
   ctx.gpu.popClip?.();
-}
+};

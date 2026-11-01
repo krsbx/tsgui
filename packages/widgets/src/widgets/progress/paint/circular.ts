@@ -1,17 +1,21 @@
 /** CircularProgress painter — buffer arc, main arc (ring or pie), label. */
+import { Palette } from "@tsgui/core";
+import { propsOf } from "@tsgui/core";
 import {
   CircularProgressDirection,
   type LayoutNode,
   ProgressType,
 } from "@tsgui/layout";
-import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../../paint.ts";
-import { colorWithOpacity, parseColor } from "../../style-resolve.ts";
-import { propsOf } from "@tsgui/core";
-import type { CircularProgressProps } from "../../widgets/progress/types.ts";
-import { resolveFillColorClamped } from "../color-stops.ts";
-import { fillRatio } from "../fill.ts";
-import { paintInlineValueLabel } from "../label.ts";
+import {
+  colorWithOpacity,
+  fillRatio,
+  type PaintContext,
+  parseColor,
+  resolveFillColorClamped,
+  type WidgetPainter,
+} from "@tsgui/paint";
+import { paintInlineValueLabel } from "../../label/paint.ts";
+import type { CircularProgressProps } from "../types.ts";
 
 /** CSS color string + opacity → packed u32 for the arc primitives. */
 function packedWithOpacity(
@@ -41,10 +45,7 @@ function paintIndeterminate(ctx: PaintContext, node: LayoutNode): void {
   });
 }
 
-export function paintCircularProgress(
-  ctx: PaintContext,
-  node: LayoutNode
-): void {
+export const paintCircularProgress: WidgetPainter = (ctx, node) => {
   const props = propsOf<CircularProgressProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
@@ -127,4 +128,4 @@ export function paintCircularProgress(
     max: props.max,
     showValue: props.showValue,
   });
-}
+};

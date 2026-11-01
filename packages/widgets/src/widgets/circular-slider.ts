@@ -4,9 +4,6 @@
  * press on the handle dot drags, captured moves apply. Controlled-only
  * (uncontrolled lands with the state milestone).
  */
-import { clamp } from "@tsgui/layout";
-import { PointerEvents, WidgetType } from "@tsgui/layout";
-import { createWidget } from "../create-widget.ts";
 import {
   disabledStyle,
   focusableWhen,
@@ -15,6 +12,9 @@ import {
   Palette,
 } from "@tsgui/core";
 import type { ReconcilableWidget } from "@tsgui/core";
+import { clamp } from "@tsgui/layout";
+import { PointerEvents, WidgetType } from "@tsgui/layout";
+import { createWidget } from "../create-widget.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {
   DEFAULT_CIRCULAR_SIZE,

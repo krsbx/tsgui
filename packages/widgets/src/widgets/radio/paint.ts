@@ -1,19 +1,13 @@
 /** Radio painter — the dot sub-mark, ported from flying-pan. */
-import type { LayoutNode } from "@tsgui/layout";
 import { Palette } from "@tsgui/core";
-import type { PaintContext } from "../paint.ts";
 import { propsOf } from "@tsgui/core";
-import type { RadioProps } from "../widgets/radio.ts";
-import { paintBackground, paintBorder } from "./shape.ts";
+import { paintBackground, paintBorder, type WidgetPainter } from "@tsgui/paint";
+import type { RadioProps } from "../radio.ts";
 
 const DOT_INSET = 0.5;
 
-export function paintRadio(
-  ctx: PaintContext,
-  node: LayoutNode,
-  checked: boolean
-): void {
-  if (!checked) return;
+export const paintRadio: WidgetPainter = (ctx, node, _style, states) => {
+  if (!states.checked) return;
 
   const props = propsOf<RadioProps>(node.widget);
   const dotSize =
@@ -35,4 +29,4 @@ export function paintRadio(
     { backgroundColor: Palette.accent, borderRadius: dotRadius, ...dotStyle },
     dotRadius
   );
-}
+};

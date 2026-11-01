@@ -15,6 +15,7 @@ import {
   Reconciler,
   StateStore,
   View,
+  widgetPainters,
 } from "../src/index.ts";
 
 // ————— reconciler —————
@@ -180,7 +181,7 @@ describe("pipeline", () => {
       availableHeight: 200,
       ctx: layoutCtx,
     });
-    paintTree({ gpu, font }, root);
+    paintTree({ gpu, font, painters: widgetPainters }, root);
 
     // root has no background — ops are: label bg, label text, view bg
     expect(recorded.length).toBe(3);

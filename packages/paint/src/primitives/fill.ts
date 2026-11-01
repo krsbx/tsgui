@@ -5,9 +5,9 @@
  * (border/background) live in shape.ts; color-stop math in
  * color-stops.ts.
  */
+import { type ColorStop, Palette } from "@tsgui/core";
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
 import { valueToRatio } from "@tsgui/layout";
-import { type ColorStop, Palette } from "@tsgui/core";
 import type { Painter } from "../paint.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintBackground, paintBorder } from "./shape.ts";
