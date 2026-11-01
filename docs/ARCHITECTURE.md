@@ -6,18 +6,28 @@ Bun workspaces (`packages/*`), one package per layer:
 
 ```
 packages/
-  bindings/     @tsgui/bindings   Native entry points (see FFI.md). The ONLY
-                                  package allowed to dlopen native code.
-  gpu/          @tsgui/gpu        Batched renderer: geometry → SDL_Vertex
-                                  buffers → SDL_RenderGeometry (see RENDERING.md).
-  layout/       @tsgui/layout     Flexbox engine. Pure TS.
-  widgets/      @tsgui/widgets    Widget set, reconciler, dispatchers,
-                                  headless harness. Pure TS at runtime.
-examples/                         Sample apps (hello, showcase, gallery).
-tools/codegen/                    Clang AST → FFI tables (bun:ffi / node:ffi)
-                                  + constants, from real C headers
-                                  (parser ported from flying-pan).
-docs/                             These documents.
+  bindings/     @tsgui/bindings      Native entry points (see FFI.md). The ONLY
+                                     package allowed to dlopen native code.
+  gpu/          @tsgui/gpu           Batched renderer: geometry → SDL_Vertex
+                                     buffers → SDL_RenderGeometry (see RENDERING.md).
+  layout/       @tsgui/layout        Flexbox engine. Pure TS.
+  core/         @tsgui/core          Shared contracts: widget tree + interaction
+                                     payloads, StateStore, design tokens,
+                                     InteractionStates. Pure TS.
+  interactions/ @tsgui/interactions  Event-fed dispatchers (pointer, focus,
+                                     scroll) + hit-test. Pure TS.
+  paint/        @tsgui/paint         Generic rendering engine: paintTree walk,
+                                     Painter/TextPainter surfaces, style
+                                     resolution, fill/shape/shadow primitives.
+                                     Pure TS.
+  widgets/      @tsgui/widgets       Widget factories, reconciler, per-widget
+                                     painters (co-located with each widget),
+                                     painter registry, headless harness. Pure TS.
+examples/                            Sample apps (hello, showcase, gallery).
+tools/codegen/                       Clang AST → FFI tables (bun:ffi / node:ffi)
+                                     + constants, from real C headers
+                                     (parser ported from flying-pan).
+docs/                                These documents.
 ```
 
 Planned packages (see ROADMAP.md): `@tsgui/platform` (window/input/audio
@@ -32,14 +42,24 @@ package that dlopens native code.
 
 Concretely:
 
-| Package | May import | Never imports |
-|---|---|---|
-| `bindings` | `bun:ffi` / `node:ffi` dlopen tables + runtime split (escape hatch: `sdlRaw`) | anything else in the repo |
-| `gpu` | `bindings` (SDL calls) | `layout`, `widgets` |
-| `layout` | nothing (pure TS) | everything |
-| `widgets` | `layout`, `@tsgui/gpu` types, injectable seams (clipboard) | `bindings` |
-| `platform` (planned) | `bindings` | `gpu`, `layout`, `widgets` |
-| `devtools` (planned) | any package (it's tooling) | — but is optional at runtime |
+| Package              | May import                                                                    | Never imports                                        |
+| -------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `bindings`           | `bun:ffi` / `node:ffi` dlopen tables + runtime split (escape hatch: `sdlRaw`) | anything else in the repo                            |
+| `gpu`                | `bindings` (SDL calls)                                                        | `layout`, `core`, `interactions`, `paint`, `widgets` |
+| `layout`             | nothing (pure TS)                                                             | everything                                           |
+| `core`               | `layout`                                                                      | `interactions`, `paint`, `widgets`, `bindings`       |
+| `interactions`       | `layout`, `core`                                                              | `paint`, `widgets`, `bindings`                       |
+| `paint`              | `layout`, `core`, `gpu` types                                                 | `interactions`, `widgets`, `bindings`                |
+| `widgets`            | `layout`, `core`, `interactions`, `paint`, injectable seams (clipboard)       | `bindings`                                           |
+| `platform` (planned) | `bindings`                                                                    | `gpu`, `layout`, and the toolkit layers              |
+| `devtools` (planned) | any package (it's tooling)                                                    | — but is optional at runtime                         |
+
+Dependencies point strictly downward (`widgets → paint → core → layout`);
+no cycles. Per-widget painters live **with their widgets**
+(`widgets/<name>/paint.ts`) and are injected into the generic engine
+through `PaintContext.painters` — that inversion is what keeps paint
+widget-agnostic despite painters needing widget internals (text-input
+editing state, slider geometry).
 
 This is enforced by an ESLint `no-restricted-imports` rule per package, not by
 convention. The payoff: `bun test packages/layout` runs the entire flexbox
@@ -72,9 +92,10 @@ RENDERING.md) — it does not scale with widget count.
 Pointer (hover/press/click/drag), focus (click-to-focus, tab cycling,
 key/char routing) and scroll (wheel → nearest scrollable ancestor,
 clamped bounds, velocity coasting) are event-fed dispatchers in
-`widgets/src/interactions/`: the app decodes SDL events into typed events
+`@tsgui/interactions`: the app decodes SDL events into typed events
 and feeds them per frame. Pure TypeScript — headless-testable, never touch
-SDL themselves.
+SDL themselves; their contracts (payloads, key/mouse enums, StateStore,
+InteractionStates) come from `@tsgui/core`.
 
 ### GC discipline
 

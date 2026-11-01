@@ -2,18 +2,16 @@
  * Progress + meter semantics through the headless harness — fill geometry,
  * direction, steps, color stops, zones, and the arc primitives' ops.
  */
+import { type ColorStop, MeterZone } from "@tsgui/core";
 import { valueToRatio } from "@tsgui/layout";
+import { parseColor, resolveFillColorClamped } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
   CircularProgress,
-  type ColorStop,
   formatValueLabel,
   Meter,
-  MeterZone,
-  parseColor,
   ProgressBar,
   renderHeadless,
-  resolveFillColorClamped,
   resolveMeterColor,
 } from "../src/index.ts";
 import { Palette } from "../src/index.ts";

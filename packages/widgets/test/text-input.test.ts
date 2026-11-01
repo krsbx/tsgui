@@ -4,27 +4,31 @@
  * and fires onChange, arrows/shift select, backspace/delete respect the
  * selection, clipboard seam, and the painter draws text/selection/caret.
  */
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
-import { describe, expect, test } from "bun:test";
 import {
-  editingStateOf,
-  FocusDispatcher,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
   KeyCode,
   KeyModifiers,
   MouseButton,
-  type PaintOp,
-  PaintOpKind,
-  parseColor,
+  type ReconcilableWidget,
+  StateStore,
+} from "@tsgui/core";
+import {
+  FocusDispatcher,
+  type KeyboardInputEvent,
+  KeyboardInputKind,
   PointerDispatcher,
   type PointerInputEvent,
   PointerInputKind,
-  type ReconcilableWidget,
+} from "@tsgui/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
+import { parseColor } from "@tsgui/paint";
+import { describe, expect, test } from "bun:test";
+import {
+  editingStateOf,
+  type PaintOp,
+  PaintOpKind,
   Reconciler,
   renderHeadless,
   resetTextInputEditingStates,
-  StateStore,
   TextInput,
   textInputClipboard,
   View,

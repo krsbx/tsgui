@@ -4,30 +4,28 @@
  * focused widget, and Enter/Space activation synthesis.
  */
 import {
+  KeyCode,
+  KeyModifiers,
+  MouseButton,
+  type ReconcilableWidget,
+  StateStore,
+} from "@tsgui/core";
+import {
+  FocusDispatcher,
+  type KeyboardInputEvent,
+  KeyboardInputKind,
+  PointerDispatcher,
+  type PointerInputEvent,
+  PointerInputKind,
+} from "@tsgui/interactions";
+import {
   FlexDirection,
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
 } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
-import {
-  Button,
-  Checkbox,
-  FocusDispatcher,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  KeyCode,
-  KeyModifiers,
-  Label,
-  MouseButton,
-  PointerDispatcher,
-  type PointerInputEvent,
-  PointerInputKind,
-  type ReconcilableWidget,
-  Reconciler,
-  StateStore,
-  View,
-} from "../src/index.ts";
+import { Button, Checkbox, Label, Reconciler, View } from "../src/index.ts";
 
 interface Harness {
   pointer(kind: PointerInputKind, x: number, y: number): void;

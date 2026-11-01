@@ -3,20 +3,17 @@
  * dispatcher: track-press jumps, handle-press drags, hover never mutates,
  * step snapping, and the disabled no-op.
  */
+import { MouseButton, Palette, StateStore } from "@tsgui/core";
+import { PointerDispatcher, PointerInputKind } from "@tsgui/interactions";
 import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
+import { parseColor } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
-  MouseButton,
   type PaintOp,
   PaintOpKind,
-  Palette,
-  parseColor,
-  PointerDispatcher,
-  PointerInputKind,
   Reconciler,
   renderHeadless,
   SliderBar,
-  StateStore,
 } from "../src/index.ts";
 
 interface Harness {

@@ -1,3 +1,4 @@
+import { StateStore } from "@tsgui/core";
 import type {
   ArcOptions,
   RectOptions,
@@ -8,15 +9,9 @@ import type {
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
+import { paintTree } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
-import {
-  Label,
-  paintTree,
-  Reconciler,
-  StateStore,
-  View,
-  widgetPainters,
-} from "../src/index.ts";
+import { Label, Reconciler, View, widgetPainters } from "../src/index.ts";
 
 // ————— reconciler —————
 

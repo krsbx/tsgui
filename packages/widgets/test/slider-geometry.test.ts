@@ -1,7 +1,7 @@
 /** Slider geometry — position↔value math and handle hit tests. */
+import { MouseButton } from "@tsgui/core";
 import { CircularProgressDirection } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
-import { MouseButton } from "../src/index.ts";
 import {
   isOnBarHandle,
   isOnCircularHandle,

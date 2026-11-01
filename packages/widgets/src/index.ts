@@ -1,15 +1,12 @@
-/** @tsgui/widgets — reconciler, state, design tokens, widget modules, paint bridge. */
+/**
+ * @tsgui/widgets — the widget library: factories, the reconciler, each
+ * widget's painter, and the headless harness. Contracts come from
+ * @tsgui/core; input dispatchers live in @tsgui/interactions; the
+ * generic rendering engine lives in @tsgui/paint (widgets contribute
+ * their painters through PaintContext.painters).
+ */
 export { createWidget, type CreateWidgetOptions } from "./create-widget.ts";
-export {
-  MeterZone,
-  type MetricKey,
-  Metrics,
-  Palette,
-  type ColorStop,
-  type PaletteColor,
-} from "@tsgui/core";
 export { Reconciler } from "./reconciler.ts";
-export { StateStore } from "@tsgui/core";
 export * from "@tsgui/core";
 
 // Per-widget modules — factories + props
@@ -57,47 +54,7 @@ export { Radio, type RadioProps } from "./widgets/radio.ts";
 export { Toggle, type ToggleProps } from "./widgets/toggle.ts";
 export { View, type ViewProps } from "./widgets/view.ts";
 
-// Interaction dispatch — pointer events, hit-testing (@tsgui/interactions)
-export {
-  FocusDispatcher,
-  type FocusDispatchOptions,
-  hitTest,
-  type HitTestOptions,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  measureContent,
-  PointerDispatcher,
-  type PointerDispatchOptions,
-  type PointerInputEvent,
-  PointerInputKind,
-  ScrollDispatcher,
-  type ScrollDispatchOptions,
-  type WheelInputEvent,
-} from "@tsgui/interactions";
-
-// Paint engine (generic) + the per-widget painter registry
-export {
-  type ContinuousFillOptions,
-  colorWithOpacity,
-  fillRatio,
-  fillShape,
-  type InteractionStates,
-  paintContinuousFill,
-  paintBackground,
-  paintBorder,
-  paintShadow,
-  paintSteppedFill,
-  type PaintContext,
-  type Painter,
-  paintTree,
-  parseColor,
-  resolveFillColor,
-  resolveFillColorClamped,
-  resolveStyle,
-  type TextPainter,
-  type WidgetPainter,
-  type WidgetPainters,
-} from "@tsgui/paint";
+// The per-widget painter registry + widget-side painter helpers
 export { widgetPainters } from "./painters.ts";
 export {
   formatValueLabel,

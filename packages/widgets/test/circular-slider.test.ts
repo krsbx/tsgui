@@ -3,19 +3,17 @@
  * real dispatcher: track-press jumps to the angle's value, handle-dot
  * press drags, hover never mutates.
  */
+import { MouseButton, StateStore } from "@tsgui/core";
+import { PointerDispatcher, PointerInputKind } from "@tsgui/interactions";
 import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
+import { parseColor } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
   CircularSlider,
-  MouseButton,
   type PaintOp,
   PaintOpKind,
-  parseColor,
-  PointerDispatcher,
-  PointerInputKind,
   Reconciler,
   renderHeadless,
-  StateStore,
 } from "../src/index.ts";
 import { Palette } from "../src/index.ts";
 

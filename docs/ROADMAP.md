@@ -35,8 +35,7 @@ FFI (see PLATFORM.md).
       `SDL_RenderGeometry` per texture batch. (Buffer since corrected to
       SDL3's 32-byte float-color `SDL_Vertex` — the SDL2-era 20-byte
       packed-u32 layout silently draws nothing.)
-- [x] Texture path: procedural pixels → `SDL_CreateTextureWithProperties`
-      + `SDL_UpdateTexture`, drawn through the textured batch. (Also fixed
+- [x] Texture path: procedural pixels → `SDL_CreateTextureWithProperties` + `SDL_UpdateTexture`, drawn through the textured batch. (Also fixed
       en route: the codegen dropped every enum-by-value param function —
       77 recovered — and node:ffi returns raw addresses for `'string'`
       returns, now converted in the node loaders.)
@@ -104,7 +103,7 @@ port now; interaction widgets wait for the phase 4 dispatch.
 - [x] `Meter` — HTML-`<meter>` low/high/optimum zones mapped to the
       success/warning/error palette.
 - Indeterminate motion waits for phase 4's AnimationManager; determinate
-      paints today.
+  paints today.
 
 **Exit:** the new widgets render through the headless harness with golden
 snapshots and in the gallery, on Node and Bun.
@@ -115,9 +114,9 @@ snapshots and in the gallery, on Node and Bun.
       border / shadow; `flags` dispatch in the paint walk replaces the
       stacked-layer approximation.
 - Everything needed is bound and confirmed: `SDL_CreateGPURenderState`,
-      the fragment-shader create-info, and the device via
-      `SDL_PROP_RENDERER_GPU_DEVICE_POINTER` ("SDL.renderer.gpu.device").
-      Requires the SDL_shadercross offline toolchain.
+  the fragment-shader create-info, and the device via
+  `SDL_PROP_RENDERER_GPU_DEVICE_POINTER` ("SDL.renderer.gpu.device").
+  Requires the SDL_shadercross offline toolchain.
 
 **Exit:** hairline-smooth decoration at any radius, no CPU tessellation
 in the paint path.
@@ -142,6 +141,15 @@ no window; CI runs the suite plus showcase/gallery selftests on both
 runtimes.
 
 ## Phase 4 — Interactions + animation
+
+- [x] Package split (2026-11-01) — `@tsgui/widgets` was four concerns in
+      one package; now `@tsgui/core` (contracts: payloads, enums,
+      StateStore, design tokens, InteractionStates), `@tsgui/interactions`
+      (pointer/focus/scroll dispatchers + hit-test), and `@tsgui/paint`
+      (generic walk + Painter surfaces + fill/shape/shadow primitives)
+      are their own packages, with per-widget painters co-located in
+      `@tsgui/widgets` and injected through `PaintContext.painters`.
+      Dependencies point strictly downward; see ARCHITECTURE.md.
 
 Foundation work (each item unblocks a widget batch):
 
@@ -174,13 +182,13 @@ Widget parity batches — each batch lands when its capability exists, not
 before (a widget painted without its input path is the hand-wired glue
 the dispatcher exists to replace):
 
-| Batch | Widgets | Needs | Status |
-|---|---|---|---|
-| 1 | `ProgressBar`, `CircularProgress`, `Meter` | paint only | ✅ Phase 3.5 (2026-10-31) |
-| 2 | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state | ✅ (2026-10-31) |
-| 3 | `SliderBar`, `CircularSlider` | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels | ✅ (2026-10-31) |
-| 4 | `TextInput` | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | ✅ (2026-11-01) — clipboard wired via the injectable seam; vertical `TextArea` is a post-parity addition built on the same editing core |
-| 5 | `Canvas`, `Custom` painter | CanvasContext + Path2D/tessellation port | phase 5 |
+| Batch | Widgets                                     | Needs                                                                                                                    | Status                                                                                                                                  |
+| ----- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | `ProgressBar`, `CircularProgress`, `Meter`  | paint only                                                                                                               | ✅ Phase 3.5 (2026-10-31)                                                                                                               |
+| 2     | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state                                                                                | ✅ (2026-10-31)                                                                                                                         |
+| 3     | `SliderBar`, `CircularSlider`               | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels                                           | ✅ (2026-10-31)                                                                                                                         |
+| 4     | `TextInput`                                 | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | ✅ (2026-11-01) — clipboard wired via the injectable seam; vertical `TextArea` is a post-parity addition built on the same editing core |
+| 5     | `Canvas`, `Custom` painter                  | CanvasContext + Path2D/tessellation port                                                                                 | phase 5                                                                                                                                 |
 
 Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
 enums); `List` (virtualized — `listLayoutFlex` already ported) and a
@@ -210,11 +218,11 @@ click a widget, see why.
 
 ## Deliberately deferred (with reasons)
 
-| Item | Why deferred |
-|---|---|
-| Accessibility tree | Large, orthogonal; design ABI hooks now (`stableId` is already the key), build later. |
-| IME / HarfBuzz shaping | HarfBuzz is a dependency and a half; UTF-8 simple text covers v1 apps. |
-| Vulkan/Metal/D3D12 backends | Come free via SDL_GPU from phase 1 — nothing deferred. |
-| wgpu / Dawn | Only if SDL_GPU ever hits a wall (see PLATFORM.md). |
-| Multi-window | flying-pan has it; port in phase 4 — cheap once the ABI takes a window handle. |
-| GPU-instanced text | Only if the atlas-quads model misses 60fps targets. |
+| Item                        | Why deferred                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------- |
+| Accessibility tree          | Large, orthogonal; design ABI hooks now (`stableId` is already the key), build later. |
+| IME / HarfBuzz shaping      | HarfBuzz is a dependency and a half; UTF-8 simple text covers v1 apps.                |
+| Vulkan/Metal/D3D12 backends | Come free via SDL_GPU from phase 1 — nothing deferred.                                |
+| wgpu / Dawn                 | Only if SDL_GPU ever hits a wall (see PLATFORM.md).                                   |
+| Multi-window                | flying-pan has it; port in phase 4 — cheap once the ABI takes a window handle.        |
+| GPU-instanced text          | Only if the atlas-quads model misses 60fps targets.                                   |

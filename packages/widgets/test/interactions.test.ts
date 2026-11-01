@@ -5,28 +5,31 @@
  * widgets riding on it.
  */
 import {
+  MouseButton,
+  Palette,
+  type ReconcilableWidget,
+  StateStore,
+} from "@tsgui/core";
+import {
+  PointerDispatcher,
+  type PointerInputEvent,
+  PointerInputKind,
+} from "@tsgui/interactions";
+import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   WidgetType,
 } from "@tsgui/layout";
+import { paintTree, parseColor } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
   Checkbox,
-  MouseButton,
   type PaintOp,
-  paintTree,
-  Palette,
-  parseColor,
-  PointerDispatcher,
-  type PointerInputEvent,
-  PointerInputKind,
   Radio,
   RadioGroup,
-  type ReconcilableWidget,
   Reconciler,
   renderHeadless,
-  StateStore,
   Toggle,
   View,
   widgetPainters,

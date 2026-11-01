@@ -2,17 +2,16 @@
  * Golden snapshots over the headless pipeline — the phase 3 exit gate.
  * The .snap file is committed; CI compares instead of writing.
  */
+import { type ReconcilableWidget, StateStore } from "@tsgui/core";
 import { FlexAlign, FlexDirection } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
 import {
   Button,
   Image,
   Label,
-  type ReconcilableWidget,
   Reconciler,
   renderHeadless,
   serializeLayoutTree,
-  StateStore,
   View,
 } from "../src/index.ts";
 

@@ -23,7 +23,23 @@ import {
   sdl,
   SdlDefines,
 } from "@tsgui/bindings";
+import {
+  KeyModifiers,
+  type MouseButton,
+  type ReconcilableWidget,
+  StateStore,
+} from "@tsgui/core";
 import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@tsgui/gpu";
+import {
+  FocusDispatcher,
+  type KeyboardInputEvent,
+  KeyboardInputKind,
+  PointerDispatcher,
+  type PointerInputEvent,
+  PointerInputKind,
+  ScrollDispatcher,
+  type WheelInputEvent,
+} from "@tsgui/interactions";
 import {
   FlexAlign,
   FlexDirection,
@@ -33,36 +49,24 @@ import {
   Overflow,
   ProgressValueType,
 } from "@tsgui/layout";
+import { paintTree } from "@tsgui/paint";
 import {
   Button,
   Checkbox,
   CircularProgress,
   CircularSlider,
-  FocusDispatcher,
   Image,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  KeyModifiers,
   Label,
   Meter,
-  type MouseButton,
-  paintTree,
   Palette,
-  PointerDispatcher,
-  type PointerInputEvent,
-  PointerInputKind,
   ProgressBar,
   Radio,
   RadioGroup,
-  type ReconcilableWidget,
   Reconciler,
-  ScrollDispatcher,
   SliderBar,
-  StateStore,
   TextInput,
   Toggle,
   View,
-  type WheelInputEvent,
   widgetPainters,
 } from "@tsgui/widgets";
 

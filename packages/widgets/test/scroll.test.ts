@@ -3,6 +3,8 @@
  * content bounds, velocity EMA + friction coasting, offset exposure for
  * LayoutContext.scrollOffsetOf.
  */
+import { type ReconcilableWidget, StateStore } from "@tsgui/core";
+import { ScrollDispatcher } from "@tsgui/interactions";
 import {
   FlexDirection,
   type LayoutContext,
@@ -11,13 +13,7 @@ import {
   Overflow,
 } from "@tsgui/layout";
 import { describe, expect, test } from "bun:test";
-import {
-  type ReconcilableWidget,
-  Reconciler,
-  ScrollDispatcher,
-  StateStore,
-  View,
-} from "../src/index.ts";
+import { Reconciler, View } from "../src/index.ts";
 
 interface Harness {
   wheel(x: number, y: number, scrollY: number, time: number): void;

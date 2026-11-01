@@ -40,17 +40,17 @@ struct SDL_Vertex {     // 32 bytes
 };
 ```
 
-The SDL2-era 20-byte layout with a packed-u32 color draws *nothing* here —
+The SDL2-era 20-byte layout with a packed-u32 color draws _nothing_ here —
 SDL3 changed the struct and `SDL_RenderGeometry` takes a bare pointer, so
 the mismatch fails silently (see CONVENTIONS: verify pixels, not return
 codes). Shapes are **CPU-tessellated** into this format:
 
-| Primitive | Tessellation |
-|---|---|
-| `fillRect` | 4 verts, 2 tris |
-| `fillRoundedRect` | center fan, 8 segments/corner |
+| Primitive              | Tessellation                                     |
+| ---------------------- | ------------------------------------------------ |
+| `fillRect`             | 4 verts, 2 tris                                  |
+| `fillRoundedRect`      | center fan, 8 segments/corner                    |
 | `fillArc` / `fillRing` | center fan / quad strip, density per full circle |
-| `drawTexture` | 4 verts, uv 0..1, white tint by default |
+| `drawTexture`          | 4 verts, uv 0..1, white tint by default          |
 
 ## Batch discipline
 
@@ -74,19 +74,21 @@ the software-driver pixel tests exercise readback without needing them.
 
 ## Decoration layers
 
-Widget chrome is painted per widget from `paint/` modules, in
-flying-pan's order: **shadow → border → background → widget content →
-children**:
+The generic engine (`@tsgui/paint`) paints per widget in flying-pan's
+order: **shadow → border → background → widget content → children**:
 
-- `shadow.ts` — stacked rounded-rect falloff layers (blur lands with the
-  SDF spike);
-- `shape.ts` — `fillShape` / `paintBorder` / `paintBackground` primitives
-  (border ring under background fill: net stroke = borderWidth/2);
-- `fill.ts` + `color-stops.ts` — value fills, continuous and stepped
-  (segments + gaps), with threshold color stops;
-- per-widget painters (`progress/bar`, `circular`, `slider-bar`,
-  `slider-marks`, `slider-handle`, `meter`, `checkbox`, `toggle`, `radio`,
-  `text-input`, `label`) — one file per concern.
+- `primitives/shadow.ts` — stacked rounded-rect falloff layers (blur
+  lands with the SDF spike);
+- `primitives/shape.ts` — `fillShape` / `paintBorder` / `paintBackground`
+  primitives (border ring under background fill: net stroke =
+  borderWidth/2);
+- `primitives/fill.ts` + `color-stops.ts` — value fills, continuous and
+  stepped (segments + gaps), with threshold color stops;
+- per-widget painters live in `@tsgui/widgets`, **co-located with their
+  widget** (`widgets/<name>/paint.ts` — `progress/paint/*`, `slider/*`,
+  `meter`, `checkbox`, `toggle`, `radio`, `text-input`, `label`, `image`)
+  and are injected through `PaintContext.painters` — one file per
+  concern, one registry assembly in `widgets/src/painters.ts`.
 
 ## Text
 
@@ -135,8 +137,8 @@ SDL, vertices across the boundary.
 
 ## Perf (measured, Apple M-series)
 
-| Scenario | Measured |
-|---|---|
+| Scenario                             | Measured                                            |
+| ------------------------------------ | --------------------------------------------------- |
 | 10,000 solid rects + 1 textured quad | ~76–120 fps (GPU backend), ~2,000+ on other drivers |
-| Gallery (48 nodes, 6 textures) | 240-frame selftest, both runtimes |
-| FFI calls per frame | constant per texture batch |
+| Gallery (48 nodes, 6 textures)       | 240-frame selftest, both runtimes                   |
+| FFI calls per frame                  | constant per texture batch                          |
