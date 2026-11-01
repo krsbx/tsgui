@@ -11,6 +11,7 @@ import type {
   Size,
   WidgetDescriptor,
 } from "./style.ts";
+import type { TextLayout } from "./text-wrap.ts";
 
 export interface LayoutNode extends Coordinate2D, Size {
   stableId: number;
@@ -21,6 +22,9 @@ export interface LayoutNode extends Coordinate2D, Size {
    *  pointer hit-testing, clipping, and any screen-space math. */
   screenX: number;
   screenY: number;
+  /** Wrapped lines for text nodes (Label) — computed during measurement
+   *  against the available width; painters draw one run per line. */
+  textLayout?: TextLayout;
 }
 
 /**

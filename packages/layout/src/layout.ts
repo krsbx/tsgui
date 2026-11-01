@@ -8,6 +8,7 @@ import { FlexDirection, FlexWrap, Overflow } from "./enums.ts";
 import { measureChildsComponent } from "./measurement.ts";
 import { widgetLevelLayoutFlex } from "./processor/list.ts";
 import { resolveSize, resolveSpacing } from "./style-resolve.ts";
+import { takeTextLayout } from "./text-wrap.ts";
 import type { LayoutFlexFn, LayoutNode } from "./types.ts";
 import { layoutSingleLine, layoutWrap } from "./wrap.ts";
 
@@ -49,6 +50,11 @@ export const layoutFlex: LayoutFlexFn = function (options) {
   };
 
   ctx.layoutIndex.set(stableId, layoutNode);
+
+  // Wrapped text lines measured earlier this frame for this descriptor —
+  // paint reads them instead of re-wrapping (see text-wrap.ts).
+  const textLayout = takeTextLayout(node);
+  if (textLayout) layoutNode.textLayout = textLayout;
 
   // Child scroll accumulation: scrollable nodes shift their children's
   // screen-space positions by their committed scroll offset.

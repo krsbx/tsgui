@@ -9,6 +9,7 @@ import type {
   PointerEvents,
   Position,
   TextAlign,
+  TextWrap,
 } from "./enums.ts";
 import { SizeUnit } from "./enums.ts";
 
@@ -135,6 +136,8 @@ export interface TextStyle extends ViewStyle {
   textAlign?: TextAlign;
   lineHeight?: number;
   letterSpacing?: number;
+  /** Line wrapping of overlong text — defaults to Wrap (web behavior). */
+  textWrap?: TextWrap;
 }
 
 export type WidgetProps = Record<string, unknown>;

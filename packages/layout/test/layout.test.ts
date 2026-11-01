@@ -5,6 +5,8 @@ import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
+  type TextStyle,
+  TextWrap,
   type WidgetDescriptor,
   WidgetType,
 } from "../src/index.ts";
@@ -37,7 +39,7 @@ function view(
 
 function label(
   text: string,
-  style: WidgetDescriptor["style"] = {}
+  style: TextStyle = {}
 ): WidgetDescriptor {
   return { type: WidgetType.Label, props: { text }, style };
 }
@@ -296,5 +298,90 @@ describe("layoutFlex (headless)", () => {
     expect(row.height).toBe(70);
     expect(row.width).toBe(16 + 24 + 16);
     expect(sibling.y).toBe(24 + 70 + 16);
+  });
+});
+
+describe("label text wrap", () => {
+  // Stub measure: 10px per char, 20px line height.
+  test("overlong label wraps to the parent content width", () => {
+    const ctx = makeContext();
+    // "aaaa bbbb cccc dddd" = 19 chars = 190px natural; 100px holds 10.
+    const tree = view({ width: 100, height: 200 }, [
+      label("aaaa bbbb cccc dddd"),
+    ]);
+
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 100,
+      availableHeight: 200,
+      ctx,
+    });
+    const text = root.children[0]!;
+
+    expect(text.width).toBe(100);
+    expect(text.height).toBe(2 * 20); // two lines at the stub line height
+    expect(text.textLayout?.lines).toEqual(["aaaa bbbb", "cccc dddd"]);
+    expect(text.textLayout?.lineAdvance).toBe(20);
+  });
+
+  test("textWrap: NoWrap keeps the single overflowing run", () => {
+    const ctx = makeContext();
+    const tree = view({ width: 100, height: 200 }, [
+      label("aaaa bbbb cccc dddd", { textWrap: TextWrap.NoWrap }),
+    ]);
+
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 100,
+      availableHeight: 200,
+      ctx,
+    });
+    const text = root.children[0]!;
+
+    expect(text.width).toBe(190); // natural width, overflow like flying-pan
+    expect(text.textLayout).toBeUndefined();
+  });
+
+  test("style.lineHeight drives the wrapped line advance", () => {
+    const ctx = makeContext();
+    const tree = view({ width: 100, height: 200 }, [
+      label("aaaa bbbb cccc dddd", { lineHeight: 30 }),
+    ]);
+
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 100,
+      availableHeight: 200,
+      ctx,
+    });
+    const text = root.children[0]!;
+
+    expect(text.height).toBe(2 * 30);
+    expect(text.textLayout?.lineAdvance).toBe(30);
+  });
+
+  test("fitting text never wraps and leaves no textLayout", () => {
+    const ctx = makeContext();
+    const tree = view({ width: 300, height: 100 }, [label("short")]);
+
+    const root = layoutFlex({
+      node: tree,
+      x: 0,
+      y: 0,
+      availableWidth: 300,
+      availableHeight: 100,
+      ctx,
+    });
+    const text = root.children[0]!;
+
+    expect(text.width).toBe(50);
+    expect(text.height).toBe(20);
+    expect(text.textLayout).toBeUndefined();
   });
 });

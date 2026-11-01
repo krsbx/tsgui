@@ -57,6 +57,16 @@ export const FlexWrap = {
 
 export type FlexWrap = (typeof FlexWrap)[keyof typeof FlexWrap];
 
+/** Text line wrapping of overlong text — web `white-space` semantics. */
+export const TextWrap = {
+  /** Break overlong text into lines that fit the available width. */
+  Wrap: "wrap",
+  /** Never break — one run, overflows like flying-pan's labels did. */
+  NoWrap: "nowrap",
+} as const;
+
+export type TextWrap = (typeof TextWrap)[keyof typeof TextWrap];
+
 export const WidgetType = {
   View: "View",
   Flex: "Flex",

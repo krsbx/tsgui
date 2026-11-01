@@ -3,9 +3,10 @@
  * managers directly; here measurement is INJECTED via LayoutContext, which
  * is what makes this layer headless-testable.
  */
-import { WidgetType } from "./enums.ts";
-import { resolveSize } from "./style-resolve.ts";
-import type { Size, WidgetDescriptor } from "./style.ts";
+import { TextWrap, WidgetType } from "./enums.ts";
+import { resolveConstraint, resolveSize } from "./style-resolve.ts";
+import type { Size, TextStyle, WidgetDescriptor } from "./style.ts";
+import { recordTextLayout, wrapText } from "./text-wrap.ts";
 import type { LayoutContext } from "./types.ts";
 
 export interface ResolveChildSizeOptions {
@@ -30,7 +31,12 @@ export function resolveChildSize(options: ResolveChildSizeOptions): Size {
 
     case WidgetType.Label:
     case WidgetType.Button:
-      resolveLabelSize({ widget, ctx: options.ctx, size });
+      resolveLabelSize({
+        widget,
+        ctx: options.ctx,
+        parentWidth,
+        size,
+      });
       break;
 
     case WidgetType.TextInput:
@@ -94,12 +100,46 @@ function resolveTextInputSize(options: {
 function resolveLabelSize(options: {
   widget: WidgetDescriptor;
   ctx: LayoutContext;
+  parentWidth: number;
   size: Size;
 }): void {
-  const text = options.widget.props["text"];
+  const { widget, ctx, parentWidth, size } = options;
+  const text = widget.props["text"];
   if (typeof text !== "string" || !text) return;
 
-  const measured = options.ctx.measureText(text, options.widget.style);
-  options.size.width ||= measured.width;
-  options.size.height ||= measured.height;
+  // Label style is a TextStyle (textWrap/lineHeight); the descriptor's
+  // ViewStyle typing is the generic container view.
+  const style = (widget.style ?? {}) as TextStyle;
+  const measured = ctx.measureText(text, style);
+  // Dimensions the caller left unset are intrinsic — measurement fills
+  // them; explicit style.width/height always win.
+  const widthIsIntrinsic = size.width === 0;
+  const heightIsIntrinsic = size.height === 0;
+  if (widthIsIntrinsic) size.width = measured.width;
+  if (heightIsIntrinsic) size.height = measured.height;
+
+  // Web text model: overlong text fills the available width and wraps.
+  // The constraint is the parent content width (∩ an explicit maxWidth).
+  if (
+    style.textWrap === TextWrap.NoWrap ||
+    parentWidth <= 0 ||
+    measured.width <= parentWidth
+  ) {
+    return;
+  }
+
+  const maxWidth = resolveConstraint(style.maxWidth, parentWidth);
+  const constraint = Math.min(parentWidth, maxWidth ?? parentWidth);
+  if (measured.width <= constraint) return;
+
+  const lineAdvance = style.lineHeight ?? measured.height;
+  const lines = wrapText({
+    text,
+    maxWidth: constraint,
+    measure: (candidate) => ctx.measureText(candidate, style).width,
+  });
+
+  if (widthIsIntrinsic) size.width = constraint;
+  if (heightIsIntrinsic) size.height = lines.length * lineAdvance;
+  recordTextLayout(widget, { lines, lineAdvance });
 }

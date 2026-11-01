@@ -26,6 +26,12 @@ export type {
   WidgetProps,
 } from "./style.ts";
 export * from "./types.ts";
+export {
+  type TextLayout,
+  recordTextLayout,
+  takeTextLayout,
+  wrapText,
+} from "./text-wrap.ts";
 export { valueToRatio } from "./value.ts";
 export { layoutFlex } from "./layout.ts";
 export { listLayoutFlex, widgetLevelLayoutFlex } from "./processor/list.ts";
