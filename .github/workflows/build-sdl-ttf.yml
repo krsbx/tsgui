@@ -343,11 +343,11 @@ jobs:
           | Asset | Contents |
           | ----- | -------- |
           | ${LIB}_linux.tar.gz | x86_64 shared library + soname symlink (ubuntu-24.04 build, glibc >= 2.39) |
-          | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default @rpath install name |
+          | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default \`@rpath\` install name |
           | ${LIB}_windows.zip | x64 DLL |
 
           FreeType, HarfBuzz and plutosvg are statically vendored — the
-          library is a single self-contained file. The macOS dylib keeps the default @rpath
+          library is a single self-contained file. The macOS dylib keeps the default \`@rpath\`
           install name; tsgui pack rewrites it into the app bundle.
           EOF
           )
