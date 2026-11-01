@@ -151,11 +151,23 @@ Foundation work (each item unblocks a widget batch):
       enter/leave with press cancellation on drag-off, opt-in press
       capture (`payload.capturePointer`), click = down+up on the same
       widget, double-click counting. Replaces gallery.ts's hand-rolled
-      hit-test. Focus/scroll dispatchers remain (batch 3/4).
+      hit-test.
+- [x] Focus dispatcher (2026-11-01) — click-to-focus (nearest focusable
+      ancestor), dead-space blur, tab/shift-tab cycling, key/char routing
+      to the focused widget, Enter/Space synth-click on activable widgets.
+- [x] Scroll dispatcher + clipping (2026-11-01) — wheel → nearest
+      scrollable ancestor (`overflow: scroll/auto`), clamped at content
+      bounds, velocity EMA + friction coasting, `offsetOf` feeding
+      `LayoutContext.scrollOffsetOf`; paint-walk `pushClip`/`popClip`
+      scissor clipping (pixel-tested on the software driver).
+- [x] Controlled/uncontrolled state, pseudo-states (2026-11-01) —
+      controlled `checked`/`value` + change handlers re-render the app;
+      uncontrolled `defaultChecked`/`defaultValue` persist in StateStore
+      keyed by stableId (radio groups by `name`), painted through
+      `PaintContext.stateStore`; pseudo-states (`_hover`/`_focus`/
+      `_pressed`/`_checked`/`_disabled`) ride the dispatchers' `statesOf`.
 - [ ] AnimationManager port (transitions, easing) — also drives progress
       indeterminate motion.
-- [ ] Controlled/uncontrolled state, pseudo-states (`:hover` etc.) —
-      StateStore drives re-renders; the dispatcher feeds `statesOf`.
 - [ ] Multi-window (deferred from the ABI work — handles already flow).
 
 Widget parity batches — each batch lands when its capability exists, not

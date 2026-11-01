@@ -70,7 +70,8 @@ RENDERING.md) — it does not scale with widget count.
 ### Dispatchers
 
 Pointer (hover/press/click/drag), focus (click-to-focus, tab cycling,
-key/char routing) and — planned — scroll are event-fed dispatchers in
+key/char routing) and scroll (wheel → nearest scrollable ancestor,
+clamped bounds, velocity coasting) are event-fed dispatchers in
 `widgets/src/interactions/`: the app decodes SDL events into typed events
 and feeds them per frame. Pure TypeScript — headless-testable, never touch
 SDL themselves.
