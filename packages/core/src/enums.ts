@@ -31,26 +31,7 @@ export const KeyModifiers = {
 
 export type KeyModifiers = (typeof KeyModifiers)[keyof typeof KeyModifiers];
 
-/**
- * SDL keycodes the toolkit interprets (SDL_KeyboardEvent.key). Letters
- * are lowercase ASCII — SDL letter keycodes are not shift-affected.
- */
-export const KeyCode = {
-  Backspace: 8, // '\b'
-  Tab: 9, // '\t'
-  Enter: 13, // '\r'
-  Space: 32, // ' '
-  Delete: 127, // '\x7F'
-  Home: 0x4000004a,
-  End: 0x4000004d,
-  Right: 0x4000004f,
-  Left: 0x40000050,
-  Down: 0x40000051,
-  Up: 0x40000052,
-  A: 97,
-  C: 99,
-  V: 118,
-  X: 120,
-} as const;
-
-export type KeyCode = (typeof KeyCode)[keyof typeof KeyCode];
+// KeyCode is GENERATED from the scanned SDLK_ defines — a new SDL
+// version that moves a code is picked up by the next
+// `bun run codegen:sdl` (see ../generated/keycodes.ts).
+export { KeyCode } from "./generated/keycodes.ts";

@@ -1,7 +1,7 @@
 /** Generator for the per-library constants file (enums + numeric defines). */
 import type { DefineConstant } from "../defines.ts";
 import type { FfiTables } from "../model/index.ts";
-import { banner } from "./shared.ts";
+import { banner, hex } from "./shared.ts";
 
 export function generateFfiConstants(
   tables: FfiTables,
@@ -30,9 +30,4 @@ export function generateFfiConstants(
     L.push(``);
   }
   return L.join("\n");
-}
-
-/** Format as a hex literal, keeping the sign outside the 0x (-0x1, not 0x-1). */
-function hex(n: number): string {
-  return `${n < 0 ? "-" : ""}0x${Math.abs(n).toString(16).toUpperCase()}`;
 }

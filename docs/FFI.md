@@ -15,7 +15,9 @@ all — no N-API addon, no `node_api.h`, no cmake for bindings. Both runtimes
 ```
 
 ```ts
-import { sdl, EventType, Define } from "@tsgui/bindings"; // backend-agnostic
+import { Define, EventType, sdl } from "@tsgui/bindings";
+
+// backend-agnostic
 sdl.SDL_CreateWindow("hi", 1280, 800, Define.SDL_WINDOW_RESIZABLE);
 ```
 
@@ -34,14 +36,16 @@ sdl.SDL_CreateWindow("hi", 1280, 800, Define.SDL_WINDOW_RESIZABLE);
 `bun run codegen:all` (tools/codegen) dumps the SDL3 family headers through clang's AST
 JSON (`clang -Xclang -ast-dump=json`) and generates:
 
-| Output | Consumed by |
-|---|---|
-| `constants.ts` — enums + numeric `#define`s, per library | both backends |
-| `defs-bun.ts` / `defs-node.ts` — declarative dlopen tables | the loaders |
-| `types.ts` — `<Lib>Symbols`: typed positional surface | loaders, hot paths |
+| Output                                                                                                                                                                                             | Consumed by                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `constants.ts` — enums + numeric `#define`s, per library                                                                                                                                           | both backends                          |
+| `defs-bun.ts` / `defs-node.ts` — declarative dlopen tables                                                                                                                                         | the loaders                            |
+| `types.ts` — `<Lib>Symbols`: typed positional surface                                                                                                                                              | loaders, hot paths                     |
 | `functions.ts` — `<Lib>Functions`: **single-object-param wrappers** with real param names from the headers (`SDL_CreateWindow({ title, w, h, flags })`), plus the `create<Lib>Functions()` factory | the primary export (`sdl`, `image`, …) |
+| `core/generated/keycodes.ts` — the SDL target also emits `@tsgui/core`'s `KeyCode` from the scanned `SDLK_*` defines (core is a pure layer and cannot read `SdlDefines` itself)                    | `@tsgui/core`                          |
 
 Two surfaces per library, both convention-compliant:
+
 - **`sdl`** (object-param) — the primary export; flying-pan's binding-level
   convention. String params are `string \| null` (C `char*` reality —
   `SDL_CreateRenderer({ window, name: null })` is the default-backend call).
@@ -50,7 +54,7 @@ Two surfaces per library, both convention-compliant:
   so the render path carries zero wrapper overhead. Both surfaces behave
   identically on Bun and Node (node loaders convert `'string'` returns).
 - **`readCString(pointer)`** — runtime-split helper (bun:ffi `CString` /
-  node:ffi `toString`) for `const char *` fields inside SDL *events*
+  node:ffi `toString`) for `const char *` fields inside SDL _events_
   (e.g. `SDL_EVENT_TEXT_INPUT.text`), which event structs carry as raw
   addresses the wrapped tables can't convert. Note `sdlRaw` is for
   bindings internals and hot paths only — toolkit code uses the wrapped
@@ -74,7 +78,7 @@ Two AST subtleties the parser handles (flying-pan's parser got these wrong
 too, silently):
 
 1. **Enum constants without explicit initializers** (`SDL_EVENT_TERMINATING`
-   & friends) have *no value node* — the compiler assigns previous + 1. The
+   & friends) have _no value node_ — the compiler assigns previous + 1. The
    parser keeps a running counter instead of defaulting to 0.
 2. **clang drops `desugaredQualType` on function types**, so SDL typedef
    names (`Uint16`, `Sint32`) survive in return types. Non-prefixed typedefs

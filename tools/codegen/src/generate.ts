@@ -17,6 +17,7 @@ import {
   generateTypes,
   summarizeUnsafe,
 } from "./gen/index.ts";
+import { generateCoreKeycodes } from "./gen/keycodes.ts";
 import { buildFfiTables, pascalCase } from "./model/index.ts";
 import { includeDir, type TargetSpec } from "./targets.ts";
 
@@ -25,6 +26,7 @@ const bindingsSrcDir = join(
   "../../..",
   "packages/bindings/src"
 );
+const coreSrcDir = join(import.meta.dir, "../../..", "packages/core/src");
 
 export async function generateTarget(
   spec: TargetSpec,
@@ -62,9 +64,21 @@ export async function generateTarget(
     [join(outDir, "functions.ts"), functions],
   ];
 
+  // The toolkit-facing KeyCode table is pure data derived from the same
+  // SDL_keycode.h defines — emitted into @tsgui/core (a pure layer, so
+  // it cannot import @tsgui/bindings to read them).
+  if (spec.name === "sdl") {
+    outputs.push([
+      join(coreSrcDir, "generated/keycodes.ts"),
+      generateCoreKeycodes(defines),
+    ]);
+  }
+
   if (check) {
     for (const [path, content] of outputs) {
-      const current = await Bun.file(path).text();
+      const current = await Bun.file(path)
+        .text()
+        .catch(() => null);
       if (current !== content) {
         console.error(
           `codegen[${spec.name}]: ${path} is out of date — run \`bun run codegen:all\``
