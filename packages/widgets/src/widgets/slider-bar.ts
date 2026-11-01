@@ -17,8 +17,8 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "../design.ts";
-import type { ReconcilableWidget } from "../types.ts";
+} from "@tsgui/core";
+import type { ReconcilableWidget } from "@tsgui/core";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {
   HANDLE_SIZE,

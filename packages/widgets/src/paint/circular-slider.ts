@@ -5,10 +5,10 @@ import {
   ProgressValueType,
   valueToRatio,
 } from "@tsgui/layout";
-import { Palette } from "../design.ts";
+import { Palette } from "@tsgui/core";
 import type { PaintContext } from "../paint.ts";
 import { parseColor } from "../style-resolve.ts";
-import { propsOf } from "../types.ts";
+import { propsOf } from "@tsgui/core";
 import { HANDLE_SIZE } from "../widgets/slider/geometry.ts";
 import type { CircularSliderProps } from "../widgets/slider/types.ts";
 import { resolveFillColorClamped } from "./fill.ts";

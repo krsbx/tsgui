@@ -7,10 +7,10 @@ export {
   Palette,
   type ColorStop,
   type PaletteColor,
-} from "./design.ts";
+} from "@tsgui/core";
 export { Reconciler } from "./reconciler.ts";
-export { StateStore } from "./state.ts";
-export * from "./types.ts";
+export { StateStore } from "@tsgui/core";
+export * from "@tsgui/core";
 
 // Per-widget modules — factories + props
 export { Button, type ButtonProps } from "./widgets/button.ts";

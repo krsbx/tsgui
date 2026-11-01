@@ -5,7 +5,8 @@ import tseslint from "typescript-eslint";
 /**
  * Layering rules from docs/ARCHITECTURE.md, mechanically enforced:
  *
- *   layout | widgets | devtools        → pure TS, never import bindings/platform
+ *   layout | core | interactions | paint | widgets | devtools
+ *                                      → pure TS, never import bindings/platform
  *   gpu                                → bindings only (renderer over SDL)
  *   platform                           → bindings only
  *   bindings                           → nothing from this repo
@@ -14,6 +15,9 @@ import tseslint from "typescript-eslint";
  */
 const PURE_LAYERS = [
   "packages/layout",
+  "packages/core",
+  "packages/interactions",
+  "packages/paint",
   "packages/widgets",
   "packages/devtools",
 ];

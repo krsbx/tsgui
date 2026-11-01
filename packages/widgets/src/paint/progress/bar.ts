@@ -6,7 +6,7 @@ import {
   ProgressType,
 } from "@tsgui/layout";
 import type { PaintContext } from "../../paint.ts";
-import { propsOf } from "../../types.ts";
+import { propsOf } from "@tsgui/core";
 import type { ProgressBarProps } from "../../widgets/progress/types.ts";
 import { resolveFillColorClamped } from "../color-stops.ts";
 import { fillRatio, paintContinuousFill, paintSteppedFill } from "../fill.ts";

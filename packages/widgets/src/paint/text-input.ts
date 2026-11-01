@@ -1,9 +1,9 @@
 /** TextInput painter — selection, text/placeholder, caret. */
 import type { LayoutNode } from "@tsgui/layout";
-import { Metrics, Palette } from "../design.ts";
+import { Metrics, Palette } from "@tsgui/core";
 import type { PaintContext } from "../paint.ts";
 import { parseColor } from "../style-resolve.ts";
-import { propsOf } from "../types.ts";
+import { propsOf } from "@tsgui/core";
 import type { TextInputProps } from "../widgets/text-input/index.ts";
 import { peekEditingState } from "../widgets/text-input/state.ts";
 

@@ -7,7 +7,7 @@
  */
 import type { ValidColor, ViewStyle } from "@tsgui/layout";
 import { valueToRatio } from "@tsgui/layout";
-import { type ColorStop, Palette } from "../design.ts";
+import { type ColorStop, Palette } from "@tsgui/core";
 import type { Painter } from "../paint.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintBackground, paintBorder } from "./shape.ts";
@@ -161,4 +161,4 @@ export function fillRatio(props: {
 
 // Re-exports kept so existing importers of paint/fill keep one surface.
 export { resolveFillColor, resolveFillColorClamped } from "./color-stops.ts";
-export type { ColorStop } from "../design.ts";
+export type { ColorStop } from "@tsgui/core";

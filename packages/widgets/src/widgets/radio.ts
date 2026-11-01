@@ -7,8 +7,8 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "../design.ts";
-import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
+} from "@tsgui/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface RadioProps extends BaseWidgetProps {
   /** Group-unique value this radio represents. */

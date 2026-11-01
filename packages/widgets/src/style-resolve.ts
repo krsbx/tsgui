@@ -7,15 +7,10 @@
  * 4's dispatch feeds the real interaction flags; until then they default
  * to false and the base style passes through untouched.
  */
+import type { InteractionStates } from "@tsgui/core";
 import type { ViewStyle } from "@tsgui/layout";
 
-export interface InteractionStates {
-  hovered: boolean;
-  focused: boolean;
-  pressed: boolean;
-  checked: boolean;
-  disabled: boolean;
-}
+export type { InteractionStates };
 
 /** Parse #rgb/#rgba/#rrggbb/#rrggbbaa into the packed u32 the gpu expects. */
 export function parseColor(css: string): number {

@@ -17,8 +17,8 @@ import {
 import type { InteractionStates, Painter, TextPainter } from "./paint.ts";
 import { paintTree } from "./paint.ts";
 import { Reconciler } from "./reconciler.ts";
-import { StateStore } from "./state.ts";
-import type { ReconcilableWidget } from "./types.ts";
+import { StateStore } from "@tsgui/core";
+import type { ReconcilableWidget } from "@tsgui/core";
 
 /** Recorded draw-call discriminators. */
 export const PaintOpKind = {

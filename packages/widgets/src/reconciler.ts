@@ -4,8 +4,8 @@
  * the `window` parameter dropped; hooks receive a plain payload.
  */
 import type { WidgetDescriptor } from "@tsgui/layout";
-import type { StateStore } from "./state.ts";
-import type { Key, ReconcilableWidget, ReconciledNode } from "./types.ts";
+import type { StateStore } from "@tsgui/core";
+import type { Key, ReconcilableWidget, ReconciledNode } from "@tsgui/core";
 
 export class Reconciler {
   private prevTree: ReconciledNode | null = null;

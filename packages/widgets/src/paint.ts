@@ -14,9 +14,14 @@ import type {
   TextDrawOptions,
   TextureDrawOptions,
 } from "@tsgui/gpu";
+import {
+  type InteractionStates,
+  Palette,
+  STATES_NONE,
+  type StateStore,
+} from "@tsgui/core";
 import type { Size } from "@tsgui/layout";
 import { type LayoutNode, Overflow, WidgetType } from "@tsgui/layout";
-import { Palette } from "./design.ts";
 import { paintCheckbox } from "./paint/checkbox.ts";
 import { paintCircularSlider } from "./paint/circular-slider.ts";
 import { paintMeter } from "./paint/meter.ts";
@@ -30,8 +35,6 @@ import { paintBackground, paintBorder } from "./paint/shape.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintTextInput } from "./paint/text-input.ts";
 import { paintToggle } from "./paint/toggle.ts";
-import type { StateStore } from "./state.ts";
-import type { InteractionStates } from "./style-resolve.ts";
 import { parseColor, resolveStyle } from "./style-resolve.ts";
 
 /** The subset of GpuRenderer the paint walk consumes. */
@@ -64,15 +67,6 @@ export interface PaintContext {
 
 export { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
 export type { InteractionStates };
-
-/** Interaction states when no dispatch is wired — every flag off. */
-const STATES_NONE: InteractionStates = {
-  hovered: false,
-  focused: false,
-  pressed: false,
-  checked: false,
-  disabled: false,
-};
 
 /** Widgets whose checked flag comes from props (Radio uses `selected`). */
 const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([

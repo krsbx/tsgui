@@ -8,8 +8,8 @@ import type {
   TextStyle,
   ViewStyle,
 } from "@tsgui/layout";
-import type { ColorStop } from "../../design.ts";
-import type { BaseWidgetProps } from "../../types.ts";
+import type { ColorStop } from "@tsgui/core";
+import type { BaseWidgetProps } from "@tsgui/core";
 
 export interface ProgressProps extends BaseWidgetProps {
   value?: number;

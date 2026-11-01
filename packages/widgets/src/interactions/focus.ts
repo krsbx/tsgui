@@ -9,13 +9,13 @@
  * synthesize a click on activable widgets (fresh press only).
  */
 import { type LayoutNode, WidgetType } from "@tsgui/layout";
-import type { StateStore } from "../state.ts";
+import type { StateStore } from "@tsgui/core";
 import {
   KeyCode,
   type KeyModifiers,
   MouseButton,
   type ReconcilableWidget,
-} from "../types.ts";
+} from "@tsgui/core";
 import { hitTest } from "./hit-test.ts";
 import {
   type KeyboardInputEvent,

@@ -5,9 +5,9 @@ import {
   ProgressValueType,
   valueToRatio,
 } from "@tsgui/layout";
-import { Palette } from "../design.ts";
+import { Palette } from "@tsgui/core";
 import type { PaintContext } from "../paint.ts";
-import { propsOf } from "../types.ts";
+import { propsOf } from "@tsgui/core";
 import { HANDLE_SIZE, TRACK_THICKNESS } from "../widgets/slider/geometry.ts";
 import type { SliderBarProps } from "../widgets/slider/types.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";

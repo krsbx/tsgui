@@ -4,10 +4,10 @@ import {
   type LayoutNode,
   ProgressType,
 } from "@tsgui/layout";
-import { Palette } from "../../design.ts";
+import { Palette } from "@tsgui/core";
 import type { PaintContext } from "../../paint.ts";
 import { colorWithOpacity, parseColor } from "../../style-resolve.ts";
-import { propsOf } from "../../types.ts";
+import { propsOf } from "@tsgui/core";
 import type { CircularProgressProps } from "../../widgets/progress/types.ts";
 import { resolveFillColorClamped } from "../color-stops.ts";
 import { fillRatio } from "../fill.ts";

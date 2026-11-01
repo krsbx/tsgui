@@ -1,5 +1,5 @@
 /** Interaction contracts — ported from flying-pan's flying/interactions. */
-import type { KeyModifiers, MouseButton } from "../types.ts";
+import type { KeyModifiers, MouseButton } from "@tsgui/core";
 
 /** Decoded input-device pointer events, fed to the dispatcher per frame. */
 export const PointerInputKind = {

@@ -10,12 +10,12 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "../design.ts";
+} from "@tsgui/core";
 import type {
   BaseWidgetProps,
   PointerPayload,
   ReconcilableWidget,
-} from "../types.ts";
+} from "@tsgui/core";
 
 export interface ToggleProps extends BaseWidgetProps {
   /** Controlled checked state — wins over defaultChecked. */

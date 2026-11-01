@@ -9,7 +9,7 @@
  * comparison alone can't). One instance per descriptor — the state dies
  * with the rebuild, where the fresh controlled value takes over.
  */
-import type { PointerPayload } from "../../types.ts";
+import type { PointerPayload } from "@tsgui/core";
 
 export interface DragValueHandlerOptions {
   disabled?: boolean;

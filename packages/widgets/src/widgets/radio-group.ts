@@ -11,12 +11,12 @@ import {
   WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import type { BaseWidgetProps } from "../types.ts";
+import type { BaseWidgetProps } from "@tsgui/core";
 import {
   type PointerPayload,
   propsOf,
   type ReconcilableWidget,
-} from "../types.ts";
+} from "@tsgui/core";
 import { Label } from "./label.ts";
 import type { RadioProps } from "./radio.ts";
 

@@ -14,9 +14,9 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "../../design.ts";
-import type { BaseWidgetProps } from "../../types.ts";
-import { KeyCode, KeyModifiers, type ReconcilableWidget } from "../../types.ts";
+} from "@tsgui/core";
+import type { BaseWidgetProps } from "@tsgui/core";
+import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@tsgui/core";
 import {
   backspace,
   CaretDirection,

@@ -1,6 +1,6 @@
 /** Inline value labels — flying-pan's renderer/paint/text value branch. */
 import { ProgressValueType, type TextStyle } from "@tsgui/layout";
-import { Palette } from "../design.ts";
+import { Palette } from "@tsgui/core";
 import type { Painter, TextPainter } from "../paint.ts";
 import { parseColor } from "../style-resolve.ts";
 

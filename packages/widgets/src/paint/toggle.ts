@@ -1,8 +1,8 @@
 /** Toggle painter — the sliding knob sub-mark, ported from flying-pan. */
 import type { LayoutNode } from "@tsgui/layout";
-import { Palette } from "../design.ts";
+import { Palette } from "@tsgui/core";
 import type { PaintContext } from "../paint.ts";
-import { propsOf } from "../types.ts";
+import { propsOf } from "@tsgui/core";
 import type { ToggleProps } from "../widgets/toggle.ts";
 import { paintBackground, paintBorder } from "./shape.ts";
 

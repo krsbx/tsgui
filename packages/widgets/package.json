@@ -4,6 +4,7 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "@tsgui/core": "workspace:*",
     "@tsgui/layout": "workspace:*",
     "@tsgui/gpu": "workspace:*"
   },

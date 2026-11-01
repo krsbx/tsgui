@@ -9,7 +9,7 @@ import type {
   Key,
   PointerPayload,
   ReconcilableWidget,
-} from "./types.ts";
+} from "@tsgui/core";
 
 export interface CreateWidgetOptions {
   type: WidgetDescriptor["type"];

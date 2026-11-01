@@ -11,8 +11,8 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "../design.ts";
-import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
+} from "@tsgui/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface ButtonProps extends BaseWidgetProps {
   style?: ViewStyle;

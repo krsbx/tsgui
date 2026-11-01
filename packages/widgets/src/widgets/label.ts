@@ -2,8 +2,8 @@
 import { PointerEvents, WidgetType } from "@tsgui/layout";
 import type { TextStyle } from "@tsgui/layout";
 import { createWidget } from "../create-widget.ts";
-import { Palette } from "../design.ts";
-import type { BaseWidgetProps, ReconcilableWidget } from "../types.ts";
+import { Palette } from "@tsgui/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
 
 export interface LabelProps extends BaseWidgetProps {
   text: string;

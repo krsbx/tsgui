@@ -6,8 +6,8 @@ import {
   WidgetType,
 } from "@tsgui/layout";
 import { createWidget } from "../../create-widget.ts";
-import { Palette } from "../../design.ts";
-import type { ReconcilableWidget } from "../../types.ts";
+import { Palette } from "@tsgui/core";
+import type { ReconcilableWidget } from "@tsgui/core";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { ProgressBarProps } from "./types.ts";
 
