@@ -2,8 +2,10 @@
  * Progress + meter semantics through the headless harness — fill geometry,
  * direction, steps, color stops, zones, and the arc primitives' ops.
  */
+import { AnimationManager } from "@tsgui/animation";
 import { type ColorStop, MeterZone } from "@tsgui/core";
 import { valueToRatio } from "@tsgui/layout";
+import { ProgressType } from "@tsgui/layout";
 import { parseColor, resolveFillColorClamped } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
@@ -248,5 +250,71 @@ describe("Meter ops", () => {
     expect(rectOps(frame.ops)[1]).toMatchObject({
       color: parseColor(Palette.warning),
     });
+  });
+});
+
+describe("indeterminate motion", () => {
+  const barAt = (time: number) => {
+    const animations = new AnimationManager();
+    animations.tick(time);
+    return renderHeadless(
+      ProgressBar({
+        type: ProgressType.Indeterminate,
+        style: { width: 200, height: 8 },
+      }),
+      { width: 200, height: 8, animationManager: animations }
+    );
+  };
+
+  const segmentOf = (frame: ReturnType<typeof renderHeadless>) =>
+    frame.ops.find(
+      (op) =>
+        (op.op === "rect" || op.op === "rrect") && (op as { w: number }).w < 200
+    ) as { x: number; w: number } | undefined;
+
+  test("the bar segment travels with the manager clock", () => {
+    // t=200: cycle 0.133, ease-in-out → 0.0356 of the 280px travel —
+    // the 80px segment is still entering: visible at x=0, ~10px wide.
+    const entering = segmentOf(barAt(200));
+    expect(entering?.x).toBe(0);
+    expect(entering?.w).toBeCloseTo(10, 0);
+
+    // t=750: cycle 0.5 → ease-in-out 0.5 → the segment centers: 60..140
+    // of the 200px track.
+    const mid = segmentOf(barAt(750));
+    expect(mid?.x).toBeCloseTo(60, 0);
+    expect(mid?.w).toBeCloseTo(80, 0);
+  });
+
+  test("without a manager the bar paints the static mid-cycle segment", () => {
+    const frame = renderHeadless(
+      ProgressBar({
+        type: ProgressType.Indeterminate,
+        style: { width: 200, height: 8 },
+      }),
+      { width: 200, height: 8 }
+    );
+    // Manager absent → time defaults to 750 (mid-cycle) — a real phase,
+    // not the old frozen third.
+    const seg = segmentOf(frame);
+    expect(seg?.x).toBeCloseTo(60, 0);
+  });
+
+  test("the circular arc sweeps with the manager clock", () => {
+    const animations = new AnimationManager();
+    animations.tick(500); // cycle 0.25 → arcStart = -π/2 + π/2 = 0
+    const frame = renderHeadless(
+      CircularProgress({
+        type: ProgressType.Indeterminate,
+        style: { width: 40, height: 40 },
+      }),
+      { width: 40, height: 40, animationManager: animations }
+    );
+
+    const ring = frame.ops.find((op) => op.op === "ring") as
+      { startAngle: number; endAngle: number } | undefined;
+    expect(ring).toBeDefined();
+    expect(ring!.startAngle).toBeCloseTo(0, 5);
+    expect(ring!.endAngle).toBeCloseTo(Math.PI * 1.5, 5);
   });
 });

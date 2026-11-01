@@ -3,19 +3,18 @@ import { Palette } from "@tsgui/core";
 import { propsOf } from "@tsgui/core";
 import {
   CircularProgressDirection,
-  type LayoutNode,
   ProgressType,
 } from "@tsgui/layout";
 import {
   colorWithOpacity,
   fillRatio,
-  type PaintContext,
   parseColor,
   resolveFillColorClamped,
   type WidgetPainter,
 } from "@tsgui/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
 import type { CircularProgressProps } from "../types.ts";
+import { paintIndeterminateCircular } from "./indeterminate.ts";
 
 /** CSS color string + opacity → packed u32 for the arc primitives. */
 function packedWithOpacity(
@@ -25,31 +24,11 @@ function packedWithOpacity(
   return colorWithOpacity(parseColor(color ?? Palette.accent), opacity ?? 1);
 }
 
-/**
- * Indeterminate motion needs a clock, which arrives with phase 4's
- * AnimationManager. Until then it paints a static third-sweep arc.
- */
-function paintIndeterminate(ctx: PaintContext, node: LayoutNode): void {
-  const props = propsOf<CircularProgressProps>(node.widget);
-  const radius = Math.min(node.width, node.height) / 2;
-  const thickness = props.thickness ?? 0.1;
-
-  ctx.gpu.fillRing({
-    cx: node.screenX + node.width / 2,
-    cy: node.screenY + node.height / 2,
-    innerRadius: radius * (1 - thickness),
-    radius,
-    startAngle: 0,
-    endAngle: Math.PI * 2 * (1 / 3),
-    color: packedWithOpacity(Palette.accent, 1),
-  });
-}
-
 export const paintCircularProgress: WidgetPainter = (ctx, node) => {
   const props = propsOf<CircularProgressProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
-    paintIndeterminate(ctx, node);
+    paintIndeterminateCircular(ctx, node);
     return;
   }
 

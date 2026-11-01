@@ -1,14 +1,12 @@
 /** ProgressBar painter — buffer, main fill (continuous or stepped), label. */
 import { propsOf } from "@tsgui/core";
 import {
-  type LayoutNode,
   ProgressBarOrientation,
   ProgressDirection,
   ProgressType,
 } from "@tsgui/layout";
 import {
   fillRatio,
-  type PaintContext,
   paintContinuousFill,
   paintSteppedFill,
   resolveFillColorClamped,
@@ -16,30 +14,13 @@ import {
 } from "@tsgui/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
 import type { ProgressBarProps } from "../types.ts";
-
-/**
- * Indeterminate motion needs a clock, which arrives with phase 4's
- * AnimationManager. Until then it paints a static third-width segment.
- */
-function paintIndeterminate(ctx: PaintContext, node: LayoutNode): void {
-  paintContinuousFill({
-    gpu: ctx.gpu,
-    x: node.screenX,
-    y: node.screenY,
-    w: node.width,
-    h: node.height,
-    isHorizontal: true,
-    isForward: true,
-    ratio: 1 / 3,
-    fillStyle: (node.widget.props as ProgressBarProps).fillStyle ?? {},
-  });
-}
+import { paintIndeterminateBar } from "./indeterminate.ts";
 
 export const paintProgressBar: WidgetPainter = (ctx, node) => {
   const props = propsOf<ProgressBarProps>(node.widget);
 
   if (props.type === ProgressType.Indeterminate) {
-    paintIndeterminate(ctx, node);
+    paintIndeterminateBar(ctx, node);
     return;
   }
 

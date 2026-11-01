@@ -42,12 +42,14 @@ import {
   type WheelInputEvent,
 } from "@tsgui/interactions";
 import {
+  EasingName,
   FlexAlign,
   FlexDirection,
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   Overflow,
+  ProgressType,
   ProgressValueType,
 } from "@tsgui/layout";
 import { paintTree } from "@tsgui/paint";
@@ -204,6 +206,10 @@ function buildTree(): ReconcilableWidget {
               _active: {
                 backgroundColor: Palette.accentActive,
                 borderColor: Palette.accentActive,
+              },
+              transition: {
+                duration: 100,
+                easing: EasingName.EaseIn,
               },
             },
             onClick: increment,
@@ -388,6 +394,7 @@ function buildTree(): ReconcilableWidget {
             max: 100,
             style: { width: 160, height: 6, borderRadius: 3 },
             showValue: ProgressValueType.Percent,
+            type: ProgressType.Indeterminate,
           }),
           ProgressBar({
             value: 6,
@@ -396,6 +403,7 @@ function buildTree(): ReconcilableWidget {
             steps: 10,
             stepGap: 3,
             style: { width: 100, height: 8 },
+            type: ProgressType.Indeterminate,
           }),
           CircularProgress({ value: 0.66, min: 0, max: 1, size: 40 }),
         ],

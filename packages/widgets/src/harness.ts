@@ -8,6 +8,7 @@
  * captured as a plain op object. That is what golden-snapshot tests diff,
  * and what phase 5's devtools can replay.
  */
+import type { AnimationManager } from "@tsgui/animation";
 import { StateStore } from "@tsgui/core";
 import type { ReconcilableWidget } from "@tsgui/core";
 import {
@@ -80,6 +81,8 @@ export interface HeadlessOptions {
   getImageSize?(src: string): Size | null;
   /** Per-node interaction flags; defaults to all-off. */
   statesOf?(node: LayoutNode): InteractionStates;
+  /** The transition engine — phases for indeterminate/caret painting. */
+  animationManager?: AnimationManager;
 }
 
 export interface HeadlessFrame {
@@ -149,6 +152,7 @@ export function renderHeadless(
       statesOf: options.statesOf,
       stateStore: stateStore,
       painters: widgetPainters,
+      animationManager: options.animationManager,
     },
     root
   );

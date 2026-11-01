@@ -69,9 +69,12 @@ export const paintTextInput: WidgetPainter = (ctx, node, style) => {
     ),
   });
 
-  // Caret — a 1px bar when focused. Blinking lands with the
-  // AnimationManager (needs a clock; static is honest meanwhile).
-  if (focused) {
+  // Caret — a 1px bar when focused, blinking on a 500ms cadence from
+  // the AnimationManager clock (flying-pan's cadence). Without a
+  // manager the caret stays visible — headless tests stay deterministic.
+  const time = ctx.animationManager?.time;
+  const blinkVisible = time === undefined || Math.floor(time / 500) % 2 === 0;
+  if (focused && blinkVisible) {
     const styleCaret = style as { caretColor?: string };
     ctx.gpu.fillRect({
       x: contentX + measure(value.slice(0, state.caret)),

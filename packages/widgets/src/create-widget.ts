@@ -24,13 +24,17 @@ export interface CreateWidgetOptions {
 export function createWidget(options: CreateWidgetOptions): ReconcilableWidget {
   const { type, props, style, children, key, handlers } = options;
 
+  // Handlers spread BEFORE type: factories forward their leftover props
+  // as handlers, and a widget prop named `type` (progress widgets) must
+  // never overwrite the descriptor's widget type — the paint registry
+  // dispatches on it.
   return {
+    ...handlers,
     type,
     props,
     style,
     children,
     key,
-    ...handlers,
   };
 }
 

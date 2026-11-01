@@ -4,6 +4,7 @@
  * and fires onChange, arrows/shift select, backspace/delete respect the
  * selection, clipboard seam, and the painter draws text/selection/caret.
  */
+import { AnimationManager } from "@tsgui/animation";
 import {
   KeyCode,
   KeyModifiers,
@@ -482,5 +483,40 @@ describe("TextInput paint", () => {
         op.op === PaintOpKind.Rect && (op as PaintOp & { w: number }).w === 1
     );
     expect(caret.length).toBe(0);
+  });
+});
+
+describe("caret blink", () => {
+  const STATES_NONE = {
+    hovered: false,
+    focused: false,
+    pressed: false,
+    checked: false,
+    disabled: false,
+  };
+  const focusedAt = (time: number | undefined) => {
+    const animations = time === undefined ? undefined : new AnimationManager();
+    if (animations) animations.tick(time);
+    return renderHeadless(
+      TextInput({ value: "abc", style: { width: 120, height: 28 } }),
+      {
+        width: 140,
+        height: 32,
+        statesOf: () => ({ ...STATES_NONE, focused: true }),
+        animationManager: animations,
+      }
+    );
+  };
+  const caretOp = (frame: ReturnType<typeof renderHeadless>) =>
+    frame.ops.find((op) => op.op === "rect" && (op as { w: number }).w === 1);
+
+  test("without a manager the caret stays visible (deterministic tests)", () => {
+    expect(caretOp(focusedAt(undefined))).toBeDefined();
+  });
+
+  test("with a manager the caret blinks on flying-pan's 500ms cadence", () => {
+    expect(caretOp(focusedAt(0))).toBeDefined(); // 0/500 on-phase
+    expect(caretOp(focusedAt(600))).toBeUndefined(); // 600/500 off-phase
+    expect(caretOp(focusedAt(1000))).toBeDefined(); // 1000/500 on-phase
   });
 });
