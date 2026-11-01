@@ -605,6 +605,7 @@ while (running) {
         ...pointer.statesOf(node),
         ...focusDispatcher.statesOf(node),
       }),
+      stateStore,
     },
     root
   );

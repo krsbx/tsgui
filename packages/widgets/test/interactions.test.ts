@@ -14,6 +14,7 @@ import { describe, expect, test } from "bun:test";
 import {
   Checkbox,
   MouseButton,
+  type PaintOp,
   paintTree,
   Palette,
   parseColor,
@@ -392,5 +393,27 @@ describe("controlled checked widgets", () => {
 
     expect(colors).toContain(parseColor(Palette.accent));
     expect(colors).toContain(parseColor(Palette.textOnAccent));
+  });
+
+  test("uncontrolled defaults resolve through the harness paint walk", () => {
+    // Guard: renderHeadless must thread its store into PaintContext — a
+    // missing stateStore resolves every uncontrolled control as unchecked
+    // (the gallery regression).
+    const checked = renderHeadless(
+      View({ children: [Checkbox({ defaultChecked: true })] }),
+      { width: 100, height: 100 }
+    );
+    const unchecked = renderHeadless(
+      View({ children: [Checkbox({ defaultChecked: false })] }),
+      { width: 100, height: 100 }
+    );
+
+    const colorsOf = (frame: { ops: PaintOp[] }): number[] =>
+      frame.ops
+        .filter((op) => op.op === "rect" || op.op === "rrect")
+        .map((op) => (op as { color: number }).color);
+
+    expect(colorsOf(checked)).toContain(parseColor(Palette.accent));
+    expect(colorsOf(unchecked)).not.toContain(parseColor(Palette.accent));
   });
 });

@@ -100,7 +100,8 @@ export function renderHeadless(
   widget: ReconcilableWidget,
   options: HeadlessOptions
 ): HeadlessFrame {
-  const reconciler = new Reconciler(new StateStore());
+  const stateStore = new StateStore();
+  const reconciler = new Reconciler(stateStore);
   const reconciled = reconciler.reconcile(widget);
 
   const layoutIndex = new Map<number, LayoutNode>();
@@ -140,7 +141,7 @@ export function renderHeadless(
         tint: o.tint ?? 0xffffffff,
       }),
   };
-  paintTree({ gpu, font, statesOf: options.statesOf }, root);
+  paintTree({ gpu, font, statesOf: options.statesOf, stateStore: stateStore }, root);
 
   return { root, ops, layoutIndex, reconciler, changed: reconciler.changed };
 }
