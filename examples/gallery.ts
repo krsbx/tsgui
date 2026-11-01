@@ -252,6 +252,20 @@ function buildTree(): ReconcilableWidget {
         ],
       }),
 
+      // uncontrolled controls — zero app state: the store + painter
+      // handle everything (the version counter drives repaints)
+      View({
+        style: { flexDirection: FlexDirection.Row, gap: 24, alignItems: FlexAlign.Center },
+        children: [
+          Checkbox({ defaultChecked: true }),
+          Toggle({ defaultChecked: false }),
+          TextInput({
+            defaultValue: "editable",
+            style: { width: 160, height: 28 },
+          }),
+        ],
+      }),
+
       // sliders — drag through the dispatcher's press capture
       View({
         style: {
@@ -563,13 +577,14 @@ while (running) {
     ctx: layoutCtx,
   });
 
-  pointer.dispatch({ events: pointerEvents, root, layoutIndex });
+  pointer.dispatch({ events: pointerEvents, root, layoutIndex, stateStore });
   focusDispatcher.dispatch({
     pointerEvents,
     keyboardEvents,
     root,
     layoutIndex,
     focusableNodes: layoutCtx.focusableNodes,
+    stateStore,
   });
   scrollDispatcher.dispatch({
     wheelEvents,
