@@ -16,7 +16,10 @@ export function paintTextInput(ctx: PaintContext, node: LayoutNode): void {
   // on the previous frame's descriptor, whose props.value lags the edits
   // made earlier this frame; adopting it would revert the keystroke and
   // clamp the caret to 0.
-  const state = peekEditingState(node.stableId, { value: props.value });
+  const state = peekEditingState(node.stableId, {
+    value: props.value,
+    defaultValue: props.defaultValue,
+  });
   const value = state.value;
 
   const hasValue = value.length > 0;

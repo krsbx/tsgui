@@ -58,8 +58,10 @@ export interface TextInputStateStyle extends ViewStyle {
 }
 
 export interface TextInputProps extends BaseWidgetProps {
-  /** Controlled text. */
+  /** Controlled text — wins over defaultValue. */
   value?: string;
+  /** Uncontrolled initial text. */
+  defaultValue?: string;
   onChange?(value: string): void;
   placeholder?: string;
   disabled?: boolean;
@@ -86,6 +88,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     onChange,
     placeholder,
     disabled,
+    defaultValue,
     measureText,
     style,
     key,
@@ -103,7 +106,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
     (m & (KeyModifiers.Meta | KeyModifiers.Control)) !== 0;
 
   const stateOf = (payload: { stableId: number }): TextInputState =>
-    editingStateOf(payload.stableId, { value });
+    editingStateOf(payload.stableId, { value, defaultValue });
 
   /** Glyph-accurate width (injected) or the 8px-per-char estimate. */
   const measureWidth = (text: string): number =>

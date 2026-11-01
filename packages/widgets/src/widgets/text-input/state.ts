@@ -20,11 +20,11 @@ const editingStates = new Map<number, TextInputState>();
  */
 export function editingStateOf(
   stableId: number,
-  props: { value?: string }
+  props: { value?: string; defaultValue?: string }
 ): TextInputState {
   let state = editingStates.get(stableId);
   if (!state) {
-    state = makeTextInputState({ value: props.value });
+    state = makeTextInputState({ value: props.value ?? props.defaultValue });
     editingStates.set(stableId, state);
   }
 
@@ -70,13 +70,15 @@ export const textInputClipboard: { get(): string; set(text: string): void } = {
  * would revert the just-typed edit and clamp the caret to 0.
  *
  * `props` seeds the initial view before the first interaction (the
- * controlled initial value / placeholder) — creation only, never stored.
+ * controlled initial value / defaultValue / placeholder) — creation only,
+ * never stored.
  */
 export function peekEditingState(
   stableId: number,
-  props?: { value?: string }
+  props?: { value?: string; defaultValue?: string }
 ): TextInputState {
   return (
-    editingStates.get(stableId) ?? makeTextInputState({ value: props?.value })
+    editingStates.get(stableId) ??
+    makeTextInputState({ value: props?.value ?? props?.defaultValue })
   );
 }

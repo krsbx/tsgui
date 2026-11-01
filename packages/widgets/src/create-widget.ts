@@ -35,19 +35,43 @@ export function createWidget(options: CreateWidgetOptions): ReconcilableWidget {
 }
 
 /**
- * Click handler shared by the checked controls (Checkbox, Toggle): the
- * consumer's onClick fires first, a disabled control no-ops, then the
- * checked state flips through onCheckedChange.
+ * Click handler shared by the checked controls (Checkbox, Toggle).
+ *
+ * Controlled (`checked` set): the consumer's onClick fires first, then
+ * onCheckedChange carries the flip — the app re-renders with the new
+ * value. Uncontrolled (`defaultChecked` instead): the flip persists in
+ * the payload's state store under the stableId; the paint pass reads it
+ * from there. Disabled controls no-op.
  */
 export function createCheckedClickHandler(options: {
   disabled?: boolean;
+  /** Controlled checked state — wins over defaultChecked. */
   checked?: boolean;
+  defaultChecked?: boolean;
   onCheckedChange?(checked: boolean, payload: PointerPayload): void;
   onClick?(payload: PointerPayload): void;
 }): (payload: PointerPayload) => void {
   return (payload) => {
     options.onClick?.(payload);
     if (options.disabled) return;
-    options.onCheckedChange?.(!(options.checked ?? false), payload);
+
+    if (options.checked !== undefined) {
+      options.onCheckedChange?.(!options.checked, payload);
+      return;
+    }
+
+    const store = payload.stateStore;
+
+    if (!store) return;
+
+    const current = store.stateFor<boolean>({
+      stableId: payload.stableId,
+      initial: options.defaultChecked ?? false,
+    });
+
+    const next = !current;
+
+    store.setState({ stableId: payload.stableId, value: next });
+    options.onCheckedChange?.(next, payload);
   };
 }

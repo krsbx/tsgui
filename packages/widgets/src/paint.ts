@@ -26,6 +26,7 @@ import {
 } from "./paint/progress/index.ts";
 import { paintRadio } from "./paint/radio.ts";
 import { paintShadow } from "./paint/shadow.ts";
+import type { StateStore } from "./state.ts";
 import { paintBackground, paintBorder } from "./paint/shape.ts";
 import { paintSliderBar } from "./paint/slider-bar.ts";
 import { paintTextInput } from "./paint/text-input.ts";
@@ -57,6 +58,8 @@ export interface PaintContext {
   font: TextPainter;
   /** Per-node interaction flags — production wires the dispatch (phase 4). */
   statesOf?(node: LayoutNode): InteractionStates;
+  /** The app's state store — uncontrolled widgets resolve values here. */
+  stateStore?: StateStore;
 }
 
 export { colorWithOpacity, parseColor, resolveStyle } from "./style-resolve.ts";
@@ -78,14 +81,46 @@ const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([
   [WidgetType.Radio, "selected"],
 ]);
 
+function resolveChecked(
+  ctx: PaintContext,
+  node: LayoutNode,
+  checkedKey: string | undefined
+): boolean {
+  if (!checkedKey) return false;
+
+  const props = node.widget.props;
+  const controlled = props[checkedKey];
+  if (controlled !== undefined) return controlled === true;
+
+  // Uncontrolled: the store-backed boolean at the node's stableId
+  // (checkbox/toggle), or the named group value (radio).
+  if (!ctx.stateStore) return false;
+
+  if (checkedKey === "selected") {
+    const name = typeof props["name"] === "string" ? (props["name"] as string) : "";
+    if (!name) return false;
+    const groupDefault =
+      typeof props["groupDefaultValue"] === "string"
+        ? (props["groupDefaultValue"] as string)
+        : "";
+    return ctx.stateStore.stateForByName({ name, initial: groupDefault }) === props["value"];
+  }
+
+  return ctx.stateStore.stateFor<boolean>({
+    stableId: node.stableId,
+    initial: props["defaultChecked"] === true,
+  });
+}
+
 function paintNode(ctx: PaintContext, node: LayoutNode): void {
   const base = node.widget.style ?? {};
   const states = ctx.statesOf?.(node) ?? STATES_NONE;
 
-  // Controls carry their checked flag in props — fold it into the
-  // pseudo-state so `_checked` style overrides apply.
+  // Controls resolve their checked flag: controlled props first, then
+  // the store-backed uncontrolled state. Folded into the pseudo-state
+  // so `_checked` style overrides apply.
   const checkedKey = CHECKED_PROP.get(node.widget.type);
-  const checked = checkedKey ? node.widget.props[checkedKey] === true : false;
+  const checked = resolveChecked(ctx, node, checkedKey);
   const effectiveStates = checkedKey ? { ...states, checked } : states;
 
   const style = resolveStyle(base, effectiveStates);

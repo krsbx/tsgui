@@ -19,8 +19,10 @@ import type {
 } from "../types.ts";
 
 export interface CheckboxProps extends BaseWidgetProps {
-  /** Controlled checked state. */
+  /** Controlled checked state — wins over defaultChecked. */
   checked?: boolean;
+  /** Uncontrolled initial state (store-backed; needs a focused paint ctx store). */
+  defaultChecked?: boolean;
   onCheckedChange?(checked: boolean, payload: PointerPayload): void;
   disabled?: boolean;
   style?: ViewStyle;
@@ -32,6 +34,7 @@ export interface CheckboxProps extends BaseWidgetProps {
 export function Checkbox(props: CheckboxProps): ReconcilableWidget {
   const {
     checked,
+    defaultChecked,
     onCheckedChange,
     disabled,
     style,
@@ -46,6 +49,7 @@ export function Checkbox(props: CheckboxProps): ReconcilableWidget {
     type: WidgetType.Checkbox,
     props: {
       checked,
+      defaultChecked,
       disabled,
       tickSize,
       tickStyle: {
@@ -77,6 +81,7 @@ export function Checkbox(props: CheckboxProps): ReconcilableWidget {
       onClick: createCheckedClickHandler({
         disabled,
         checked,
+        defaultChecked,
         onCheckedChange,
         onClick,
       }),

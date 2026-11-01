@@ -70,7 +70,7 @@ function setup(widget: ReconcilableWidget): Harness {
 
   const dispatcher = new PointerDispatcher();
   const fire = (events: PointerInputEvent[]): void =>
-    dispatcher.dispatch({ events, root, layoutIndex });
+    dispatcher.dispatch({ events, root, layoutIndex, stateStore });
 
   const render = (next: ReconcilableWidget): void => {
     const reconciledNext = reconciler.reconcile(next);
@@ -364,6 +364,19 @@ describe("controlled checked widgets", () => {
     };
     collect(root);
     expect(selectedIds.length).toBe(1);
+  });
+
+  test("uncontrolled checkbox persists via the payload state store", () => {
+    const changes: boolean[] = [];
+    const h = setup(
+      Checkbox({ defaultChecked: true, onCheckedChange: (next) => changes.push(next) })
+    );
+
+    h.fire([
+      { kind: PointerInputKind.Down, x: 8, y: 8, button: MouseButton.Left },
+      { kind: PointerInputKind.Up, x: 8, y: 8, button: MouseButton.Left },
+    ]);
+    expect(changes).toEqual([false]);
   });
 
   test("checked pseudo-state styles merge through the paint walk", () => {

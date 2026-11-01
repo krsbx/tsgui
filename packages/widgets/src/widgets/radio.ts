@@ -15,6 +15,10 @@ export interface RadioProps extends BaseWidgetProps {
   value: string;
   /** Controlled selection — set by a RadioGroup; standalone is cosmetic. */
   selected?: boolean;
+  /** Uncontrolled group name — set by a RadioGroup (derived if absent). */
+  name?: string;
+  /** Uncontrolled initial selection — the group's defaultValue. */
+  groupDefaultValue?: string;
   /** Rendered next to the dot when the Radio is used in a RadioGroup. */
   label?: string;
   labelStyle?: TextStyle;
@@ -33,6 +37,8 @@ export function Radio(props: RadioProps): ReconcilableWidget {
     props: {
       value: props.value,
       selected: props.selected,
+      name: props.name,
+      groupDefaultValue: props.groupDefaultValue,
       label: props.label,
       labelStyle: props.labelStyle,
       disabled: props.disabled,

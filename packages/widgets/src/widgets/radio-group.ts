@@ -21,8 +21,12 @@ import { Label } from "./label.ts";
 import type { RadioProps } from "./radio.ts";
 
 export interface RadioGroupProps extends BaseWidgetProps {
-  /** Controlled selected value. */
+  /** Controlled selected value — wins over defaultValue. */
   value?: string;
+  /** Uncontrolled initial selection. */
+  defaultValue?: string;
+  /** Group name for the shared uncontrolled state (derived if absent). */
+  name?: string;
   onValueChange?(value: string): void;
   direction?: FlexDirection;
   gap?: number;
@@ -41,6 +45,13 @@ export function RadioGroup(props: RadioGroupProps): ReconcilableWidget {
     key,
   } = props;
 
+  // Uncontrolled groups share state under a derived name; controlled
+  // groups resolve from the `value` prop.
+  const isControlled = value !== undefined;
+  const groupName =
+    props.name ?? `__radio::${(children ?? []).filter((c) => c.type === WidgetType.Radio).map((c) => propsOf<RadioProps>(c).value).join("|")}`;
+  const groupDefault = props.defaultValue ?? "";
+
   const augmented = (children ?? []).map((child) => {
     if (child.type !== WidgetType.Radio) return child;
 
@@ -51,11 +62,23 @@ export function RadioGroup(props: RadioGroupProps): ReconcilableWidget {
     // with the group's selection click wrapped around the child's own.
     const control: ReconcilableWidget = {
       ...child,
-      props: { ...child.props, selected: radio.value === value },
+      props: {
+        ...child.props,
+        selected: isControlled ? radio.value === value : undefined,
+        name: isControlled ? undefined : groupName,
+        groupDefaultValue: isControlled ? undefined : groupDefault,
+      },
       key: child.key ?? radio.value,
       onClick: (payload: PointerPayload) => {
         child.onClick?.(payload);
         if (isDisabled) return;
+
+        if (!isControlled && payload.stateStore) {
+          payload.stateStore.setStateByName({
+            name: groupName,
+            value: radio.value,
+          });
+        }
         onValueChange?.(radio.value);
       },
     };

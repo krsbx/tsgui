@@ -18,8 +18,10 @@ import type {
 } from "../types.ts";
 
 export interface ToggleProps extends BaseWidgetProps {
-  /** Controlled checked state. */
+  /** Controlled checked state — wins over defaultChecked. */
   checked?: boolean;
+  /** Uncontrolled initial state (store-backed). */
+  defaultChecked?: boolean;
   onCheckedChange?(checked: boolean, payload: PointerPayload): void;
   disabled?: boolean;
   style?: ViewStyle;
@@ -29,6 +31,7 @@ export interface ToggleProps extends BaseWidgetProps {
 export function Toggle(props: ToggleProps): ReconcilableWidget {
   const {
     checked,
+    defaultChecked,
     onCheckedChange,
     disabled,
     style,
@@ -72,6 +75,7 @@ export function Toggle(props: ToggleProps): ReconcilableWidget {
       onClick: createCheckedClickHandler({
         disabled,
         checked,
+        defaultChecked,
         onCheckedChange,
         onClick,
       }),

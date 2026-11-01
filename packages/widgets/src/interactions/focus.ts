@@ -9,6 +9,7 @@
  * synthesize a click on activable widgets (fresh press only).
  */
 import { type LayoutNode, WidgetType } from "@tsgui/layout";
+import type { StateStore } from "../state.ts";
 import {
   KeyCode,
   type KeyModifiers,
@@ -50,6 +51,8 @@ export interface FocusDispatchOptions {
   layoutIndex: Map<number, LayoutNode>;
   /** Focusable nodes collected during layout — tree order = tab order. */
   focusableNodes: LayoutNode[];
+  /** The app's state store — stamped into payloads for uncontrolled widgets. */
+  stateStore?: StateStore;
 }
 
 export class FocusDispatcher {
@@ -58,8 +61,14 @@ export class FocusDispatcher {
   private pendingBlur = false;
 
   public dispatch(options: FocusDispatchOptions): void {
-    const { pointerEvents, keyboardEvents, root, layoutIndex, focusableNodes } =
-      options;
+    const {
+      pointerEvents,
+      keyboardEvents,
+      root,
+      layoutIndex,
+      focusableNodes,
+      stateStore,
+    } = options;
 
     // 1. Validate current focus — blur if unmounted or no longer focusable.
     if (this.focusedId !== null) {
@@ -101,7 +110,7 @@ export class FocusDispatcher {
       const node = layoutIndex.get(this.focusedId) ?? null;
       if (node) {
         for (const event of keyboardEvents) {
-          this.route(event, node);
+          this.route(event, node, stateStore);
         }
       }
     }
@@ -226,7 +235,11 @@ export class FocusDispatcher {
     });
   }
 
-  private route(event: KeyboardInputEvent, node: LayoutNode): void {
+  private route(
+    event: KeyboardInputEvent,
+    node: LayoutNode,
+    stateStore: StateStore | undefined
+  ): void {
     const widget = node.widget as ReconcilableWidget;
 
     if (event.kind === KeyboardInputKind.Char) {
@@ -247,6 +260,7 @@ export class FocusDispatcher {
       repeat: event.repeat ?? false,
       stableId: node.stableId,
       node,
+      stateStore,
     };
 
     if (event.kind === KeyboardInputKind.KeyDown) {
