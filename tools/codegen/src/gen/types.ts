@@ -8,14 +8,14 @@ import { banner } from "./shared.ts";
 export function generateTypes(
   tables: FfiTables,
   pascalName: string,
-  namePrefix: string
+  namePrefixes: string[]
 ): string {
   const L = banner(`pointer brands + symbols type for ${pascalName}`);
 
   // Satellite libraries reference core handles (SDL_Window, …): import
   // them from the sdl target's types instead of re-declaring.
   const imported = tables.handleTypes.filter(
-    (h) => h.startsWith("SDL_") && namePrefix !== "SDL_"
+    (h) => h.startsWith("SDL_") && !namePrefixes.includes("SDL_")
   );
   L.push(`/**`);
   L.push(

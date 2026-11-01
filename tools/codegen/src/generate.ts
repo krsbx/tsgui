@@ -17,8 +17,7 @@ import {
   generateTypes,
   summarizeUnsafe,
 } from "./gen/index.ts";
-import { buildFfiTables } from "./model/index.ts";
-import { pascalCase } from "./model/index.ts";
+import { buildFfiTables, pascalCase } from "./model/index.ts";
 import { includeDir, type TargetSpec } from "./targets.ts";
 
 const bindingsSrcDir = join(
@@ -39,10 +38,10 @@ export async function generateTarget(
   // No parser-level name filter: non-prefixed typedefs (Sint32, Uint16, …)
   // must reach the alias resolver; the model filters by prefix instead.
   const header = await new ClangNodeParser(ast).parse();
-  const tables = buildFfiTables(header, { namePrefix: spec.prefix });
+  const tables = buildFfiTables(header, { namePrefixes: spec.prefixes });
 
   const { defines, skipped } = spec.definesSubdir
-    ? scanNumericDefines(base, spec.definesSubdir, spec.prefix)
+    ? scanNumericDefines(base, spec.definesSubdir, spec.prefixes)
     : { defines: [], skipped: 0 };
 
   const outDir = join(bindingsSrcDir, "libraries", spec.name, "generated");
@@ -53,7 +52,7 @@ export async function generateTarget(
     `${pascalCase(spec.name)}Defines`
   );
   const defs = generateDefs(tables, spec.origin, `${spec.name}Defs`);
-  const types = generateTypes(tables, pascalCase(spec.name), spec.prefix);
+  const types = generateTypes(tables, pascalCase(spec.name), spec.prefixes);
   const functions = generateFunctions(tables, pascalCase(spec.name));
 
   const outputs: [string, string][] = [

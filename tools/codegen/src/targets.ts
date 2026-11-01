@@ -10,7 +10,7 @@ export interface TargetSpec {
   origin: string;
   /** Header path relative to the base include dir. */
   headerRel: string;
-  prefix: string;
+  prefixes: string[];
   /** Subdirectory of the include dir to scan for numeric #defines. */
   definesSubdir?: string;
 }
@@ -25,11 +25,14 @@ export function includeDir(): string {
   );
 }
 
-/** SDL3 satellite libraries — everything else derives from the name. */
+/**
+ * SDL3 satellite libraries — everything else derives from the name.
+ * The derived `SDL_<NAME>_` prefix picks up the version #defines.
+ */
 const SATELLITES = [
-  { name: "image", prefix: "IMG_" },
-  { name: "ttf", prefix: "TTF_" },
-  { name: "mixer", prefix: "MIX_" },
+  { name: "image", prefixes: ["IMG_"] },
+  { name: "ttf", prefixes: ["TTF_"] },
+  { name: "mixer", prefixes: ["MIX_"] },
 ] as const;
 
 export const TARGETS: Record<string, TargetSpec> = {
@@ -37,17 +40,19 @@ export const TARGETS: Record<string, TargetSpec> = {
     name: "sdl",
     origin: "SDL3 headers",
     headerRel: "SDL3/SDL.h",
-    prefix: "SDL_",
+    // SDLK_ keycodes are plain #defines in SDL_keycode.h. KMOD_/AUDIO_/RW_
+    // only exist as SDL_oldnames.h aliases, so they are deliberately omitted.
+    prefixes: ["SDL_", "SDLK_"],
     definesSubdir: "SDL3",
   },
   ...Object.fromEntries(
-    SATELLITES.map(({ name, prefix }) => [
+    SATELLITES.map(({ name, prefixes }) => [
       name,
       {
         name,
         origin: `SDL3_${name} headers`,
         headerRel: `SDL3_${name}/SDL_${name}.h`,
-        prefix,
+        prefixes: [...prefixes, `SDL_${name.toUpperCase()}_`],
         definesSubdir: `SDL3_${name}`,
       } satisfies TargetSpec,
     ])

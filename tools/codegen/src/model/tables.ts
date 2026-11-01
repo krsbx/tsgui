@@ -127,7 +127,7 @@ export function buildFfiTables(
   for (const decl of header.declarations) {
     if (decl.kind !== DeclarationKind.FUNCTION) continue;
     const fn = decl as CFunctionDecl;
-    if (!fn.name.startsWith(opts.namePrefix)) continue;
+    if (!opts.namePrefixes.some((p) => fn.name.startsWith(p))) continue;
 
     if (fn.variadic) {
       unsafe.push({ name: fn.name, reason: "variadic" });

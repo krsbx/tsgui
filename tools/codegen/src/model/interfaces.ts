@@ -39,6 +39,6 @@ export interface FfiTables {
 }
 
 export interface FfiFilterOptions {
-  /** Only functions whose names start with this prefix (e.g. "SDL_"). */
-  namePrefix: string;
+  /** Only symbols whose names start with one of these prefixes (e.g. "SDL_"). */
+  namePrefixes: string[];
 }

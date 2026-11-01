@@ -25,7 +25,7 @@ export function collectEnums(
     if (decl.kind === DeclarationKind.ENUM) {
       const e = decl as CEnumDecl;
       const inSource = e.constants.some((c) =>
-        c.name.startsWith(opts.namePrefix)
+        opts.namePrefixes.some((p) => c.name.startsWith(p))
       );
       if (!inSource || e.constants.length === 0) continue;
 
@@ -47,7 +47,7 @@ export function collectEnums(
       if (e.name) {
         enums.push({
           cName: e.name,
-          tsName: pascalCase(stripPrefix(e.name, opts.namePrefix)),
+          tsName: pascalCase(stripPrefix(e.name, opts.namePrefixes)),
           constants,
         });
         pendingAnonymous = null;
@@ -62,7 +62,7 @@ export function collectEnums(
       if (t.tag === "enum" && pendingAnonymous) {
         enums.push({
           cName: t.name,
-          tsName: pascalCase(stripPrefix(t.name, opts.namePrefix)),
+          tsName: pascalCase(stripPrefix(t.name, opts.namePrefixes)),
           constants: pendingAnonymous.constants,
         });
         pendingAnonymous = null;
