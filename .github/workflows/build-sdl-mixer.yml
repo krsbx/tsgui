@@ -1,0 +1,312 @@
+# Build SDL3_mixer from a libsdl-org release tag and publish the shared
+# library as a tsgui release asset — split out of build-sdl.yml so the mixer
+# satellite can carry its own vendoring setup.
+#
+# Trigger: Actions → "Build SDL Mixer" → Run workflow
+#   tag      — SDL_mixer source tag to build, e.g. release-3.2.0
+#   repo     — source repository (default libsdl-org/SDL_mixer)
+#   sdl3_tag — SDL3 tag to link against (each matrix job builds it into a
+#              local prefix first). Blank = newest stable <repo owner>/SDL
+#              release.
+#
+# One run publishes one tsgui release tagged SDL3_mixer-<version> with three
+# assets:
+#
+#   SDL3_mixer_linux.tar.gz   x86_64 ELF soname + soname symlink
+#                             (built on ubuntu-24.04 → glibc ≥ 2.39 at runtime)
+#   SDL3_mixer_macos.tar.gz   universal2 dylib (arm64 + x86_64), keeping the
+#                             default @rpath install name — tsgui pack
+#                             rewrites it into the app bundle
+#   SDL3_mixer_windows.zip    x64 DLL
+#
+# Codecs come from SDL_mixer's external/ submodules and are statically linked
+# (SDLMIXER_VENDORED=ON, SDLMIXER_DEPS_SHARED=OFF) so the library is
+# self-contained. FluidSynth has no vendored copy, so MIDI via FluidSynth is
+# off (SDLMIXER_MIDI_FLUIDSYNTH=OFF); the built-in Timidity path remains.
+# Recheck the target tag's CMakeLists for option names when jumping majors.
+
+name: Build SDL Mixer
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.2.0
+        required: true
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_mixer
+        required: true
+        default: "libsdl-org/SDL_mixer"
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = latest stable release)
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  LIB: SDL3_mixer
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.prep.outputs.version }}
+      release_tag: ${{ steps.prep.outputs.release_tag }}
+      sdl3_repo: ${{ steps.prep.outputs.sdl3_repo }}
+      sdl3_tag: ${{ steps.prep.outputs.sdl3_tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - id: prep
+        env:
+          TAG: ${{ inputs.tag }}
+          REPO: ${{ inputs.repo }}
+          SDL3_TAG_INPUT: ${{ inputs.sdl3_tag }}
+        run: |
+          set -euo pipefail
+
+          # SDL projects tag releases as release-X.Y.Z — fail fast on typos.
+          if [[ ! "$TAG" =~ ^release-[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::tag must look like release-3.2.0, got: $TAG"
+            exit 1
+          fi
+          if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::repo must look like owner/name, got: $REPO"
+            exit 1
+          fi
+
+          # SDL3 comes from the same owner as SDL_mixer, so a fork builds
+          # against its own SDL (owner/SDL_mixer → owner/SDL).
+          sdl3_repo="${REPO%%/*}/SDL"
+
+          if [[ -n "$SDL3_TAG_INPUT" ]]; then
+            sdl3_tag=$SDL3_TAG_INPUT
+          else
+            sdl3_tag=$(gh api "repos/$sdl3_repo/releases?per_page=30" \
+              --jq '[.[] | select(.draft == false and .prerelease == false)][0].tag_name')
+          fi
+
+          version=${TAG#release-}
+          {
+            echo "version=$version"
+            echo "release_tag=$LIB-$version"
+            echo "sdl3_repo=$sdl3_repo"
+            echo "sdl3_tag=$sdl3_tag"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-24.04
+          - platform: macos
+            os: macos-15
+          - platform: windows
+            os: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      OSX_FLAGS: ${{ matrix.platform == 'macos' && '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64' || '' }}
+    steps:
+      # Only libSDL3_mixer ships, so SDL3 itself needs no video/audio backend
+      # headers — just a toolchain. nasm is for the vendored codecs' asm.
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1
+
+      - name: Checkout SDL_mixer source (with vendored dependency submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ inputs.tag }}
+          path: lib-src
+          submodules: recursive
+
+      - name: Checkout SDL3 (link dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.prepare.outputs.sdl3_repo }}
+          ref: ${{ needs.prepare.outputs.sdl3_tag }}
+          path: sdl3-src
+
+      - name: Build + install SDL3 into a local prefix
+        run: |
+          set -euo pipefail
+          cmake -S sdl3-src -B sdl3-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDL_SHARED=ON -DSDL_STATIC=OFF \
+            $OSX_FLAGS
+          cmake --build sdl3-build --config Release --parallel
+          cmake --install sdl3-build --config Release --prefix "$PWD/sdl3-prefix"
+          ls sdl3-prefix/lib
+
+      - name: Configure SDL3_mixer
+        run: |
+          set -euo pipefail
+          cmake -S lib-src -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DSDLMIXER_VENDORED=ON \
+            -DSDLMIXER_DEPS_SHARED=OFF \
+            -DSDLMIXER_MIDI_FLUIDSYNTH=OFF \
+            -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
+            $OSX_FLAGS
+
+      - name: Build + install SDL3_mixer
+        run: |
+          set -euo pipefail
+          cmake --build build --config Release --parallel
+          cmake --install build --config Release --prefix "$PWD/dist"
+
+      - name: Collect shared libraries
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          case "$PLATFORM" in
+            linux)
+              # Real soname files only (symlinks are re-created below).
+              find dist -name "*.so.*" -type f -exec cp {} staging/ \;
+              for f in staging/lib*.so.*; do
+                base=$(basename "$f")
+                soname=$(printf '%s' "$base" | sed -E 's/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/')
+                if [[ "$soname" != "$base" ]]; then
+                  ln -sf "$base" "staging/$soname"
+                fi
+              done
+              ;;
+            macos)
+              # Real dylibs only — the plain .dylib symlink is the dev-link
+              # name; the versioned file matches the install name.
+              find dist -name "*.dylib" -type f -exec cp {} staging/ \;
+              lipo -info staging/*.dylib
+              ;;
+            windows)
+              find dist -name "*.dll" -type f -exec cp {} staging/ \;
+              ;;
+          esac
+          ls -la staging/
+
+      - name: Audit dependencies (fail loud on leaked build-machine paths)
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          # CMake silently ignores unknown -D options, so a stale vendored
+          # flag would quietly link the runner's own codecs. Verify instead.
+          case "$PLATFORM" in
+            macos)
+              if otool -L staging/*.dylib | grep -E '/opt/homebrew|/usr/local/'; then
+                echo "::error::dylib links against Homebrew paths — vendored deps did not engage"
+                exit 1
+              fi
+              otool -L staging/*.dylib
+              ;;
+            linux)
+              # Vendored codecs must not show up as NEEDED entries.
+              for f in staging/lib*.so.*; do
+                [[ -L "$f" ]] && continue
+                echo "== $(basename "$f")"
+                needed=$(readelf -d "$f" | grep NEEDED || true)
+                echo "$needed"
+                if grep -E 'lib(ogg|vorbis|opus|FLAC|mpg123|xmp|wavpack|gme|fluidsynth|modplug)' <<<"$needed"; then
+                  echo "::error::$(basename "$f") links a system dependency — vendored deps did not engage"
+                  exit 1
+                fi
+              done
+              ;;
+            windows)
+              if ls staging/*.dll | grep -viE 'SDL3_mixer\.dll$'; then
+                echo "::warning::extra DLLs in staging — codecs may be shared, not static"
+              fi
+              ;;
+          esac
+
+      - name: Package (${{ matrix.platform }})
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          name="${LIB}_${PLATFORM}"
+          case "$PLATFORM" in
+            windows)
+              powershell -NoProfile -Command \
+                "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
+              ;;
+            *)
+              tar -czf "${name}.tar.gz" -C staging .
+              ;;
+          esac
+          ls -la "${name}".*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-${{ matrix.platform }}
+          path: ${{ env.LIB }}_${{ matrix.platform }}.*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asset-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release ${{ needs.prepare.outputs.release_tag }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          SDL3_TAG: ${{ needs.prepare.outputs.sdl3_tag }}
+          REPO: ${{ inputs.repo }}
+          SOURCE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          cd dist
+          ls -la
+
+          notes=$(cat <<EOF
+          Prebuilt **$LIB $VERSION** shared library, built by tsgui CI from
+          [$REPO @ $SOURCE_TAG](https://github.com/$REPO/tree/$SOURCE_TAG),
+          linked against SDL3 $SDL3_TAG.
+
+          | Asset | Contents |
+          | ----- | -------- |
+          | ${LIB}_linux.tar.gz | x86_64 shared library + soname symlink (ubuntu-24.04 build, glibc >= 2.39) |
+          | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default @rpath install name |
+          | ${LIB}_windows.zip | x64 DLL |
+
+          Audio codecs are statically vendored — the library is a single
+          self-contained file. The macOS dylib keeps the default @rpath
+          install name; tsgui pack rewrites it into the app bundle.
+          EOF
+          )
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG exists — replacing assets"
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber ./*
+          else
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --title "$LIB $VERSION" --notes "$notes" ./*
+          fi
