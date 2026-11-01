@@ -64,10 +64,25 @@ These are flying-pan semantics, preserved faithfully and codified in
 | `measurement.ts` | Child measurement (flow vs absolute + content-fit aggregates) + wrap measurement + justify calculation. Auto-sized containers measure **recursively** — intrinsic size is bottom-up content size (web model), so nested auto containers never collapse |
 | `calculator.ts` | flex-grow distribution and flex-shrink |
 | `utility.ts` | Main-axis clamp + cross-axis fill, fused with totals accumulation |
-| `resolver.ts` | Per-widget intrinsic size: Label/Button via injected `measureText`, Image via props/injected metadata, default from style |
+| `resolver.ts` | Per-widget intrinsic size: Label/Button via injected `measureText` (+ text wrapping, below), Image via props/injected metadata, default from style |
+| `text-wrap.ts` | `wrapText` — greedy word packing with character breaks for overlong words; the per-descriptor frame cache handing wrapped lines to `LayoutNode.textLayout` |
 | `processor/list.ts` | List virtualization + the `widgetLevelLayoutFlex` hook pattern |
 
 Adding a widget-specific processor = one `case` in the hook + one file.
+
+## Text wrapping
+
+Labels follow the web text model (**default on**): when a label's natural
+run is wider than the width available to it — the parent content width,
+intersected with an explicit `maxWidth` — it wraps into lines that fit.
+The wrapped block fills that width; height grows to `lines × lineAdvance`
+(`lineHeight` if set, otherwise the measured single-line height). Lines
+are computed once at measure time, recorded per descriptor in a
+same-frame cache, and attached to the node as `textLayout` — the painter
+draws one run per line and never re-wraps, so lines and measured height
+cannot disagree. `textWrap: TextWrap.NoWrap` opts out to a single
+overflowing run (flying-pan's old behavior). Buttons wrap free — their
+label is a child Label.
 
 ## Style model
 

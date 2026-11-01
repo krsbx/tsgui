@@ -341,6 +341,7 @@ function buildTree(): ReconcilableWidget {
         style: {
           width: 320,
           height: 120,
+          flexDirection: FlexDirection.Column,
           overflow: Overflow.Scroll,
           borderRadius: 8,
           backgroundColor: Palette.surface,

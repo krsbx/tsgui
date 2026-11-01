@@ -150,6 +150,13 @@ runtimes.
       are their own packages, with per-widget painters co-located in
       `@tsgui/widgets` and injected through `PaintContext.painters`.
       Dependencies point strictly downward; see ARCHITECTURE.md.
+- [x] Text wrapping (2026-11-01) — labels wrap to the available width
+      like the web (default on; `textWrap: TextWrap.NoWrap` opts out).
+      Lines are computed at measure time against the parent content
+      width ∩ `maxWidth`, height grows by line count (`lineHeight` is
+      now consumed), and the painter draws one run per line from
+      `node.textLayout` — the first net-new layout capability beyond
+      the flying-pan port.
 
 Foundation work (each item unblocks a widget batch):
 

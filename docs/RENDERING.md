@@ -90,6 +90,11 @@ order: **shadow → border → background → widget content → children**:
   and are injected through `PaintContext.painters` — one file per
   concern, one registry assembly in `widgets/src/painters.ts`.
 
+Labels paint one run per line when layout wrapped them
+(`node.textLayout.lines`, stepped by the recorded `lineAdvance`);
+unwrapped labels are a single run. The wrap itself is layout's job —
+see LAYOUT.md.
+
 ## Text
 
 The SDL3_ttf tier: white glyph runs rendered per unique string
