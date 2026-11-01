@@ -362,7 +362,7 @@ function buildTree(): ReconcilableWidget {
           padding: 20,
           borderRadius: 12,
           backgroundColor: Palette.surface,
-          boxShadow: { x: 0, y: 8, blur: 24, spread: 0, color: "#020617aa" },
+          boxShadow: { x: 0, y: 4, blur: 16, spread: 0, color: "#02061759" },
         },
         children: [
           Label({ text: "Card title" }),

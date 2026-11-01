@@ -9,6 +9,7 @@ import type {
 import { FlexDirection } from "@tsgui/layout";
 import { layoutFlex } from "@tsgui/layout";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
+import { colorWithOpacity, parseColor } from "@tsgui/paint";
 import { paintTree } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
 import {
@@ -202,9 +203,10 @@ describe("label wrap paint", () => {
   test("wrapped label records one text op per line at the line advance", () => {
     // Harness stub: 8px per char, 18px line height. 60px holds 7 chars.
     const frame = renderHeadless(
-      View({ style: { width: 60, height: 60 }, children: [
-        Label({ text: "wrap me please" }),
-      ] }),
+      View({
+        style: { width: 60, height: 60 },
+        children: [Label({ text: "wrap me please" })],
+      }),
       { width: 200, height: 200 }
     );
 
@@ -220,13 +222,64 @@ describe("label wrap paint", () => {
 
   test("fitting labels stay a single text op", () => {
     const frame = renderHeadless(
-      View({ style: { width: 200, height: 60 }, children: [
-        Label({ text: "wrap me please" }),
-      ] }),
+      View({
+        style: { width: 200, height: 60 },
+        children: [Label({ text: "wrap me please" })],
+      }),
       { width: 400, height: 200 }
     );
 
     const textOps = frame.ops.filter((op) => op.op === "text");
     expect(textOps.length).toBe(1);
+  });
+});
+
+describe("box shadow paint", () => {
+  const shadow = { x: 0, y: 4, blur: 16, spread: 0, color: "#02061759" };
+
+  test("layers stack evenly — concentric, faintest ramp, no dark halo", () => {
+    // extent = blur/2 = 8; layers grow 8/6/4/2 around the offset rect.
+    const frame = renderHeadless(
+      View({
+        style: { width: 100, height: 50, boxShadow: shadow },
+      }),
+      { width: 300, height: 300 }
+    );
+
+    const expected = colorWithOpacity(parseColor(shadow.color), 0.25);
+    const layers = frame.ops.filter(
+      (op) => op.op === "rrect" && (op as { color: number }).color === expected
+    ) as Array<{ x: number; y: number; w: number; h: number; radius: number }>;
+
+    expect(layers.length).toBe(4);
+
+    // Outermost first, each strictly smaller.
+    const widths = layers.map((op) => op.w);
+    expect(widths).toEqual([...widths].sort((a, b) => b - a));
+
+    // Even space on both sides of each axis: every layer stays centered
+    // on the offset rect (cx = 50; cy = 25 + offsetY 4) — the "shadow
+    // takes a different amount of space per side" regression.
+    for (const op of layers) {
+      expect(op.x + op.w / 2).toBe(50);
+      expect(op.y + op.h / 2).toBe(29);
+    }
+
+    // The reach matches blur/2: the widest layer extends 8px per side.
+    expect(widths[0]).toBe(100 + 2 * 8);
+  });
+
+  test("no shadow, no shadow ops", () => {
+    const frame = renderHeadless(View({ style: { width: 40, height: 40 } }), {
+      width: 100,
+      height: 100,
+    });
+    const expected = colorWithOpacity(parseColor("#02061759"), 0.25);
+    expect(
+      frame.ops.filter(
+        (op) =>
+          op.op === "rrect" && (op as { color: number }).color === expected
+      ).length
+    ).toBe(0);
   });
 });

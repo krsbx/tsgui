@@ -25,22 +25,32 @@ export function paintShadow(
     ? style.boxShadow
     : [style.boxShadow];
 
+  const layers = 4;
+
   for (const shadow of shadows) {
-    const blur = shadow.blur ?? 0;
-    const spread = shadow.spread ?? 0;
-    const layers = 3;
+    const ox = shadow.x ?? 0;
+    const oy = shadow.y ?? 0;
+    // CSS-ish reach: a blur value extends about half its size beyond the
+    // offset rect (the full blur painted a huge halo that swallowed
+    // neighboring widgets).
+    const extent = (shadow.blur ?? 0) / 2 + (shadow.spread ?? 0);
     const color = parseColor(shadow.color);
 
+    // Outermost first, uniform per-layer alpha: each layer contributes
+    // 1/layers of the color so the stacked composite ramps from faint at
+    // the edge toward the base alpha at the rect instead of the previous
+    // inverted falloff (darkest ring farthest out, ~0.86 composite at
+    // the center). The offset applies fully to every layer — layers stay
+    // concentric with each other, corners grow with the rect.
     for (let i = layers; i >= 1; i--) {
-      const grow = (blur + spread) * (i / layers);
+      const grow = extent * (i / layers);
       gpu.fillRoundedRect({
-        x: rect.x + (shadow.x ?? 0) - grow,
-        y: rect.y + (shadow.y ?? 0) - grow,
+        x: rect.x + ox - grow,
+        y: rect.y + oy - grow,
         w: rect.w + grow * 2,
         h: rect.h + grow * 2,
-        // Layers stay concentric with the source rect's corners.
         radius: (radius ?? 0) + grow,
-        color: colorWithOpacity(color, i / layers),
+        color: colorWithOpacity(color, 1 / layers),
       });
     }
   }
