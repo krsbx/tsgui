@@ -1,60 +1,11 @@
 /** Reconcilable widget trees + interaction contract. */
 import type { LayoutNode, WidgetDescriptor } from "@tsgui/layout";
+import type { KeyModifiers, MouseButton } from "./enums.ts";
 import type { StateStore } from "./state.ts";
 
 export type { LayoutNode };
 
 export type Key = string | number;
-
-/** SDL mouse button codes (SDL_MouseButtonEvent.button). */
-export const MouseButton = {
-  /** No button — moves and hover transitions. */
-  None: 0,
-  Left: 1,
-  Middle: 2,
-  Right: 3,
-  Back: 4,
-  Forward: 5,
-} as const;
-
-export type MouseButton = (typeof MouseButton)[keyof typeof MouseButton];
-
-/**
- * Toolkit keyboard-modifier bitmask — apps translate SDL_KMOD_* (left and
- * right variants collapse; Command maps to Meta on darwin).
- */
-export const KeyModifiers = {
-  None: 0,
-  Shift: 1,
-  Control: 2,
-  Meta: 4,
-} as const;
-
-export type KeyModifiers = (typeof KeyModifiers)[keyof typeof KeyModifiers];
-
-/**
- * SDL keycodes the toolkit interprets (SDL_KeyboardEvent.key). Letters
- * are lowercase ASCII — SDL letter keycodes are not shift-affected.
- */
-export const KeyCode = {
-  Backspace: 8, // '\b'
-  Tab: 9, // '\t'
-  Enter: 13, // '\r'
-  Space: 32, // ' '
-  Delete: 127, // '\x7F'
-  Home: 0x4000004a,
-  End: 0x4000004d,
-  Right: 0x4000004f,
-  Left: 0x40000050,
-  Down: 0x40000051,
-  Up: 0x40000052,
-  A: 97,
-  C: 99,
-  V: 118,
-  X: 120,
-} as const;
-
-export type KeyCode = (typeof KeyCode)[keyof typeof KeyCode];
 
 /** Payload carried by every pointer handler. */
 export interface PointerPayload {
@@ -161,9 +112,4 @@ export interface ReconciledNode {
   widget: ReconcilableWidget;
   stableId: number;
   children: ReconciledNode[];
-}
-
-/** Typed view of a descriptor's props bag — one cast site for the codebase. */
-export function propsOf<T extends object>(widget: WidgetDescriptor): T {
-  return widget.props as T;
 }

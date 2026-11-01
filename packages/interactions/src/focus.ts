@@ -16,13 +16,9 @@ import {
   type ReconcilableWidget,
 } from "@tsgui/core";
 import { type LayoutNode, WidgetType } from "@tsgui/layout";
+import { KeyboardInputKind, PointerInputKind } from "./enums.ts";
 import { hitTest } from "./hit-test.ts";
-import {
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  type PointerInputEvent,
-  PointerInputKind,
-} from "./types.ts";
+import { type KeyboardInputEvent, type PointerInputEvent } from "./types.ts";
 
 /** Blur/focus payloads are built inline; the handlers define the shape. */
 type Widget = ReconcilableWidget;

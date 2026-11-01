@@ -11,7 +11,7 @@ unused vars, formatting); the rest is review discipline.
   `bun:ffi` on Bun, `node:ffi` (Node ≥ 26.9) on Node. No N-API addons, no
   build step; `libtsgui` is permanently retired (see PLATFORM.md).
 - **Both runtimes, always.** A feature isn't done until its selftest passes
-  on Bun *and* Node. Node strips types only — no parameter properties
+  on Bun _and_ Node. Node strips types only — no parameter properties
   (`constructor(private x)` is rejected at runtime), no TS `enum` values,
   nothing else that needs real codegen.
 - **flying-pan is the spec.** Port its patterns (per-widget modules, paint
@@ -27,6 +27,15 @@ unused vars, formatting); the rest is review discipline.
   reference the enum type (`textAlign?: TextAlign`), never the literal
   union. This has been corrected three separate times; assume any new
   `| "…"` union is a bug.
+- **Enums and functions live in runtime modules; types-only files carry
+  no runtime code.** Each package keeps its closed sets in `enums.ts`
+  (or the runtime module that owns them — a widget's domain enum sits
+  with its logic, design tokens in `design.ts`). A `types.ts` exports
+  interfaces and type aliases only — no `export const` enums, no
+  helpers (`propsOf` lives in `props.ts`, `rgba` in gpu's `color.ts`).
+  Generated code is exempt. When adding an enum, check it isn't already
+  exported by another package or by the generated bindings — names are
+  global through the barrels and the root re-export.
 - **Named, reusable types — no inline object literals in signatures.**
   Define `interface FooOptions`; extend shared bases so types compose
   (`RectOptions extends Rect`, `RoundedRectOptions extends RectOptions`).

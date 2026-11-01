@@ -1,16 +1,8 @@
 /** Interaction contracts — ported from flying-pan's flying/interactions. */
 import type { KeyModifiers, MouseButton } from "@tsgui/core";
+import type { KeyboardInputKind, PointerInputKind } from "./enums.ts";
 
 /** Decoded input-device pointer events, fed to the dispatcher per frame. */
-export const PointerInputKind = {
-  Move: "move",
-  Down: "down",
-  Up: "up",
-} as const;
-
-export type PointerInputKind =
-  (typeof PointerInputKind)[keyof typeof PointerInputKind];
-
 export interface PointerInputEvent {
   kind: PointerInputKind;
   x: number;
@@ -20,17 +12,6 @@ export interface PointerInputEvent {
 }
 
 /** Decoded keyboard events, fed to the focus dispatcher per frame. */
-export const KeyboardInputKind = {
-  KeyDown: "keydown",
-  KeyUp: "keyup",
-  /** SDL_EVENT_TEXT_INPUT — `text` carries the decoded UTF-8. */
-  Char: "char",
-} as const;
-
-export type KeyboardInputKind =
-  (typeof KeyboardInputKind)[keyof typeof KeyboardInputKind];
-
-/** Decoded wheel events, fed to the scroll dispatcher per frame. */
 export interface WheelInputEvent {
   /** Horizontal scroll delta, positive right. */
   scrollX: number;

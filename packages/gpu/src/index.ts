@@ -12,3 +12,4 @@ export { GpuRenderer } from "./renderer.ts";
 export { type TextDrawOptions, TtfFont } from "./text.ts";
 export { createTextureFromPixels, destroyTexture } from "./textures.ts";
 export * from "./types.ts";
+export * from "./color.ts";

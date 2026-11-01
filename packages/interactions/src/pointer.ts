@@ -13,8 +13,9 @@ import type { InteractionStates } from "@tsgui/core";
 import type { PointerPayload, ReconcilableWidget } from "@tsgui/core";
 import { MouseButton } from "@tsgui/core";
 import type { LayoutNode } from "@tsgui/layout";
+import { PointerInputKind } from "./enums.ts";
 import { hitTest } from "./hit-test.ts";
-import { type PointerInputEvent, PointerInputKind } from "./types.ts";
+import { type PointerInputEvent } from "./types.ts";
 
 const DOUBLE_CLICK_MS = 500;
 

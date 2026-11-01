@@ -6,15 +6,14 @@
  * coasting), plus the hit-test they share. Pure TypeScript — headless-
  * testable, never touch SDL; contracts come from @tsgui/core.
  */
+export * from "./enums.ts";
 export { hitTest, type HitTestOptions } from "./hit-test.ts";
 export { PointerDispatcher, type PointerDispatchOptions } from "./pointer.ts";
 export {
   type KeyboardInputEvent,
-  KeyboardInputKind,
   type PointerInputEvent,
-  PointerInputKind,
+  type WheelInputEvent,
 } from "./types.ts";
-export { type WheelInputEvent } from "./types.ts";
 export { FocusDispatcher, type FocusDispatchOptions } from "./focus.ts";
 export {
   measureContent,
