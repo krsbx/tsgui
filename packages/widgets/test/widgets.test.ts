@@ -11,7 +11,13 @@ import { layoutFlex } from "@tsgui/layout";
 import type { LayoutContext, LayoutNode } from "@tsgui/layout";
 import { paintTree } from "@tsgui/paint";
 import { describe, expect, test } from "bun:test";
-import { Label, Reconciler, View, widgetPainters } from "../src/index.ts";
+import {
+  Label,
+  Reconciler,
+  renderHeadless,
+  View,
+  widgetPainters,
+} from "../src/index.ts";
 
 // ————— reconciler —————
 
@@ -189,5 +195,38 @@ describe("pipeline", () => {
       w: 100,
       h: 50,
     });
+  });
+});
+
+describe("label wrap paint", () => {
+  test("wrapped label records one text op per line at the line advance", () => {
+    // Harness stub: 8px per char, 18px line height. 60px holds 7 chars.
+    const frame = renderHeadless(
+      View({ style: { width: 60, height: 60 }, children: [
+        Label({ text: "wrap me please" }),
+      ] }),
+      { width: 200, height: 200 }
+    );
+
+    const textOps = frame.ops.filter((op) => op.op === "text") as Array<{
+      x: number;
+      y: number;
+      text: string;
+    }>;
+
+    expect(textOps.map((op) => op.text)).toEqual(["wrap me", "please"]);
+    expect(textOps[1]!.y).toBe(textOps[0]!.y + 18);
+  });
+
+  test("fitting labels stay a single text op", () => {
+    const frame = renderHeadless(
+      View({ style: { width: 200, height: 60 }, children: [
+        Label({ text: "wrap me please" }),
+      ] }),
+      { width: 400, height: 200 }
+    );
+
+    const textOps = frame.ops.filter((op) => op.op === "text");
+    expect(textOps.length).toBe(1);
   });
 });

@@ -67,15 +67,29 @@ export function paintInlineValueLabel(
   });
 }
 
-/** Label painter — the walk's text case, registered per widget type. */
+/**
+ * Label painter — the walk's text case, registered per widget type.
+ * Wrapped labels (layout recorded node.textLayout) draw one run per
+ * line at the line advance; unwrapped labels draw a single run.
+ */
 export const paintLabel: WidgetPainter = (ctx, node, style) => {
   const text = node.widget.props["text"];
   if (typeof text !== "string") return;
 
-  ctx.font.draw(ctx.gpu, {
-    x: node.screenX,
-    y: node.screenY,
-    text,
-    tint: parseColor((style as { color?: string }).color ?? Palette.text),
-  });
+  const tint = parseColor((style as { color?: string }).color ?? Palette.text);
+
+  if (node.textLayout) {
+    const { lines, lineAdvance } = node.textLayout;
+    for (const [i, line] of lines.entries()) {
+      ctx.font.draw(ctx.gpu, {
+        x: node.screenX,
+        y: node.screenY + i * lineAdvance,
+        text: line,
+        tint,
+      });
+    }
+    return;
+  }
+
+  ctx.font.draw(ctx.gpu, { x: node.screenX, y: node.screenY, text, tint });
 };
