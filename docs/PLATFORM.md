@@ -68,13 +68,13 @@ reach JS.
 
 A from-scratch toolkit cannot avoid owning an OS boundary — windowing,
 events, input, audio must be talked to in ~1–2k lines of C somewhere, in
-every architecture. The wrapper is not that cost; it is the *containment*
+every architecture. The wrapper is not that cost; it is the _containment_
 of that cost:
 
 - **Ours:** one file — event mapping switch, handle registry, init/quit,
   the render path (our logic, SDL's API).
 - **SDL's:** platform quirks (Wayland/X11/Win32/Cocoa), the entire GPU
-  backend layer (SDL_GPU *is* the Metal/D3D12/Vulkan backend — zero backend
+  backend layer (SDL_GPU _is_ the Metal/D3D12/Vulkan backend — zero backend
   code of ours), audio devices, DPI, input edge cases.
 
 Binding SDL (or GLFW) directly from JS — the flying-pan model — does not
@@ -104,7 +104,7 @@ every library choice.
 
 What we give up vs the earlier curated-only design: SDL's API shape is
 visible to app code that chooses the hardcore tiers. What we keep: the
-*toolkit's* own layers sit in `@tsgui/gpu` and `@tsgui/widgets` as plain
+_toolkit's_ own layers sit in `@tsgui/gpu` and `@tsgui/widgets` as plain
 TypeScript — a future platform swap is table regeneration plus one TS
 module.
 

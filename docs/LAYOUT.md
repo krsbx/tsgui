@@ -38,7 +38,7 @@ These are flying-pan semantics, preserved faithfully and codified in
 
 - **Child x/y accumulate the parent's position.** `positionFlowChildren`
   calls `layoutFlex` with `x: parent.x + childX`, so a child's stored `x`
-  is the parent's absolute x plus its relative offset — *excluding* scroll.
+  is the parent's absolute x plus its relative offset — _excluding_ scroll.
 - **`screenX`/`screenY` add ancestor scroll.** Threaded via
   `scrollAccumulated` through flow/wrap/absolute during `layoutFlex`, not a
   separate post-pass. Read these for pointer hit-testing and clipping;
@@ -55,18 +55,18 @@ These are flying-pan semantics, preserved faithfully and codified in
 
 ## Engine map
 
-| File | Job |
-|---|---|
-| `layout.ts` | `layoutFlex` — resolve dims → content box → register node → processor hook → measure children → content-fit → flow/wrap/absolute |
-| `flow.ts` | Positions flow children along the main axis (justify/align/flex-grow), recursing via `layoutFlex` |
-| `wrap.ts` | Line breaking + per-line layout for `flexWrap: wrap` |
-| `absolute.ts` | `left`/`top`/`right`/`bottom` positioning against the padding box |
-| `measurement.ts` | Child measurement (flow vs absolute + content-fit aggregates) + wrap measurement + justify calculation. Auto-sized containers measure **recursively** — intrinsic size is bottom-up content size (web model), so nested auto containers never collapse |
-| `calculator.ts` | flex-grow distribution and flex-shrink |
-| `utility.ts` | Main-axis clamp + cross-axis fill, fused with totals accumulation |
-| `resolver.ts` | Per-widget intrinsic size: Label/Button via injected `measureText` (+ text wrapping, below), Image via props/injected metadata, default from style |
-| `text-wrap.ts` | `wrapText` — greedy word packing with character breaks for overlong words; the per-descriptor frame cache handing wrapped lines to `LayoutNode.textLayout` |
-| `processor/list.ts` | List virtualization + the `widgetLevelLayoutFlex` hook pattern |
+| File                | Job                                                                                                                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `layout.ts`         | `layoutFlex` — resolve dims → content box → register node → processor hook → measure children → content-fit → flow/wrap/absolute                                                                                                                       |
+| `flow.ts`           | Positions flow children along the main axis (justify/align/flex-grow), recursing via `layoutFlex`                                                                                                                                                      |
+| `wrap.ts`           | Line breaking + per-line layout for `flexWrap: wrap`                                                                                                                                                                                                   |
+| `absolute.ts`       | `left`/`top`/`right`/`bottom` positioning against the padding box                                                                                                                                                                                      |
+| `measurement.ts`    | Child measurement (flow vs absolute + content-fit aggregates) + wrap measurement + justify calculation. Auto-sized containers measure **recursively** — intrinsic size is bottom-up content size (web model), so nested auto containers never collapse |
+| `calculator.ts`     | flex-grow distribution and flex-shrink                                                                                                                                                                                                                 |
+| `utility.ts`        | Main-axis clamp + cross-axis fill, fused with totals accumulation                                                                                                                                                                                      |
+| `resolver.ts`       | Per-widget intrinsic size: Label/Button via injected `measureText` (+ text wrapping, below), Image via props/injected metadata, default from style                                                                                                     |
+| `text-wrap.ts`      | `wrapText` — greedy word packing with character breaks for overlong words; the per-descriptor frame cache handing wrapped lines to `LayoutNode.textLayout`                                                                                             |
+| `processor/list.ts` | List virtualization + the `widgetLevelLayoutFlex` hook pattern                                                                                                                                                                                         |
 
 Adding a widget-specific processor = one `case` in the hook + one file.
 
