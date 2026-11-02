@@ -41,7 +41,7 @@ export interface LayoutContext {
   /** Committed scroll offset of a scrollable node (previous frame). */
   scrollOffsetOf(node: LayoutNode): Coordinate2D;
   /** Intrinsic text measurement — ttf tier in production, stubs in tests. */
-  measureText(text: string, style: unknown): Size;
+  measureText(text: string, style: unknown, fontName?: string): Size;
   /** Intrinsic image size from decoded metadata (null = unknown). */
   getImageSize(src: string): Size | null;
 }

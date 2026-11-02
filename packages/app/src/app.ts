@@ -7,6 +7,7 @@
  * render every frame, unlike flying-pan's active-window-only pass).
  */
 import { sdl, SdlDefines } from "@tsgui/bindings";
+import { type FontDescriptor, FontManager } from "@tsgui/fonts";
 import { type DecodedEvents, EventDecoder } from "./events.ts";
 import { AppWindow, type AppWindowOptions, type RGBA } from "./window.ts";
 
@@ -18,6 +19,12 @@ export interface AppOptions {
   height: number;
   /** Root window frame clear color. */
   backgroundColor?: RGBA;
+  /**
+   * Named fonts for every window — "default" is the font widgets
+   * render in unless they name another. Unspecified → built-in
+   * fallback font.
+   */
+  fonts?: Record<string, FontDescriptor>;
   /** Esc closes the app. Default true (the examples' behavior). */
   quitOnEscape?: boolean;
 }
@@ -27,6 +34,7 @@ export class App {
   public readonly root: AppWindow;
 
   private readonly windows = new Map<number, AppWindow>();
+  private readonly fontManager: FontManager;
   private readonly pendingDestroy: AppWindow[] = [];
   private readonly decoder = new EventDecoder();
   private readonly quitOnEscape: boolean;
@@ -35,6 +43,7 @@ export class App {
 
   public constructor(options: AppOptions) {
     this.quitOnEscape = options.quitOnEscape ?? true;
+    this.fontManager = new FontManager(options.fonts);
 
     if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
       throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
@@ -58,7 +67,7 @@ export class App {
     return [...this.windows.values()];
   }
 
-  public createWindow(options: AppWindowOptions): AppWindow {
+  public createWindow(options: Omit<AppWindowOptions, "fonts">): AppWindow {
     const handle = sdl.SDL_CreateWindow({
       title: options.title,
       w: options.width,
@@ -67,7 +76,7 @@ export class App {
     });
     if (!handle) throw new Error(`SDL_CreateWindow: ${sdl.SDL_GetError()}`);
 
-    const window = new AppWindow(options, handle);
+    const window = new AppWindow(options, handle, this.fontManager);
     this.windows.set(window.id, window);
     return window;
   }

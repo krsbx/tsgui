@@ -14,6 +14,7 @@ import {
   type ReconciledNode,
   StateStore,
 } from "@tsgui/core";
+import { type FontManager, type WindowFonts } from "@tsgui/fonts";
 import { GpuRenderer, TtfFont, type WindowHandle } from "@tsgui/gpu";
 import {
   FocusDispatcher,
@@ -26,18 +27,6 @@ import {
 import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
 import { paintTree } from "@tsgui/paint";
 import { Reconciler, widgetPainters } from "@tsgui/widgets";
-
-const FONT_POINT_SIZE = 18;
-
-/** Default font — overridable with TSGUI_FONT_PATH. */
-function fontPath(): string {
-  const fromEnv = process.env.TSGUI_FONT_PATH;
-  if (fromEnv) return fromEnv;
-  if (process.platform === "darwin") {
-    return "/System/Library/Fonts/Supplemental/Arial.ttf";
-  }
-  return "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
-}
 
 export interface RGBA {
   r: number;
@@ -71,6 +60,8 @@ export class AppWindow {
   public root: LayoutNode | null = null;
 
   public readonly renderer: GpuRenderer;
+  public readonly fonts: WindowFonts;
+  /** The default font — alias of fonts.default. */
   public readonly font: TtfFont;
   public readonly stateStore = new StateStore();
   public readonly reconciler = new Reconciler(this.stateStore);
@@ -86,7 +77,11 @@ export class AppWindow {
   private readonly posX = new Int32Array(1);
   private readonly posY = new Int32Array(1);
 
-  public constructor(options: AppWindowOptions, handle: WindowHandle) {
+  public constructor(
+    options: AppWindowOptions,
+    handle: WindowHandle,
+    fontManager: FontManager
+  ) {
     this.handle = handle;
     this.title = options.title;
     this.id = sdl.SDL_GetWindowID({ window: handle });
@@ -95,18 +90,20 @@ export class AppWindow {
 
     if (options.backgroundColor)
       this.renderer.clearColor = options.backgroundColor;
-    this.font = new TtfFont(
-      this.renderer.renderer,
-      fontPath(),
-      FONT_POINT_SIZE
-    );
+    this.fonts = fontManager.materialize(this.renderer.renderer);
+    this.font = this.fonts.default;
 
     this.layoutCtx = {
       layoutIndex: this.layoutIndex,
       focusableNodes: [],
       scrollOffsetOf: (node) => this.scroll.offset(node),
       getStableId: this.reconciler.getStableId,
-      measureText: (text) => this.font.measure(text),
+      // Named fonts resolve through the window's font set — label
+      // layout and label paint measure the same font.
+      measureText: (text, _style, fontName) =>
+        fontName
+          ? this.fonts.get(fontName).measure(text)
+          : this.fonts.default.measure(text),
       getImageSize: () => null,
     };
 
@@ -216,7 +213,7 @@ export class AppWindow {
   public destroy(): void {
     if (this.tornDown) return;
     this.tornDown = true;
-    this.font.destroy();
+    this.fonts.destroy();
     this.renderer.destroy();
     sdl.SDL_DestroyWindow({ window: this.handle });
   }

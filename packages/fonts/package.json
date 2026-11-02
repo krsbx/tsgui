@@ -1,0 +1,16 @@
+{
+  "name": "@tsgui/fonts",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@tsgui/gpu": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.6.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

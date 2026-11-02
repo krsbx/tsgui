@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@tsgui/animation": "workspace:*",
+    "@tsgui/fonts": "workspace:*",
     "@tsgui/bindings": "workspace:*",
     "@tsgui/core": "workspace:*",
     "@tsgui/gpu": "workspace:*",

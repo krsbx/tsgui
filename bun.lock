@@ -14,6 +14,7 @@
         "@tsgui/app": "workspace:*",
         "@tsgui/bindings": "workspace:*",
         "@tsgui/core": "workspace:*",
+        "@tsgui/fonts": "workspace:*",
         "@tsgui/gpu": "workspace:*",
         "@tsgui/interactions": "workspace:*",
         "@tsgui/layout": "workspace:*",
@@ -52,6 +53,7 @@
         "@tsgui/animation": "workspace:*",
         "@tsgui/bindings": "workspace:*",
         "@tsgui/core": "workspace:*",
+        "@tsgui/fonts": "workspace:*",
         "@tsgui/gpu": "workspace:*",
         "@tsgui/interactions": "workspace:*",
         "@tsgui/layout": "workspace:*",
@@ -76,6 +78,17 @@
       "version": "0.0.1",
       "dependencies": {
         "@tsgui/layout": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
+    "packages/fonts": {
+      "name": "@tsgui/fonts",
+      "version": "0.0.1",
+      "dependencies": {
+        "@tsgui/gpu": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -148,6 +161,14 @@
       "bin": {
         "tsgui-codegen": "./src/index.ts",
       },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
+    "tools/devtools": {
+      "name": "@tsgui/devtools",
+      "version": "0.0.1",
       "devDependencies": {
         "@types/bun": "latest",
         "@types/node": "^26.6.6",
@@ -286,6 +307,10 @@
     "@tsgui/codegen": ["@tsgui/codegen@workspace:tools/codegen"],
 
     "@tsgui/core": ["@tsgui/core@workspace:packages/core"],
+
+    "@tsgui/devtools": ["@tsgui/devtools@workspace:tools/devtools"],
+
+    "@tsgui/fonts": ["@tsgui/fonts@workspace:packages/fonts"],
 
     "@tsgui/gpu": ["@tsgui/gpu@workspace:packages/gpu"],
 
