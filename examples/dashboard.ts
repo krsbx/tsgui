@@ -35,6 +35,7 @@ import {
   Radio,
   RadioGroup,
   SliderBar,
+  TextArea,
   TextInput,
   Toggle,
   View,
@@ -58,6 +59,7 @@ const state = {
   checkboxChecked: false,
   toggleOn: false,
   textInputValue: "",
+  notes: "tsgui notes:\n- zero C\n- multi-window",
   flavor: "mint",
 };
 
@@ -128,12 +130,35 @@ function buildDashboard(app: App): ReconcilableWidget {
       TextInput({
         value: state.textInputValue,
         placeholder: "Type something...",
+        measureText: (text) => app.root.font.measure(text).width,
         onChange: (text) => {
           state.textInputValue = text;
         },
         style: {
           width: "100%",
           height: 48,
+          backgroundColor: SURFACE,
+          borderColor: ACCENT,
+          borderWidth: 2,
+          borderRadius: 4,
+          color: TEXT,
+          placeholderColor: "#555555",
+          _focus: { borderColor: "#ffffff" },
+          transition: { property: "borderColor", duration: 200 },
+        },
+      }),
+
+      TextArea({
+        value: state.notes,
+        placeholder: "Notes...",
+        measureText: (text) => app.root.font.measure(text).width,
+        onChange: (text) => {
+          state.notes = text;
+        },
+        style: {
+          width: "100%",
+          height: 96,
+          lineHeight: 22,
           backgroundColor: SURFACE,
           borderColor: ACCENT,
           borderWidth: 2,
@@ -325,6 +350,12 @@ function buildDetails(win: AppWindow): ReconcilableWidget {
       }),
 
       Label({ text: `Text: ${input}`, style: { color: TEXT } }),
+      Label({
+        // Newlines render as spaces in a single label — make the live
+        // line breaks visible in the readout.
+        text: `Notes: ${state.notes.replaceAll("\n", " ⏎ ")}`,
+        style: { color: TEXT, width: "100%" },
+      }),
       Label({
         text: `Checkbox: ${state.checkboxChecked ? "on" : "off"}`,
         style: { color: TEXT },
