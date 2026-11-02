@@ -204,13 +204,14 @@ Widget parity batches — each batch lands when its capability exists, not
 before (a widget painted without its input path is the hand-wired glue
 the dispatcher exists to replace):
 
-| Batch | Widgets                                     | Needs                                                                                                                    | Status                                                                                                                                  |
-| ----- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | `ProgressBar`, `CircularProgress`, `Meter`  | paint only                                                                                                               | ✅ Phase 3.5 (2026-10-31)                                                                                                               |
-| 2     | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state                                                                                | ✅ (2026-10-31)                                                                                                                         |
-| 3     | `SliderBar`, `CircularSlider`               | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels                                           | ✅ (2026-10-31)                                                                                                                         |
-| 4     | `TextInput`                                 | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan | ✅ (2026-11-01) — clipboard wired via the injectable seam; vertical `TextArea` is a post-parity addition built on the same editing core |
-| 5     | `Canvas`, `Custom` painter                  | CanvasContext + Path2D/tessellation port                                                                                 | phase 5                                                                                                                                 |
+| Batch | Widgets                                     | Needs                                                                                                                                     | Status                                                    |
+| ----- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1     | `ProgressBar`, `CircularProgress`, `Meter`  | paint only                                                                                                                                | ✅ Phase 3.5 (2026-10-31)                                 |
+| 2     | `Checkbox`, `Toggle`, `Radio`, `RadioGroup` | click dispatch + controlled checked state                                                                                                 | ✅ (2026-10-31)                                           |
+| 3     | `SliderBar`, `CircularSlider`               | pointer drag (press capture, move tracking, value mapping) + ticks/tick labels                                                            | ✅ (2026-10-31)                                           |
+| 4     | `TextInput`                                 | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan                  | ✅ (2026-11-01) — clipboard wired via the injectable seam |
+| 4.5   | `TextArea` (net-new — flying-pan has none)  | shared editing core + text wrap + font prop; Enter keydown, visual-line Up/Down with goal column, y-position click mapping, scroll-follow | ✅ (2026-11-02) — dashboard notes demo                    |
+| 5     | `Canvas`, `Custom` painter                  | CanvasContext + Path2D/tessellation port                                                                                                  | phase 5                                                   |
 
 Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
 enums); `List` (virtualized — `listLayoutFlex` already ported) and a
@@ -256,5 +257,5 @@ click a widget, see why.
 | IME / HarfBuzz shaping      | HarfBuzz is a dependency and a half; UTF-8 simple text covers v1 apps.                |
 | Vulkan/Metal/D3D12 backends | Come free via SDL_GPU from phase 1 — nothing deferred.                                |
 | wgpu / Dawn                 | Only if SDL_GPU ever hits a wall (see PLATFORM.md).                                   |
-| Multi-window                | flying-pan has it; port in phase 4 — cheap once the ABI takes a window handle.        |
+| ~~Multi-window~~            | ✅ Landed 2026-11-01 (`@tsgui/app`) — struck from this list.                          |
 | GPU-instanced text          | Only if the atlas-quads model misses 60fps targets.                                   |

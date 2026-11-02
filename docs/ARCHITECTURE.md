@@ -26,9 +26,10 @@ packages/
                                      Painter/TextPainter surfaces, style
                                      resolution, fill/shape/shadow primitives.
                                      Pure TS.
-  widgets/      @tsgui/widgets       Widget factories, reconciler, per-widget
-                                     painters (co-located with each widget),
-                                     painter registry, headless harness. Pure TS.
+  widgets/      @tsgui/widgets       Widget factories (incl. net-new TextArea),
+                                     reconciler, per-widget painters (co-located
+                                     with each widget), painter registry,
+                                     headless harness. Pure TS.
   app/          @tsgui/app           The application shell: multi-window App
                                      (SDL init, window registry, event decode
                                      + window routing, the run loop) and the
