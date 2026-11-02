@@ -7,15 +7,20 @@ import { createWidget } from "../create-widget.ts";
 
 export interface LabelProps extends BaseWidgetProps {
   text: string;
+  /** Named font registered with the app's font manager. */
+  font?: string;
   style?: TextStyle;
 }
 
 export function Label(props: LabelProps): ReconcilableWidget {
-  const { text, style, key, ...handlers } = props;
+  const { text, font, style, key, ...handlers } = props;
 
   return createWidget({
     type: WidgetType.Label,
-    props: { text },
+    // font must reach the props bag — the paint walk and the layout
+    // resolver both read it to resolve the named font (factory rule:
+    // props painters/resolvers read are forwarded here).
+    props: { text, font },
     style: {
       // Labels never intercept the pointer — hit-tests fall through.
       pointerEvents: PointerEvents.None,

@@ -71,6 +71,13 @@ export interface PaintContext {
   font: TextPainter;
   /** Per-node interaction flags — production wires the dispatchers. */
   statesOf?(node: LayoutNode): InteractionStates;
+  /**
+   * Named-font lookup — resolves a widget's `font` prop to its
+   * TextPainter. Implementations may throw on unknown names
+   * (fail-loud) or return undefined (fall back to `font`). Absent →
+   * every widget renders in `font`.
+   */
+  fonts?: (name: string) => TextPainter | undefined;
   /** The app's state store — uncontrolled widgets resolve values here. */
   stateStore?: StateStore;
   /** Per-widget painters — widget-specific content painting. */

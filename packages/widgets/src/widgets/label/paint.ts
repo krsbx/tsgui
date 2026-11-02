@@ -70,18 +70,27 @@ export function paintInlineValueLabel(
 /**
  * Label painter — the walk's text case, registered per widget type.
  * Wrapped labels (layout recorded node.textLayout) draw one run per
- * line at the line advance; unwrapped labels draw a single run.
+ * line at the line advance; unwrapped labels draw a single run. A
+ * `font` prop resolves through the context lookup — absent lookup
+ * falls back to the default font (headless compat); a present lookup
+ * with an unknown name fails loud (flying-pan semantics).
  */
 export const paintLabel: WidgetPainter = (ctx, node, style) => {
   const text = node.widget.props["text"];
   if (typeof text !== "string") return;
+
+  const fontProp = node.widget.props["font"];
+  const font =
+    typeof fontProp === "string"
+      ? (ctx.fonts?.(fontProp) ?? ctx.font)
+      : ctx.font;
 
   const tint = parseColor((style as { color?: string }).color ?? Palette.text);
 
   if (node.textLayout) {
     const { lines, lineAdvance } = node.textLayout;
     for (const [i, line] of lines.entries()) {
-      ctx.font.draw(ctx.gpu, {
+      font.draw(ctx.gpu, {
         x: node.screenX,
         y: node.screenY + i * lineAdvance,
         text: line,
@@ -91,5 +100,5 @@ export const paintLabel: WidgetPainter = (ctx, node, style) => {
     return;
   }
 
-  ctx.font.draw(ctx.gpu, { x: node.screenX, y: node.screenY, text, tint });
+  font.draw(ctx.gpu, { x: node.screenX, y: node.screenY, text, tint });
 };

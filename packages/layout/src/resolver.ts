@@ -110,7 +110,11 @@ function resolveLabelSize(options: {
   // Label style is a TextStyle (textWrap/lineHeight); the descriptor's
   // ViewStyle typing is the generic container view.
   const style = (widget.style ?? {}) as TextStyle;
-  const measured = ctx.measureText(text, style);
+  const fontName =
+    typeof widget.props["font"] === "string"
+      ? (widget.props["font"] as string)
+      : undefined;
+  const measured = ctx.measureText(text, style, fontName);
   // Dimensions the caller left unset are intrinsic — measurement fills
   // them; explicit style.width/height always win.
   const widthIsIntrinsic = size.width === 0;
@@ -136,7 +140,7 @@ function resolveLabelSize(options: {
   const lines = wrapText({
     text,
     maxWidth: constraint,
-    measure: (candidate) => ctx.measureText(candidate, style).width,
+    measure: (candidate) => ctx.measureText(candidate, style, fontName).width,
   });
 
   if (widthIsIntrinsic) size.width = constraint;
