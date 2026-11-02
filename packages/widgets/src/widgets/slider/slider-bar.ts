@@ -9,6 +9,7 @@ import {
 import {
   paintBackground,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
 } from "@tsgui/paint";
 import { paintInlineValueLabel } from "../label/paint.ts";
@@ -100,7 +101,7 @@ export const paintSliderBar: WidgetPainter = (ctx, node) => {
   // Handle — a bordered disc centered on the value's position.
   paintSliderHandle(ctx, handleX, handleY, handleStyle as never);
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

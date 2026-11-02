@@ -193,6 +193,19 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
   }
 }
 
+/**
+ * Resolve the font a widget renders in: a `font` prop naming a font
+ * from `PaintContext.fonts`, else the default font. One helper so
+ * every painter resolves identically — a named font that the lookup
+ * rejects propagates the error (fail-loud), and no lookup falls back
+ * to the default font (headless compat).
+ */
+export function resolveFont(ctx: PaintContext, node: LayoutNode): TextPainter {
+  const font = node.widget.props["font"];
+  if (typeof font !== "string") return ctx.font;
+  return ctx.fonts?.(font) ?? ctx.font;
+}
+
 /** Paint a laid-out tree in pre-order. */
 export function paintTree(ctx: PaintContext, root: LayoutNode): void {
   paintNode(ctx, root);

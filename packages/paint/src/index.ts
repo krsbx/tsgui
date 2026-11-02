@@ -13,6 +13,7 @@ export {
   parseColor,
   type PaintContext,
   type Painter,
+  resolveFont,
   resolveStyle,
   type TextPainter,
   type WidgetPainter,

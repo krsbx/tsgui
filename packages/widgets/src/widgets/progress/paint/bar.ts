@@ -10,6 +10,7 @@ import {
   paintContinuousFill,
   paintSteppedFill,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
 } from "@tsgui/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
@@ -108,7 +109,7 @@ export const paintProgressBar: WidgetPainter = (ctx, node) => {
     });
   }
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

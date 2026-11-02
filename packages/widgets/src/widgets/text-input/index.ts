@@ -60,6 +60,8 @@ export interface TextInputStateStyle extends ViewStyle {
 export interface TextInputProps extends BaseWidgetProps {
   /** Controlled text — wins over defaultValue. */
   value?: string;
+  /** Named font registered with the app's font manager. */
+  font?: string;
   /** Uncontrolled initial text. */
   defaultValue?: string;
   onChange?(value: string): void;
@@ -85,6 +87,7 @@ export interface TextInputProps extends BaseWidgetProps {
 export function TextInput(props: TextInputProps): ReconcilableWidget {
   const {
     value,
+    font,
     onChange,
     placeholder,
     disabled,
@@ -138,6 +141,7 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
       disabled,
       // Painter parity with the handlers — see TextArea.
       measureText,
+      font,
     },
     style: {
       padding: Metrics.defaultPadding,

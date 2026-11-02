@@ -7,6 +7,7 @@ import {
   type TextPainter,
   type WidgetPainter,
 } from "@tsgui/paint";
+import { resolveFont } from "@tsgui/paint";
 
 /** Auto label from a value; `null` when there's nothing to show. */
 export function formatValueLabel(options: {
@@ -79,11 +80,7 @@ export const paintLabel: WidgetPainter = (ctx, node, style) => {
   const text = node.widget.props["text"];
   if (typeof text !== "string") return;
 
-  const fontProp = node.widget.props["font"];
-  const font =
-    typeof fontProp === "string"
-      ? (ctx.fonts?.(fontProp) ?? ctx.font)
-      : ctx.font;
+  const font = resolveFont(ctx, node);
 
   const tint = parseColor((style as { color?: string }).color ?? Palette.text);
 

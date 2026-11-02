@@ -70,6 +70,8 @@ export function resetTextAreaEditingStates(): void {
 interface LayoutCache {
   value: string;
   maxWidth: number;
+  /** Probe width — invalidates the cache when the measure changes. */
+  probe: number;
   layout: TextAreaLayout;
 }
 
@@ -77,10 +79,12 @@ const layoutCaches = new Map<number, LayoutCache>();
 
 /**
  * The wrapped-line layout for this field — computed against the live
- * value + content width and cached per stableId (invalidated when
- * either input changes). The painter and the handlers both call this;
- * same inputs produce the same lines, so the click/caret mapping always
- * agrees with what was painted.
+ * value + content width and cached per stableId (invalidated when the
+ * value, the width, or the measure changes — a probe width detects a
+ * swapped measure function, e.g. a named font vs an app override). The
+ * painter and the handlers both call this; same inputs produce the same
+ * lines, so the click/caret mapping always agrees with what was
+ * painted.
  */
 export function ensureLayout(
   stableId: number,
@@ -88,12 +92,18 @@ export function ensureLayout(
   maxWidth: number,
   measure: (text: string) => number
 ): TextAreaLayout {
+  const probe = measure("MMMMMMMMMM");
   const cached = layoutCaches.get(stableId);
-  if (cached && cached.value === state.value && cached.maxWidth === maxWidth) {
+  if (
+    cached &&
+    cached.value === state.value &&
+    cached.maxWidth === maxWidth &&
+    cached.probe === probe
+  ) {
     return cached.layout;
   }
 
   const layout = layoutLines({ value: state.value, maxWidth, measure });
-  layoutCaches.set(stableId, { value: state.value, maxWidth, layout });
+  layoutCaches.set(stableId, { value: state.value, maxWidth, probe, layout });
   return layout;
 }

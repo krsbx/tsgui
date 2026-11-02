@@ -6,7 +6,7 @@
  * placeholder shows when empty.
  */
 import { Metrics, Palette, propsOf } from "@tsgui/core";
-import { parseColor, type WidgetPainter } from "@tsgui/paint";
+import { parseColor, resolveFont, type WidgetPainter } from "@tsgui/paint";
 import { caretVisual, TEXT_LINE_ADVANCE } from "./core.ts";
 import type { TextAreaProps } from "./index.ts";
 import { ensureLayout, peekEditingState } from "./state.ts";
@@ -18,6 +18,8 @@ export const paintTextArea: WidgetPainter = (ctx, node, style) => {
     defaultValue: props.defaultValue,
   });
 
+  const font = resolveFont(ctx, node);
+
   const pad = Metrics.defaultPadding;
   const contentX = node.screenX + pad;
   const contentY = node.screenY + pad;
@@ -25,8 +27,11 @@ export const paintTextArea: WidgetPainter = (ctx, node, style) => {
   const contentH = Math.max(0, node.height - pad * 2);
   if (contentW <= 0 || contentH <= 0) return;
 
+  // The resolved font is what draws — its measure is glyph truth.
+  // props.measureText (handler parity) and the 8px/char estimate are
+  // fallbacks for stub fonts without a measure.
   const measure = (text: string): number =>
-    props.measureText?.(text) ?? text.length * 8;
+    font.measure?.(text)?.width ?? props.measureText?.(text) ?? text.length * 8;
 
   const layout = ensureLayout(node.stableId, state, contentW, measure);
 
@@ -96,7 +101,7 @@ export const paintTextArea: WidgetPainter = (ctx, node, style) => {
 
     if (!hasValue) {
       if (row === 0 && props.placeholder) {
-        ctx.font.draw(ctx.gpu, {
+        font.draw(ctx.gpu, {
           x: contentX,
           y: contentY,
           text: props.placeholder,
@@ -107,7 +112,7 @@ export const paintTextArea: WidgetPainter = (ctx, node, style) => {
     }
 
     if (line.text.length > 0) {
-      ctx.font.draw(ctx.gpu, { x: contentX, y, text: line.text, tint });
+      font.draw(ctx.gpu, { x: contentX, y, text: line.text, tint });
     }
   }
 

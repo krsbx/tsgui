@@ -6,6 +6,7 @@ import {
   fillRatio,
   parseColor,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
 } from "@tsgui/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
@@ -91,7 +92,7 @@ export const paintCircularProgress: WidgetPainter = (ctx, node) => {
     packedWithOpacity(mainColor, fillStyle.opacity)
   );
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

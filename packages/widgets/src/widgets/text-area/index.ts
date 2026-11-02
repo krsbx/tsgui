@@ -71,6 +71,8 @@ export interface TextAreaStateStyle {
 export interface TextAreaProps extends BaseWidgetProps {
   /** Controlled text — wins over defaultValue. */
   value?: string;
+  /** Named font registered with the app's font manager. */
+  font?: string;
   /** Uncontrolled initial text. */
   defaultValue?: string;
   onChange?(value: string): void;
@@ -89,6 +91,7 @@ export interface TextAreaProps extends BaseWidgetProps {
 export function TextArea(props: TextAreaProps): ReconcilableWidget {
   const {
     value,
+    font,
     onChange,
     placeholder,
     disabled,
@@ -145,10 +148,9 @@ export function TextArea(props: TextAreaProps): ReconcilableWidget {
       value,
       placeholder,
       disabled,
-      // The painter needs the same measure the handlers use — without
-      // it, highlights and the caret draw at the 8px estimate while the
-      // text renders with real glyph widths.
+      // Painter/handler measure parity — see TextInput.
       measureText,
+      font,
     },
     style: {
       padding: Metrics.defaultPadding,
