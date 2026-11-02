@@ -126,6 +126,8 @@ export const CaretDirection = {
   Right: "right",
   Home: "home",
   End: "end",
+  Up: "up",
+  Down: "down",
 } as const;
 
 export type CaretDirection =
@@ -156,6 +158,10 @@ export function moveCaret(
         caret: state.value.length,
         anchor: shift ? anchor : state.value.length,
       };
+    // TextArea's vertical navigation goes through its own core — the
+    // single-line field has no other line to move to.
+    default:
+      return state;
   }
 }
 

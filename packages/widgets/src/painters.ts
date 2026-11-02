@@ -16,6 +16,7 @@ import {
 import { paintRadio } from "./widgets/radio/paint.ts";
 import { paintCircularSlider } from "./widgets/slider/circular-slider.ts";
 import { paintSliderBar } from "./widgets/slider/slider-bar.ts";
+import { paintTextArea } from "./widgets/text-area/paint.ts";
 import { paintTextInput } from "./widgets/text-input/paint.ts";
 import { paintToggle } from "./widgets/toggle/paint.ts";
 
@@ -31,4 +32,5 @@ export const widgetPainters: WidgetPainters = new Map([
   [WidgetType.SliderBar, paintSliderBar],
   [WidgetType.CircularSlider, paintCircularSlider],
   [WidgetType.TextInput, paintTextInput],
+  [WidgetType.TextArea, paintTextArea],
 ]);

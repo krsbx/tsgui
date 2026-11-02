@@ -1,10 +1,6 @@
 /** CircularProgress painter — buffer arc, main arc (ring or pie), label. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import {
-  CircularProgressDirection,
-  ProgressType,
-} from "@tsgui/layout";
+import { Palette, propsOf } from "@tsgui/core";
+import { CircularProgressDirection, ProgressType } from "@tsgui/layout";
 import {
   colorWithOpacity,
   fillRatio,

@@ -136,6 +136,8 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
       value,
       placeholder,
       disabled,
+      // Painter parity with the handlers — see TextArea.
+      measureText,
     },
     style: {
       padding: Metrics.defaultPadding,

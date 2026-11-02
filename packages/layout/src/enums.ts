@@ -106,6 +106,7 @@ export const WidgetType = {
   CircularProgress: "CircularProgress",
   Meter: "Meter",
   TextInput: "TextInput",
+  TextArea: "TextArea",
   List: "List",
   Custom: "Custom",
 } as const;

@@ -5,13 +5,14 @@
  * generic rendering engine lives in @tsgui/paint (widgets contribute
  * their painters through PaintContext.painters).
  */
+export * from "@tsgui/core";
 export { createWidget, type CreateWidgetOptions } from "./create-widget.ts";
 export { Reconciler } from "./reconciler.ts";
-export * from "@tsgui/core";
 
 // Per-widget modules — factories + props
 export { Button, type ButtonProps } from "./widgets/button.ts";
 export { Checkbox, type CheckboxProps } from "./widgets/checkbox.ts";
+export { CircularSlider } from "./widgets/circular-slider.ts";
 export { Image, type ImageProps } from "./widgets/image.ts";
 export { Label, type LabelProps } from "./widgets/label.ts";
 export { Meter, type MeterProps } from "./widgets/meter.ts";
@@ -23,8 +24,29 @@ export {
   type ProgressProps,
 } from "./widgets/progress/index.ts";
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
+export { Radio, type RadioProps } from "./widgets/radio.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
-export { CircularSlider } from "./widgets/circular-slider.ts";
+export {
+  type CircularGeometry,
+  isOnBarHandle,
+  isOnCircularHandle,
+  pointerToAngleValue,
+  pointerToValue,
+  resolveGeometry,
+  sliderValue,
+} from "./widgets/slider/geometry.ts";
+export { type SliderMark } from "./widgets/slider/types.ts";
+export type {
+  CircularSliderProps,
+  SliderProps,
+} from "./widgets/slider/types.ts";
+export {
+  resetTextAreaEditingStates,
+  TextArea,
+  editingStateOf as textAreaEditingStateOf,
+  type TextAreaProps,
+  type TextAreaStyle,
+} from "./widgets/text-area/index.ts";
 export {
   TextInput,
   type TextInputProps,
@@ -36,21 +58,6 @@ export {
   textInputClipboard,
   type TextInputState,
 } from "./widgets/text-input/state.ts";
-export {
-  isOnBarHandle,
-  isOnCircularHandle,
-  pointerToAngleValue,
-  pointerToValue,
-  resolveGeometry,
-  sliderValue,
-  type CircularGeometry,
-} from "./widgets/slider/geometry.ts";
-export { type SliderMark } from "./widgets/slider/types.ts";
-export type {
-  CircularSliderProps,
-  SliderProps,
-} from "./widgets/slider/types.ts";
-export { Radio, type RadioProps } from "./widgets/radio.ts";
 export { Toggle, type ToggleProps } from "./widgets/toggle.ts";
 export { View, type ViewProps } from "./widgets/view.ts";
 
