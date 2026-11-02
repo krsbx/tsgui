@@ -27,6 +27,7 @@ export class App {
   public readonly root: AppWindow;
 
   private readonly windows = new Map<number, AppWindow>();
+  private readonly pendingDestroy: AppWindow[] = [];
   private readonly decoder = new EventDecoder();
   private readonly quitOnEscape: boolean;
   private running = true;
@@ -71,10 +72,17 @@ export class App {
     return window;
   }
 
+  /**
+   * Remove a window. The registry delete is immediate (future frames
+   * skip it) but the SDL teardown is DEFERRED to end-of-frame: handlers
+   * fire mid-dispatch, mid-iteration — destroying the renderer there
+   * would make the same frame's paint hit a dead renderer.
+   */
   public destroyWindow(window: AppWindow): void {
     if (!this.windows.has(window.id)) return;
     this.windows.delete(window.id);
-    window.destroy();
+    this.pendingDestroy.push(window);
+    if (window === this.root) this.running = false; // root gone → exit
   }
 
   /**
@@ -93,7 +101,10 @@ export class App {
 
       frameBody(this);
 
-      for (const window of this.windows.values()) {
+      // Snapshot: handlers this frame may create windows (a live Map
+      // iterator would visit them half-initialized) or destroy them.
+      const windows = [...this.windows.values()];
+      for (const window of windows) {
         window.reconcile();
         window.layout();
         window.dispatch(
@@ -105,6 +116,7 @@ export class App {
       }
 
       this.frames_++;
+      this.flushDestroyQueue();
       sdl.SDL_Delay({ ms: FRAME_MS });
     }
 
@@ -131,7 +143,14 @@ export class App {
     }
   }
 
+  private flushDestroyQueue(): void {
+    while (this.pendingDestroy.length > 0) {
+      this.pendingDestroy.shift()!.destroy();
+    }
+  }
+
   private teardown(): void {
+    this.flushDestroyQueue();
     for (const window of this.windows.values()) {
       window.destroy();
     }

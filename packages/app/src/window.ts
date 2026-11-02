@@ -73,7 +73,7 @@ export class AppWindow {
   public readonly renderer: GpuRenderer;
   public readonly font: TtfFont;
   public readonly stateStore = new StateStore();
-  public readonly reconciler: Reconciler;
+  public readonly reconciler = new Reconciler(this.stateStore);
   public readonly pointer = new PointerDispatcher();
   public readonly focus = new FocusDispatcher();
   public readonly scroll = new ScrollDispatcher();
@@ -92,6 +92,7 @@ export class AppWindow {
     this.id = sdl.SDL_GetWindowID({ window: handle });
 
     this.renderer = new GpuRenderer(handle);
+
     if (options.backgroundColor)
       this.renderer.clearColor = options.backgroundColor;
     this.font = new TtfFont(
@@ -99,7 +100,6 @@ export class AppWindow {
       fontPath(),
       FONT_POINT_SIZE
     );
-    this.reconciler = new Reconciler(this.stateStore);
 
     this.layoutCtx = {
       layoutIndex: this.layoutIndex,
@@ -209,7 +209,13 @@ export class AppWindow {
     this.renderer.present();
   }
 
+  private tornDown = false;
+
+  /** Idempotent — a window destroyed mid-frame by a handler must not
+   *  double-destroy its SDL handles (deferred teardown flushes later). */
   public destroy(): void {
+    if (this.tornDown) return;
+    this.tornDown = true;
     this.font.destroy();
     this.renderer.destroy();
     sdl.SDL_DestroyWindow({ window: this.handle });
