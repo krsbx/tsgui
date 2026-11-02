@@ -19,6 +19,9 @@ packages/
   animation/    @tsgui/animation     Style animation engine: AnimationManager
                                      (transitions), easings, packed-color
                                      interpolation. Pure TS.
+  fonts/        @tsgui/fonts         Font registry: named font descriptors
+                                     (path + size) materialized per renderer
+                                     as TtfFont instances.
   paint/        @tsgui/paint         Generic rendering engine: paintTree walk,
                                      Painter/TextPainter surfaces, style
                                      resolution, fill/shape/shadow primitives.

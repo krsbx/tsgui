@@ -103,6 +103,7 @@ function buildDashboard(app: App): ReconcilableWidget {
         children: [
           Label({
             text: "tsgui Dashboard",
+            font: "display",
             style: { color: ACCENT, width: "100%" },
           }),
         ],
@@ -383,11 +384,20 @@ function buildDetails(win: AppWindow): ReconcilableWidget {
 
 // --- the app ---------------------------------------------------------------
 
+const displayFontPath =
+  process.platform === "darwin"
+    ? "/System/Library/Fonts/Helvetica.ttc"
+    : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+
 const app = new App({
   title: "tsgui — dashboard",
   width: 800,
   height: 600,
   backgroundColor: BACKDROP,
+  fonts: {
+    // default: { path: process.env.TSGUI_FONT_PATH ?? displayFontPath, size: 18 },
+    display: { path: displayFontPath, size: 28 },
+  },
 });
 
 let lastNodes = 0;
