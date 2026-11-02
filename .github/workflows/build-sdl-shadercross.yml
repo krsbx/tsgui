@@ -26,7 +26,7 @@
 # .github/workflows/main.yml (vendored/prebuilt splits, env-var discovery,
 # macOS universal2 flags included).
 
-name: Build SDL_shadercross
+name: Build SDL ShaderCross
 
 on:
   workflow_dispatch:
