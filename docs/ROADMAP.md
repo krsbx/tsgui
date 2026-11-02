@@ -186,6 +186,12 @@ Foundation work (each item unblocks a widget batch):
       parse-normalized color settling), easings, and the clock that
       drives indeterminate progress motion, the caret blink, and
       ViewStyle transitions. Injected through PaintContext.animationManager.
+- [x] Font manager (2026-11-02) — `@tsgui/fonts`: named font
+      descriptors (path + size) materialized per renderer as TtfFont
+      instances; "default" is a registered identifier (apps load a
+      specific font and alias it — never a hardcoded system font).
+      Label.font resolves through PaintContext.fonts; layout measures
+      the same font via measureText's fontName parameter.
 - [x] Multi-window (2026-11-01) — `@tsgui/app`, the application shell:
       App with a window registry (create/destroy keyed by SDL windowID),
       event decode + routing, and a run loop that reconciles → lays out →

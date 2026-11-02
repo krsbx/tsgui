@@ -103,7 +103,13 @@ see LAYOUT.md.
 
 The SDL3_ttf tier: white glyph runs rendered per unique string
 (`TTF_RenderText_Blended`, length 0 = NUL-terminated), uploaded as
-textures, tinted at draw, cached per string in the `TtfFont`. The
+textures, tinted at draw, cached per string in the `TtfFont`. Fonts
+are NAMED: the app registers descriptors (path + size) through
+`@tsgui/fonts`, every window materializes its own TtfFont set (SDL
+font textures are renderer-scoped), and `Label.font` resolves through
+`PaintContext.fonts` — layout measures the same font via
+`LayoutContext.measureText`'s fontName parameter, so wrap and paint
+stay on one ruler. The
 `TextPainter` surface adds optional `measure` (backed by
 `TTF_GetStringSize`) which inline value labels and the text-input caret
 math use. Caret blink waits for the AnimationManager (needs a clock).

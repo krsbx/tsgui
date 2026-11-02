@@ -61,6 +61,7 @@ Concretely:
 | `core`               | `layout`                                                                      | `interactions`, `paint`, `widgets`, `bindings`       |
 | `interactions`       | `layout`, `core`                                                              | `paint`, `widgets`, `bindings`                       |
 | `paint`              | `layout`, `core`, `gpu` types                                                 | `interactions`, `widgets`, `bindings`                |
+| `fonts`              | `gpu` (TtfFont per renderer)                                                  | `layout`, `core`, and the toolkit above              |
 | `widgets`            | `layout`, `core`, `interactions`, `paint`, injectable seams (clipboard)       | `bindings`                                           |
 | `app`                | everything (the application layer: bindings, gpu, and the toolkit)            | nothing — it is the top                              |
 | `platform` (planned) | `bindings`                                                                    | `gpu`, `layout`, and the toolkit layers              |
