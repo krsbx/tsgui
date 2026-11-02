@@ -290,16 +290,18 @@ jobs:
           echo "== prefix/bin:"; ls prefix/bin
           echo "== prefix/lib:"; ls prefix/lib || true
 
+      # Not PLATFORM: the MSVC dev env exports Platform=x64, and Windows env
+      # names are case-insensitive — bash would only ever see "Platform".
       - name: Collect CLI + bundled libraries
         env:
-          PLATFORM: ${{ matrix.platform }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
           # Keep the installed bin/ + lib/ layout — the CLI's RPATH is
           # $ORIGIN/../lib. -a preserves the soname symlinks.
           mkdir -p staging/bin
           cp -a prefix/bin/. staging/bin/
-          case "$PLATFORM" in
+          case "$TARGET_PLATFORM" in
             linux)
               mkdir -p staging/lib
               find prefix/lib -maxdepth 1 -name "*.so*" -exec cp -a {} staging/lib/ \;
@@ -321,10 +323,10 @@ jobs:
 
       - name: Audit dependencies (fail loud on leaked build-machine paths)
         env:
-          PLATFORM: ${{ matrix.platform }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          case "$PLATFORM" in
+          case "$TARGET_PLATFORM" in
             macos)
               bins=$(find staging/bin staging/lib -type f)
               if otool -L $bins | grep -E '/opt/homebrew|/usr/local/'; then
@@ -343,11 +345,11 @@ jobs:
 
       - name: Package (${{ matrix.platform }})
         env:
-          PLATFORM: ${{ matrix.platform }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          name="SDL_shadercross_${PLATFORM}"
-          case "$PLATFORM" in
+          name="SDL_shadercross_${TARGET_PLATFORM}"
+          case "$TARGET_PLATFORM" in
             windows)
               powershell -NoProfile -Command \
                 "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
@@ -360,20 +362,20 @@ jobs:
 
       - name: Smoke — compile a real HLSL shader with the packaged CLI
         env:
-          PLATFORM: ${{ matrix.platform }}
+          TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
           # Runs the CLI from the extracted archive — exactly what ships —
           # with no loader-path overrides, so RPATH / bundling bugs fail here.
           rm -rf smoke && mkdir smoke
-          case "$PLATFORM" in
+          case "$TARGET_PLATFORM" in
             windows)
               powershell -NoProfile -Command \
                 "Expand-Archive -Path 'SDL_shadercross_windows.zip' -DestinationPath 'smoke'"
               cli="$PWD/smoke/bin/shadercross.exe"
               ;;
             *)
-              tar -xzf "SDL_shadercross_${PLATFORM}.tar.gz" -C smoke
+              tar -xzf "SDL_shadercross_${TARGET_PLATFORM}.tar.gz" -C smoke
               cli="$PWD/smoke/bin/shadercross"
               ;;
           esac
