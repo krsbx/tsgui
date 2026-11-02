@@ -1,0 +1,465 @@
+# Build SDL_shadercross (the HLSL → SPIR-V / MSL / DXIL offline translator)
+# and publish the CLI tool as tsgui release assets — the toolchain the phase
+# 2.5 SDF spike needs (ROADMAP.md: shaders authored in HLSL, cross-compiled
+# offline, blobs checked in).
+#
+# Differences from the SDL-family workflows (build-sdl*.yml):
+# - Upstream has NO release tags — input is a git ref (default main) and the
+#   tsgui release is tagged SDL_shadercross-<short-sha> unless overridden.
+# - The artifact is an offline CLI tool plus its bundled libraries, not a
+#   runtime dylib. SDLSHADERCROSS_INSTALL_RUNTIME=ON installs dxcompiler,
+#   spirv-cross, vkd3d and SDL3 into lib/ and sets the CLI's RPATH to
+#   $ORIGIN/../lib (@executable_path/../lib on macOS), so the archive keeps
+#   the bin/ + lib/ layout — flattening it would break that RPATH.
+# - macOS builds the SDL-forked DirectXShaderCompiler from source
+#   (SDLSHADERCROSS_VENDORED=ON — upstream DXC ships no macOS binaries; the
+#   macOS job is the long one, expect 30-90 min). Linux/Windows download
+#   prebuilt DXC per upstream's own CI. If that download 404s (the satellite
+#   submodules lesson), the workflow fails loud instead of shipping a CLI
+#   that can't translate.
+# - Smoke test extracts the packaged archive and compiles a real HLSL
+#   fragment shader to SPIR-V with the CLI inside it, no loader-path
+#   overrides — a broken RPATH or missing bundled lib fails here, not on
+#   your machine.
+#
+# Build recipe mirrored from libsdl-org/SDL_shadercross's own
+# .github/workflows/main.yml (vendored/prebuilt splits, env-var discovery,
+# macOS universal2 flags included).
+
+name: Build SDL_shadercross
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch / tag / commit to build (upstream has no release tags)
+        required: false
+        default: main
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_shadercross
+        required: true
+        default: "libsdl-org/SDL_shadercross"
+        type: string
+      release_tag:
+        description: tsgui release tag (blank = SDL_shadercross-<short sha>)
+        required: false
+        default: ""
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = latest stable release)
+        required: false
+        default: ""
+        type: string
+  # Same inputs, so build-sdl-family.yml can call this workflow.
+  workflow_call:
+    inputs:
+      ref:
+        description: Branch / tag / commit to build (upstream has no release tags)
+        required: false
+        default: main
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_shadercross
+        required: true
+        default: "libsdl-org/SDL_shadercross"
+        type: string
+      release_tag:
+        description: tsgui release tag (blank = SDL_shadercross-<short sha>)
+        required: false
+        default: ""
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = latest stable release)
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.prep.outputs.short_sha }}
+      release_tag: ${{ steps.prep.outputs.release_tag }}
+      sdl3_repo: ${{ steps.prep.outputs.sdl3_repo }}
+      sdl3_tag: ${{ steps.prep.outputs.sdl3_tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - id: prep
+        env:
+          REF: ${{ inputs.ref }}
+          REPO: ${{ inputs.repo }}
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
+          SDL3_TAG_INPUT: ${{ inputs.sdl3_tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::repo must look like owner/name, got: $REPO"
+            exit 1
+          fi
+
+          short_sha=$(gh api "repos/$REPO/commits/$REF" --jq '.sha[0:7]')
+
+          # SDL3 comes from the same owner (owner/SDL_shadercross → owner/SDL).
+          sdl3_repo="${REPO%%/*}/SDL"
+
+          if [[ -n "$RELEASE_TAG_INPUT" ]]; then
+            release_tag=$RELEASE_TAG_INPUT
+          else
+            release_tag="SDL_shadercross-$short_sha"
+          fi
+
+          if [[ -n "$SDL3_TAG_INPUT" ]]; then
+            sdl3_tag=$SDL3_TAG_INPUT
+          else
+            sdl3_tag=$(gh api "repos/$sdl3_repo/releases?per_page=30" \
+              --jq '[.[] | select(.draft == false and .prerelease == false
+                and (.tag_name | startswith("release-3.")))][0].tag_name')
+          fi
+
+          {
+            echo "short_sha=$short_sha"
+            echo "release_tag=$release_tag"
+            echo "sdl3_repo=$sdl3_repo"
+            echo "sdl3_tag=$sdl3_tag"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-24.04
+            vendored: "OFF"
+            osx_flags: ""
+            osx_cflags: ""
+          - platform: macos
+            os: macos-15
+            vendored: "ON"
+            osx_flags: "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"
+            osx_cflags: "-DCMAKE_C_FLAGS=-mmacosx-version-min=11.0 -DCMAKE_CXX_FLAGS=-mmacosx-version-min=11.0"
+          - platform: windows
+            os: windows-latest
+            vendored: "OFF"
+            osx_flags: ""
+            osx_cflags: ""
+    defaults:
+      run:
+        shell: bash
+    steps:
+      # SDL 3.4 hard-fails without XTest; the vulkan-loader that
+      # INSTALL_RUNTIME builds wants the X11/Wayland headers too. patchelf is
+      # REQUIRED by INSTALL_RUNTIME on Linux; bison + libjson-perl by vkd3d.
+      - name: Install Linux build deps (SDL3 backends + shadercross extras)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential pkg-config patchelf bison \
+            libx11-dev libxext-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxrandr-dev libxss-dev libxtst-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libdecor-0-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev \
+            libdbus-1-dev libudev-dev \
+            libdrm-dev libgbm-dev libegl1-mesa-dev libgl1-mesa-dev \
+            libibus-1.0-dev \
+            libjson-perl
+
+      - name: Install macOS build deps (bison + JSON for vendored vkd3d)
+        if: matrix.platform == 'macos'
+        run: |
+          brew install bison cpanm
+          cpanm JSON
+          echo "/opt/homebrew/opt/bison/bin" >> "$GITHUB_PATH"
+
+      # INSTALL_RUNTIME resolves spirv-cross's DLL deps with dumpbin, which is
+      # only on PATH inside an MSVC dev shell (upstream CI does the same).
+      - name: Set up MSVC dev environment
+        if: matrix.platform == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Checkout SDL_shadercross source (with toolchain submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ inputs.ref }}
+          path: lib-src
+          submodules: recursive
+
+      - name: Checkout SDL3 (link dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.prepare.outputs.sdl3_repo }}
+          ref: ${{ needs.prepare.outputs.sdl3_tag }}
+          path: sdl3-src
+
+      - name: Build + install SDL3 into a local prefix
+        env:
+          OSX_FLAGS: ${{ matrix.osx_flags }}
+        run: |
+          set -euo pipefail
+          cmake -S sdl3-src -B sdl3-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDL_SHARED=ON -DSDL_STATIC=OFF \
+            $OSX_FLAGS
+          cmake --build sdl3-build --config Release --parallel
+          cmake --install sdl3-build --config Release --prefix "$PWD/sdl3-prefix"
+          ls sdl3-prefix/lib
+
+      - name: Build SPIRV-Cross (shadercross discovers it via _ROOT below)
+        env:
+          OSX_FLAGS: ${{ matrix.osx_flags }}
+          OSX_CFLAGS: ${{ matrix.osx_cflags }}
+        run: |
+          set -euo pipefail
+          cmake -S lib-src/external/SPIRV-Cross -B spirv_cross_build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSPIRV_CROSS_SHARED=ON -DSPIRV_CROSS_STATIC=ON \
+            $OSX_FLAGS $OSX_CFLAGS
+          cmake --build spirv_cross_build --config Release --parallel
+          cmake --install spirv_cross_build --config Release --prefix "$PWD/spirv_cross_prefix"
+
+          # Windows paths go to cmake.exe as mixed-slash; separator differs.
+          root="$PWD/spirv_cross_prefix"
+          sep=":"
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            root=$(cygpath -m "$root")
+            sep=";"
+          fi
+          echo "spirv_cross_c_shared_ROOT=${root}${sep}${root}/share/spirv_cross_c_shared" >> "$GITHUB_ENV"
+
+      - name: Download prebuilt DirectXShaderCompiler (per upstream CI)
+        if: matrix.vendored == 'OFF'
+        run: |
+          set -euo pipefail
+          cmake -P lib-src/build-scripts/download-prebuilt-DirectXShaderCompiler.cmake
+
+          # The script lands the binaries either beside itself or in CWD —
+          # accept both, fail loud on neither.
+          dxc_root=""
+          for d in "$PWD/external/DirectXShaderCompiler-binaries" \
+                   "$PWD/lib-src/external/DirectXShaderCompiler-binaries"; do
+            if [[ -d "$d" ]]; then dxc_root="$d"; break; fi
+          done
+          if [[ -z "$dxc_root" ]]; then
+            echo "::error::prebuilt DXC download did not land where expected"
+            exit 1
+          fi
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            dxc_root=$(cygpath -m "$dxc_root")
+          fi
+          echo "DirectXShaderCompiler_ROOT=$dxc_root" >> "$GITHUB_ENV"
+
+      - name: Configure SDL_shadercross
+        env:
+          VENDORED: ${{ matrix.vendored }}
+          OSX_FLAGS: ${{ matrix.osx_flags }}
+          OSX_CFLAGS: ${{ matrix.osx_cflags }}
+        run: |
+          set -euo pipefail
+          # No RPATH flags: INSTALL_RUNTIME sets the CLI's INSTALL_RPATH to
+          # $ORIGIN/../lib itself (overriding CMAKE_INSTALL_RPATH) and adds
+          # $ORIGIN / @loader_path to every bundled library.
+          cmake -S lib-src -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDLSHADERCROSS_CLI=ON \
+            -DSDLSHADERCROSS_SHARED=ON -DSDLSHADERCROSS_STATIC=ON \
+            -DSDLSHADERCROSS_VENDORED=$VENDORED \
+            -DSDLSHADERCROSS_INSTALL=ON \
+            -DSDLSHADERCROSS_INSTALL_RUNTIME=ON \
+            -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
+            $OSX_FLAGS $OSX_CFLAGS
+
+      - name: Build + install SDL_shadercross
+        run: |
+          set -euo pipefail
+          cmake --build build --config Release --parallel
+          cmake --install build --config Release --prefix "$PWD/prefix"
+          echo "== prefix/bin:"; ls prefix/bin
+          echo "== prefix/lib:"; ls prefix/lib || true
+
+      - name: Collect CLI + bundled libraries
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          # Keep the installed bin/ + lib/ layout — the CLI's RPATH is
+          # $ORIGIN/../lib. -a preserves the soname symlinks.
+          mkdir -p staging/bin
+          cp -a prefix/bin/. staging/bin/
+          case "$PLATFORM" in
+            linux)
+              mkdir -p staging/lib
+              find prefix/lib -maxdepth 1 -name "*.so*" -exec cp -a {} staging/lib/ \;
+              ;;
+            macos)
+              mkdir -p staging/lib
+              find prefix/lib -maxdepth 1 -name "*.dylib" -exec cp -a {} staging/lib/ \;
+              ;;
+            windows)
+              # DLLs install beside the exe; catch any that landed in lib/.
+              find prefix/lib -maxdepth 1 -name "*.dll" -exec cp -n {} staging/bin/ \; 2>/dev/null || true
+              ;;
+          esac
+          if [[ -d prefix/share/licenses ]]; then
+            mkdir -p staging/share
+            cp -a prefix/share/licenses staging/share/
+          fi
+          find staging | sort
+
+      - name: Audit dependencies (fail loud on leaked build-machine paths)
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          case "$PLATFORM" in
+            macos)
+              bins=$(find staging/bin staging/lib -type f)
+              if otool -L $bins | grep -E '/opt/homebrew|/usr/local/'; then
+                echo "::error::binary links against Homebrew paths — not self-contained"
+                exit 1
+              fi
+              otool -L $bins
+              ;;
+            linux)
+              for f in $(find staging/bin staging/lib -type f); do
+                echo "== $f"
+                readelf -d "$f" | grep -E 'NEEDED|RUNPATH|RPATH' || true
+              done
+              ;;
+          esac
+
+      - name: Package (${{ matrix.platform }})
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          name="SDL_shadercross_${PLATFORM}"
+          case "$PLATFORM" in
+            windows)
+              powershell -NoProfile -Command \
+                "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
+              ;;
+            *)
+              tar -czf "${name}.tar.gz" -C staging .
+              ;;
+          esac
+          ls -la "${name}".*
+
+      - name: Smoke — compile a real HLSL shader with the packaged CLI
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          # Runs the CLI from the extracted archive — exactly what ships —
+          # with no loader-path overrides, so RPATH / bundling bugs fail here.
+          rm -rf smoke && mkdir smoke
+          case "$PLATFORM" in
+            windows)
+              powershell -NoProfile -Command \
+                "Expand-Archive -Path 'SDL_shadercross_windows.zip' -DestinationPath 'smoke'"
+              cli="$PWD/smoke/bin/shadercross.exe"
+              ;;
+            *)
+              tar -xzf "SDL_shadercross_${PLATFORM}.tar.gz" -C smoke
+              cli="$PWD/smoke/bin/shadercross"
+              ;;
+          esac
+          test -f "$cli"
+
+          "$cli" -h > /dev/null
+
+          cat > smoke.hlsl <<'EOF'
+          Texture2D gTexture : register(t0);
+          SamplerState gSampler : register(s0);
+
+          float4 main(float2 vTexCoord : TEXCOORD0) : SV_Target0
+          {
+              return gTexture.Sample(gSampler, vTexCoord);
+          }
+          EOF
+
+          # HLSL → SPIR-V exercises dxcompiler; SPIR-V → MSL exercises
+          # spirv-cross. Positional input; dest inferred from the extension.
+          "$cli" smoke.hlsl -o smoke.spv -t fragment
+          test -s smoke.spv
+          "$cli" smoke.spv -o smoke.msl -t fragment
+          test -s smoke.msl
+          echo "smoke.spv: $(wc -c < smoke.spv) bytes, smoke.msl: $(wc -c < smoke.msl) bytes"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-SDL_shadercross-${{ matrix.platform }}
+          path: SDL_shadercross_${{ matrix.platform }}.*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asset-SDL_shadercross-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release ${{ needs.prepare.outputs.release_tag }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.short_sha }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          REF: ${{ inputs.ref }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          set -euo pipefail
+          cd dist
+          ls -la
+
+          notes=$(cat <<EOF
+          Prebuilt **SDL_shadercross** CLI toolchain (source commit $VERSION,
+          built from [$REPO @ $REF](https://github.com/$REPO/tree/$REF))
+          — the offline HLSL → SPIR-V / MSL / DXIL translator the tsgui phase
+          2.5 SDF spike compiles its shaders with.
+
+          | Asset | Contents |
+          | ----- | -------- |
+          | SDL_shadercross_linux.tar.gz | x86_64 bin/shadercross + lib/ bundled .so libraries (ubuntu-24.04 build, glibc >= 2.39) |
+          | SDL_shadercross_macos.tar.gz | universal2 bin/shadercross (arm64 + x86_64) + lib/ bundled dylibs, DXC built from the SDL fork |
+          | SDL_shadercross_windows.zip | x64 bin/shadercross.exe + DLLs |
+
+          Each archive is self-contained: the CLI finds its bundled
+          dxcompiler / spirv-cross / SDL3 libraries in ../lib via RPATH, so
+          after extracting (keep the bin/ + lib/ layout) it runs directly:
+
+              ./bin/shadercross shader.hlsl -o shader.spv -t fragment
+
+          Upstream has no release tags yet — releases here are pinned to a
+          source commit (see the tag name).
+          EOF
+          )
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG exists — replacing assets"
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber ./*
+          else
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --title "SDL_shadercross $VERSION" --notes "$notes" ./*
+          fi
