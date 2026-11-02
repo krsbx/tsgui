@@ -163,6 +163,8 @@ jobs:
     if: inputs.shadercross_ref != ''
     permissions:
       contents: write
+    # inherit → optional SHADERCROSS_ARTIFACT_TOKEN for upstream prebuilt packages
+    secrets: inherit
     uses: ./.github/workflows/build-sdl-shadercross.yml
     with:
       ref: ${{ inputs.shadercross_ref }}
