@@ -11,23 +11,14 @@
 #   spirv-cross, vkd3d and SDL3 into lib/ and sets the CLI's RPATH to
 #   $ORIGIN/../lib (@executable_path/../lib on macOS), so the archive keeps
 #   the bin/ + lib/ layout — flattening it would break that RPATH.
-# - Prebuilt mode (default, input prebuilt=true): upstream's own CI already
-#   builds this exact bundle (INSTALL_RUNTIME, vendored DXC on macOS,
-#   universal2) for every push to main and keeps the packages 90 days. When
-#   a successful upstream run exists for the resolved commit, each platform
-#   job downloads its package into prefix/ instead of compiling — a few
-#   minutes instead of the ~30-40 min macOS DXC (LLVM) build. Packages used:
-#     linux   → SDL3_shadercross-slrsniper   (Steam Runtime sniper, glibc 2.31+)
-#     macos   → SDL3_shadercross-macos-arm64 (universal2 despite the name)
-#     windows → SDL3_shadercross-VC-x64      (MSVC)
-#   Downloading another repo's artifacts may need more than GITHUB_TOKEN; if
-#   so, add a read-only PAT as the SHADERCROSS_ARTIFACT_TOKEN repo secret.
-# - Source mode (fallback when no unexpired upstream run exists, the token
-#   can't download, or prebuilt=false): macOS builds the SDL-forked DXC from
-#   source (SDLSHADERCROSS_VENDORED=ON — upstream DXC ships no macOS
-#   binaries); Linux/Windows download prebuilt DXC per upstream's own CI.
-# - Both modes share Collect → Audit → Package → Smoke: the smoke test
-#   extracts the packaged archive and runs HLSL → SPIR-V → MSL with the CLI
+# - Built from source so the bundled SDL3 is our pinned SDL3 (upstream
+#   CI's prebuilt packages bundle an unreleased SDL main snapshot). macOS
+#   builds the SDL-forked DirectXShaderCompiler from source
+#   (SDLSHADERCROSS_VENDORED=ON — upstream DXC ships no macOS binaries; ~30-40
+#   min cold, faster once ccache is warm). Linux/Windows download prebuilt
+#   DXC per upstream's own CI.
+# - Smoke test: after packaging, it
+#   extracts the archive and runs HLSL → SPIR-V → MSL with the CLI
 #   inside it, no loader-path overrides — a broken RPATH or missing bundled
 #   lib fails here, not on your machine.
 #
@@ -41,9 +32,9 @@ on:
   workflow_dispatch:
     inputs:
       ref:
-        description: Branch / tag / commit to build (upstream has no release tags)
+        description: Commit / branch / tag to build (blank = version.lock; upstream has no release tags)
         required: false
-        default: main
+        default: ""
         type: string
       repo:
         description: Repository, e.g. libsdl-org/SDL_shadercross
@@ -56,22 +47,17 @@ on:
         default: ""
         type: string
       sdl3_tag:
-        description: SDL3 tag to link against (blank = latest stable release)
+        description: SDL3 tag to link against (blank = version.lock)
         required: false
         default: ""
         type: string
-      prebuilt:
-        description: Use upstream CI's prebuilt package when one exists for the commit (falls back to building from source)
-        required: false
-        default: true
-        type: boolean
   # Same inputs, so build-sdl-family.yml can call this workflow.
   workflow_call:
     inputs:
       ref:
-        description: Branch / tag / commit to build (upstream has no release tags)
+        description: Commit / branch / tag to build (blank = version.lock; upstream has no release tags)
         required: false
-        default: main
+        default: ""
         type: string
       repo:
         description: Repository, e.g. libsdl-org/SDL_shadercross
@@ -84,18 +70,10 @@ on:
         default: ""
         type: string
       sdl3_tag:
-        description: SDL3 tag to link against (blank = latest stable release)
+        description: SDL3 tag to link against (blank = version.lock)
         required: false
         default: ""
         type: string
-      prebuilt:
-        description: Use upstream CI's prebuilt package when one exists for the commit (falls back to building from source)
-        required: false
-        default: true
-        type: boolean
-    secrets:
-      SHADERCROSS_ARTIFACT_TOKEN:
-        required: false
 
 permissions:
   contents: read
@@ -104,26 +82,45 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
+      ref: ${{ steps.prep.outputs.ref }}
       short_sha: ${{ steps.prep.outputs.short_sha }}
-      mode: ${{ steps.prep.outputs.mode }}
-      upstream_run: ${{ steps.prep.outputs.upstream_run }}
       release_tag: ${{ steps.prep.outputs.release_tag }}
       sdl3_repo: ${{ steps.prep.outputs.sdl3_repo }}
       sdl3_tag: ${{ steps.prep.outputs.sdl3_tag }}
     env:
-      GH_TOKEN: ${{ secrets.SHADERCROSS_ARTIFACT_TOKEN || github.token }}
+      GH_TOKEN: ${{ github.token }}
     steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
       - id: prep
         env:
           REF: ${{ inputs.ref }}
           REPO: ${{ inputs.repo }}
-          PREBUILT: ${{ inputs.prebuilt }}
-          # Keep in sync with matrix.upstream_artifact below.
-          UPSTREAM_ARTIFACTS: SDL3_shadercross-slrsniper SDL3_shadercross-macos-arm64 SDL3_shadercross-VC-x64
           RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
           SDL3_TAG_INPUT: ${{ inputs.sdl3_tag }}
         run: |
           set -euo pipefail
+
+          # Pinned value for a library from version.lock (KEY=value lines).
+          lock() {
+            local value
+            value=$(sed -n "s/^$1=//p" version.lock | head -n1)
+            if [[ -z "$value" ]]; then
+              echo "::error::version.lock has no $1= entry" >&2
+              exit 1
+            fi
+            echo "$value"
+          }
+
+          # Blank ref → the pinned commit in version.lock.
+          if [[ -z "$REF" ]]; then
+            REF=$(lock SDL_shadercross)
+            echo "Using version.lock: SDL_shadercross=$REF"
+          fi
 
           if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
             echo "::error::repo must look like owner/name, got: $REPO"
@@ -132,42 +129,6 @@ jobs:
 
           full_sha=$(gh api "repos/$REPO/commits/$REF" --jq '.sha')
           short_sha=${full_sha:0:7}
-
-          # Prebuilt mode: a successful upstream main.yml run for this exact
-          # commit, all three packages unexpired, and a token that can
-          # actually download them (artifact zip → 302 redirect).
-          mode=build
-          upstream_run=""
-          if [[ "$PREBUILT" == true ]]; then
-            upstream_run=$(gh api "repos/$REPO/actions/runs?head_sha=$full_sha&status=success&per_page=50" \
-              --jq '[.workflow_runs[] | select(.path == ".github/workflows/main.yml")][0].id // empty')
-            if [[ -z "$upstream_run" ]]; then
-              echo "::warning::no successful upstream CI run for $REPO@$short_sha — building from source"
-            else
-              arts=$(gh api "repos/$REPO/actions/runs/$upstream_run/artifacts?per_page=100" \
-                --jq '[.artifacts[] | select(.expired == false)]')
-              missing=""
-              for n in $UPSTREAM_ARTIFACTS; do
-                jq -e --arg n "$n" 'any(.[]; .name == $n)' <<<"$arts" >/dev/null || missing="$missing $n"
-              done
-              if [[ -n "$missing" ]]; then
-                echo "::warning::upstream run $upstream_run lacks (or expired):$missing — building from source"
-                upstream_run=""
-              else
-                probe=$(jq -r '.[0].id' <<<"$arts")
-                code=$(curl -s -o /dev/null -w '%{http_code}' \
-                  -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" \
-                  "https://api.github.com/repos/$REPO/actions/artifacts/$probe/zip")
-                if [[ "$code" == 302 ]]; then
-                  mode=prebuilt
-                  echo "Using upstream CI run $upstream_run: https://github.com/$REPO/actions/runs/$upstream_run"
-                else
-                  echo "::warning::token cannot download upstream artifacts (HTTP $code) — add a read-only PAT as the SHADERCROSS_ARTIFACT_TOKEN secret. Building from source."
-                  upstream_run=""
-                fi
-              fi
-            fi
-          fi
 
           # SDL3 comes from the same owner (owner/SDL_shadercross → owner/SDL).
           sdl3_repo="${REPO%%/*}/SDL"
@@ -181,15 +142,12 @@ jobs:
           if [[ -n "$SDL3_TAG_INPUT" ]]; then
             sdl3_tag=$SDL3_TAG_INPUT
           else
-            sdl3_tag=$(gh api "repos/$sdl3_repo/releases?per_page=30" \
-              --jq '[.[] | select(.draft == false and .prerelease == false
-                and (.tag_name | startswith("release-3.")))][0].tag_name')
+            sdl3_tag=$(lock SDL3)
           fi
 
           {
+            echo "ref=$REF"
             echo "short_sha=$short_sha"
-            echo "mode=$mode"
-            echo "upstream_run=$upstream_run"
             echo "release_tag=$release_tag"
             echo "sdl3_repo=$sdl3_repo"
             echo "sdl3_tag=$sdl3_tag"
@@ -206,19 +164,16 @@ jobs:
         include:
           - platform: linux
             os: ubuntu-24.04
-            upstream_artifact: SDL3_shadercross-slrsniper
             vendored: "OFF"
             osx_flags: ""
             osx_cflags: ""
           - platform: macos
             os: macos-15
-            upstream_artifact: SDL3_shadercross-macos-arm64
             vendored: "ON"
             osx_flags: "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64 -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0"
             osx_cflags: "-DCMAKE_C_FLAGS=-mmacosx-version-min=11.0 -DCMAKE_CXX_FLAGS=-mmacosx-version-min=11.0"
           - platform: windows
             os: windows-latest
-            upstream_artifact: SDL3_shadercross-VC-x64
             vendored: "OFF"
             osx_flags: ""
             osx_cflags: ""
@@ -226,52 +181,11 @@ jobs:
       run:
         shell: bash
     steps:
-      # Prebuilt mode: upstream CI's CPack package is one top-level folder
-      # (bin/ lib/ share/ …) — exactly an install prefix, so it becomes
-      # prefix/ and the Collect/Audit/Package/Smoke steps run unchanged.
-      - name: Fetch upstream CI package (prebuilt mode)
-        if: needs.prepare.outputs.mode == 'prebuilt'
-        env:
-          GH_TOKEN: ${{ secrets.SHADERCROSS_ARTIFACT_TOKEN || github.token }}
-          REPO: ${{ inputs.repo }}
-          RUN_ID: ${{ needs.prepare.outputs.upstream_run }}
-          ARTIFACT: ${{ matrix.upstream_artifact }}
-        run: |
-          set -euo pipefail
-          echo "Fetching $ARTIFACT from https://github.com/$REPO/actions/runs/$RUN_ID"
-          gh run download "$RUN_ID" -R "$REPO" -n "$ARTIFACT" -D upstream
-          ls -la upstream
-
-          pkg=$(find upstream -maxdepth 1 -type f \( -name '*.tar.gz' -o -name '*.zip' \) | head -n1)
-          mkdir -p upstream-x
-          case "$pkg" in
-            *.zip)
-              powershell -NoProfile -Command \
-                "Expand-Archive -Path '$pkg' -DestinationPath 'upstream-x'"
-              ;;
-            *.tar.gz)
-              tar -xzf "$pkg" -C upstream-x
-              ;;
-            *)
-              echo "::error::no .tar.gz/.zip package inside $ARTIFACT"
-              exit 1
-              ;;
-          esac
-
-          top=$(find upstream-x -mindepth 1 -maxdepth 1 -type d | head -n1)
-          if [[ -z "$top" || ! -d "$top/bin" ]]; then
-            echo "::error::unexpected package layout in $ARTIFACT (no <dir>/bin)"
-            exit 1
-          fi
-          mv "$top" prefix
-          echo "== prefix/bin:"; ls prefix/bin
-          echo "== prefix/lib:"; ls prefix/lib || true
-
       # SDL 3.4 hard-fails without XTest; the vulkan-loader that
       # INSTALL_RUNTIME builds wants the X11/Wayland headers too. patchelf is
       # REQUIRED by INSTALL_RUNTIME on Linux; bison + libjson-perl by vkd3d.
       - name: Install Linux build deps (SDL3 backends + shadercross extras)
-        if: needs.prepare.outputs.mode == 'build' && matrix.platform == 'linux'
+        if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -286,7 +200,7 @@ jobs:
             libjson-perl
 
       - name: Install macOS build deps (bison + JSON for vendored vkd3d, ninja)
-        if: needs.prepare.outputs.mode == 'build' && matrix.platform == 'macos'
+        if: matrix.platform == 'macos'
         run: |
           brew install bison cpanm ninja
           cpanm JSON
@@ -296,7 +210,7 @@ jobs:
       # cold, same as upstream CI. ccache, persisted across runs, makes
       # rebuilds of an unchanged DXC submodule mostly cache hits.
       - name: Set up ccache (vendored DXC build)
-        if: needs.prepare.outputs.mode == 'build' && matrix.platform == 'macos'
+        if: matrix.platform == 'macos'
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: shadercross-macos
@@ -305,7 +219,7 @@ jobs:
       # INSTALL_RUNTIME resolves spirv-cross's DLL deps with dumpbin, which is
       # only on PATH inside an MSVC dev shell (upstream CI does the same).
       - name: Set up MSVC dev environment
-        if: needs.prepare.outputs.mode == 'build' && matrix.platform == 'windows'
+        if: matrix.platform == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
@@ -314,23 +228,20 @@ jobs:
       # Makefiles generator — on the 3-vCPU / 7 GB macOS runner the DXC (LLVM)
       # build swaps itself to a standstill. Pin jobs to the core count.
       - name: Pin build parallelism
-        if: needs.prepare.outputs.mode == 'build'
         run: |
           jobs=$(getconf _NPROCESSORS_ONLN 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-2}")
           echo "BUILD_JOBS=$jobs" >> "$GITHUB_ENV"
           echo "Building with $jobs parallel jobs"
 
       - name: Checkout SDL_shadercross source (with toolchain submodules)
-        if: needs.prepare.outputs.mode == 'build'
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repo }}
-          ref: ${{ inputs.ref }}
+          ref: ${{ needs.prepare.outputs.ref }}
           path: lib-src
           submodules: recursive
 
       - name: Checkout SDL3 (link dependency)
-        if: needs.prepare.outputs.mode == 'build'
         uses: actions/checkout@v4
         with:
           repository: ${{ needs.prepare.outputs.sdl3_repo }}
@@ -338,7 +249,6 @@ jobs:
           path: sdl3-src
 
       - name: Build + install SDL3 into a local prefix
-        if: needs.prepare.outputs.mode == 'build'
         env:
           OSX_FLAGS: ${{ matrix.osx_flags }}
         run: |
@@ -352,7 +262,6 @@ jobs:
           ls sdl3-prefix/lib
 
       - name: Build SPIRV-Cross (shadercross discovers it via _ROOT below)
-        if: needs.prepare.outputs.mode == 'build'
         env:
           OSX_FLAGS: ${{ matrix.osx_flags }}
           OSX_CFLAGS: ${{ matrix.osx_cflags }}
@@ -375,7 +284,7 @@ jobs:
           echo "spirv_cross_c_shared_ROOT=${root}${sep}${root}/share/spirv_cross_c_shared" >> "$GITHUB_ENV"
 
       - name: Download prebuilt DirectXShaderCompiler (per upstream CI)
-        if: needs.prepare.outputs.mode == 'build' && matrix.vendored == 'OFF'
+        if: matrix.vendored == 'OFF'
         run: |
           set -euo pipefail
           cmake -P lib-src/build-scripts/download-prebuilt-DirectXShaderCompiler.cmake
@@ -397,7 +306,6 @@ jobs:
           echo "DirectXShaderCompiler_ROOT=$dxc_root" >> "$GITHUB_ENV"
 
       - name: Configure SDL_shadercross
-        if: needs.prepare.outputs.mode == 'build'
         env:
           VENDORED: ${{ matrix.vendored }}
           OSX_FLAGS: ${{ matrix.osx_flags }}
@@ -423,7 +331,6 @@ jobs:
             $OSX_FLAGS $OSX_CFLAGS
 
       - name: Build + install SDL_shadercross
-        if: needs.prepare.outputs.mode == 'build'
         run: |
           set -euo pipefail
           cmake --build build --config Release --parallel "$BUILD_JOBS"
@@ -569,23 +476,14 @@ jobs:
       - name: Publish release ${{ needs.prepare.outputs.release_tag }}
         env:
           VERSION: ${{ needs.prepare.outputs.short_sha }}
-          MODE: ${{ needs.prepare.outputs.mode }}
-          UPSTREAM_RUN: ${{ needs.prepare.outputs.upstream_run }}
           RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
-          REF: ${{ inputs.ref }}
+          REF: ${{ needs.prepare.outputs.ref }}
           REPO: ${{ inputs.repo }}
+          SDL3_TAG: ${{ needs.prepare.outputs.sdl3_tag }}
         run: |
           set -euo pipefail
           cd dist
           ls -la
-
-          if [[ "$MODE" == prebuilt ]]; then
-            provenance="Binaries repackaged from upstream CI run [#$UPSTREAM_RUN](https://github.com/$REPO/actions/runs/$UPSTREAM_RUN) and smoke-tested by vulcania CI (HLSL → SPIR-V → MSL)."
-            linux_desc="Steam Linux Runtime 3.0 (sniper) build, glibc >= 2.31"
-          else
-            provenance="Built from source by vulcania CI and smoke-tested (HLSL → SPIR-V → MSL)."
-            linux_desc="ubuntu-24.04 build, glibc >= 2.39"
-          fi
 
           notes=$(cat <<EOF
           Prebuilt **SDL_shadercross** CLI toolchain (source commit $VERSION,
@@ -593,11 +491,12 @@ jobs:
           — the offline HLSL → SPIR-V / MSL / DXIL translator the vulcania phase
           2.5 SDF spike compiles its shaders with.
 
-          $provenance
+          Built from source by CI against SDL3 $SDL3_TAG and smoke-tested
+          (HLSL → SPIR-V → MSL).
 
           | Asset | Contents |
           | ----- | -------- |
-          | SDL_shadercross_linux.tar.gz | x86_64 bin/shadercross + lib/ bundled .so libraries ($linux_desc) |
+          | SDL_shadercross_linux.tar.gz | x86_64 bin/shadercross + lib/ bundled .so libraries (ubuntu-24.04 build, glibc >= 2.39) |
           | SDL_shadercross_macos.tar.gz | universal2 bin/shadercross (arm64 + x86_64) + lib/ bundled dylibs, DXC built from the SDL fork |
           | SDL_shadercross_windows.zip | x64 bin/shadercross.exe + DLLs |
 

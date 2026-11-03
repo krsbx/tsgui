@@ -1,25 +1,20 @@
 [submodule "vendor/SDL"]
 	path = vendor/SDL
 	url = https://github.com/libsdl-org/SDL.git
-  branch = release-3.4.18
 	shallow = true
 [submodule "vendor/SDL_image"]
 	path = vendor/SDL_image
 	url = https://github.com/libsdl-org/SDL_image.git
-  branch = release-3.4.8
 	shallow = true
 [submodule "vendor/SDL_ttf"]
 	path = vendor/SDL_ttf
 	url = https://github.com/libsdl-org/SDL_ttf.git
-  branch = release-3.2.2
 	shallow = true
 [submodule "vendor/SDL_mixer"]
 	path = vendor/SDL_mixer
 	url = https://github.com/libsdl-org/SDL_mixer.git
-  branch = release-3.2.4
 	shallow = true
 [submodule "vendor/SDL_shadercross"]
 	path = vendor/SDL_shadercross
 	url = https://github.com/libsdl-org/SDL_shadercross.git
-  branch = 1ff05bec573988a98ef9e0260b4da44f512b8367
 	shallow = true

@@ -13,10 +13,11 @@
 #   image_tag — SDL_image tag, e.g. release-3.2.4
 #   ttf_tag   — SDL_ttf tag, e.g. release-3.2.2
 #   mixer_tag — SDL_mixer tag, e.g. release-3.2.4
-# Any blank tag = newest stable release-3.x of that repo.
-#   shadercross_ref — SDL_shadercross branch/commit (upstream has no release
-#               tags; default main). Blank = skip shadercross — its macOS
-#               job builds DXC from source and takes 30-90 min.
+#   shadercross_ref — SDL_shadercross commit/branch (upstream has no
+#               release tags)
+# Any blank tag/ref = the pin in version.lock (repo root).
+#   skip_shadercross — skip the shadercross build (its macOS job builds DXC
+#               from source and takes 30-40 min cold).
 
 name: Build SDL family
 
@@ -29,30 +30,35 @@ on:
         default: "libsdl-org"
         type: string
       sdl3_tag:
-        description: SDL3 tag (blank = latest stable release-3.x)
+        description: SDL3 tag (blank = version.lock)
         required: false
         default: ""
         type: string
       image_tag:
-        description: SDL_image tag (blank = latest stable release-3.x)
+        description: SDL_image tag (blank = version.lock)
         required: false
         default: ""
         type: string
       ttf_tag:
-        description: SDL_ttf tag (blank = latest stable release-3.x)
+        description: SDL_ttf tag (blank = version.lock)
         required: false
         default: ""
         type: string
       mixer_tag:
-        description: SDL_mixer tag (blank = latest stable release-3.x)
+        description: SDL_mixer tag (blank = version.lock)
         required: false
         default: ""
         type: string
       shadercross_ref:
-        description: SDL_shadercross branch/commit (blank = skip shadercross)
+        description: SDL_shadercross commit/branch (blank = version.lock)
         required: false
-        default: main
+        default: ""
         type: string
+      skip_shadercross:
+        description: Skip the SDL_shadercross build (slow macOS DXC build)
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -65,9 +71,14 @@ jobs:
       image_tag: ${{ steps.prep.outputs.image_tag }}
       ttf_tag: ${{ steps.prep.outputs.ttf_tag }}
       mixer_tag: ${{ steps.prep.outputs.mixer_tag }}
-    env:
-      GH_TOKEN: ${{ github.token }}
+      shadercross_ref: ${{ steps.prep.outputs.shadercross_ref }}
     steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
       - id: prep
         env:
           OWNER: ${{ inputs.owner }}
@@ -75,6 +86,7 @@ jobs:
           IMAGE_TAG: ${{ inputs.image_tag }}
           TTF_TAG: ${{ inputs.ttf_tag }}
           MIXER_TAG: ${{ inputs.mixer_tag }}
+          SHADERCROSS_REF: ${{ inputs.shadercross_ref }}
         run: |
           set -euo pipefail
 
@@ -83,33 +95,32 @@ jobs:
             exit 1
           fi
 
-          # Explicit tag wins; blank → newest stable release-3.x (the SDL
-          # repos also cut 2.x maintenance releases, which must be skipped).
+          # Explicit input wins; blank → the pin in version.lock.
           resolve() {
-            local repo=$1 tag=$2
-            if [[ -z "$tag" ]]; then
-              tag=$(gh api "repos/$OWNER/$repo/releases?per_page=30" \
-                --jq '[.[] | select(.draft == false and .prerelease == false
-                  and (.tag_name | startswith("release-3.")))][0].tag_name')
+            local key=$1 value=$2
+            if [[ -z "$value" ]]; then
+              value=$(sed -n "s/^$key=//p" version.lock | head -n1)
             fi
-            if [[ -z "$tag" || "$tag" == null ]]; then
-              echo "::error::no stable release-3.x found for $OWNER/$repo — pass a tag"
+            if [[ -z "$value" ]]; then
+              echo "::error::no $key input and no $key= entry in version.lock" >&2
               exit 1
             fi
-            echo "$OWNER/$repo → $tag" >&2
-            echo "$tag"
+            echo "$key → $value" >&2
+            echo "$value"
           }
 
           # Plain assignments so a failed resolve trips set -e.
-          sdl3=$(resolve SDL "$SDL3_TAG")
+          sdl3=$(resolve SDL3 "$SDL3_TAG")
           image=$(resolve SDL_image "$IMAGE_TAG")
           ttf=$(resolve SDL_ttf "$TTF_TAG")
           mixer=$(resolve SDL_mixer "$MIXER_TAG")
+          shadercross=$(resolve SDL_shadercross "$SHADERCROSS_REF")
           {
             echo "sdl3_tag=$sdl3"
             echo "image_tag=$image"
             echo "ttf_tag=$ttf"
             echo "mixer_tag=$mixer"
+            echo "shadercross_ref=$shadercross"
           } >> "$GITHUB_OUTPUT"
 
   # All run in parallel — each satellite builds its own SDL3 (pinned to
@@ -160,13 +171,13 @@ jobs:
   shadercross:
     name: SDL_shadercross
     needs: prepare
-    if: inputs.shadercross_ref != ''
+    if: ${{ !inputs.skip_shadercross }}
     permissions:
       contents: write
     # inherit → optional SHADERCROSS_ARTIFACT_TOKEN for upstream prebuilt packages
     secrets: inherit
     uses: ./.github/workflows/build-sdl-shadercross.yml
     with:
-      ref: ${{ inputs.shadercross_ref }}
+      ref: ${{ needs.prepare.outputs.shadercross_ref }}
       repo: ${{ inputs.owner }}/SDL_shadercross
       sdl3_tag: ${{ needs.prepare.outputs.sdl3_tag }}

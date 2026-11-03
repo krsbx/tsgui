@@ -4,11 +4,10 @@
 #
 # Trigger: Actions → "Build SDL TTF" → Run workflow
 #   tag      — SDL_ttf source tag to build, e.g. release-3.2.2
-#              (blank = newest stable release-3.x of repo)
+#              (blank = pin in version.lock)
 #   repo     — source repository (default libsdl-org/SDL_ttf)
 #   sdl3_tag — SDL3 tag to link against (each matrix job builds it into a
-#              local prefix first). Blank = newest stable <repo owner>/SDL
-#              release.
+#              local prefix first). Blank = SDL3 pin in version.lock.
 #
 # One run publishes one vulcania release tagged SDL3_ttf-<version> with three
 # assets:
@@ -31,7 +30,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Source tag, e.g. release-3.2.2 (blank = latest stable release-3.x)
+        description: Source tag, e.g. release-3.2.2 (blank = version.lock)
         required: false
         default: ""
         type: string
@@ -41,7 +40,7 @@ on:
         default: "libsdl-org/SDL_ttf"
         type: string
       sdl3_tag:
-        description: SDL3 tag to link against (blank = latest stable release)
+        description: SDL3 tag to link against (blank = version.lock)
         required: false
         default: ""
         type: string
@@ -49,7 +48,7 @@ on:
   workflow_call:
     inputs:
       tag:
-        description: Source tag, e.g. release-3.2.2 (blank = latest stable release-3.x)
+        description: Source tag, e.g. release-3.2.2 (blank = version.lock)
         required: false
         default: ""
         type: string
@@ -59,7 +58,7 @@ on:
         default: "libsdl-org/SDL_ttf"
         type: string
       sdl3_tag:
-        description: SDL3 tag to link against (blank = latest stable release)
+        description: SDL3 tag to link against (blank = version.lock)
         required: false
         default: ""
         type: string
@@ -82,6 +81,12 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
       - id: prep
         env:
           TAG: ${{ inputs.tag }}
@@ -90,18 +95,26 @@ jobs:
         run: |
           set -euo pipefail
 
+          # Pinned value for a library from version.lock (KEY=value lines).
+          lock() {
+            local value
+            value=$(sed -n "s/^$1=//p" version.lock | head -n1)
+            if [[ -z "$value" ]]; then
+              echo "::error::version.lock has no $1= entry" >&2
+              exit 1
+            fi
+            echo "$value"
+          }
+
           if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
             echo "::error::repo must look like owner/name, got: $REPO"
             exit 1
           fi
 
-          # Blank tag → newest stable release-3.x of the repo (the SDL repos
-          # also cut 2.x maintenance releases, which must be skipped).
+          # Blank tag → the pin in version.lock.
           if [[ -z "$TAG" ]]; then
-            TAG=$(gh api "repos/$REPO/releases?per_page=30" \
-              --jq '[.[] | select(.draft == false and .prerelease == false
-                and (.tag_name | startswith("release-3.")))][0].tag_name')
-            echo "Resolved latest release of $REPO: $TAG"
+            TAG=$(lock SDL_ttf)
+            echo "Using version.lock: SDL_ttf=$TAG"
           fi
 
           # SDL projects tag releases as release-X.Y.Z — fail fast on typos.
@@ -117,9 +130,7 @@ jobs:
           if [[ -n "$SDL3_TAG_INPUT" ]]; then
             sdl3_tag=$SDL3_TAG_INPUT
           else
-            sdl3_tag=$(gh api "repos/$sdl3_repo/releases?per_page=30" \
-              --jq '[.[] | select(.draft == false and .prerelease == false
-                and (.tag_name | startswith("release-3.")))][0].tag_name')
+            sdl3_tag=$(lock SDL3)
           fi
 
           version=${TAG#release-}
