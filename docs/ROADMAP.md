@@ -212,6 +212,7 @@ the dispatcher exists to replace):
 | 4     | `TextInput`                                 | keyboard + focus dispatch, char/pointer handlers, selection range, scroll-x recompute — the hardest widget in flying-pan                  | ✅ (2026-11-01) — clipboard wired via the injectable seam |
 | 4.5   | `TextArea` (net-new — flying-pan has none)  | shared editing core + text wrap + font prop; Enter keydown, visual-line Up/Down with goal column, y-position click mapping, scroll-follow | ✅ (2026-11-02) — dashboard notes demo                    |
 | 5     | `Canvas`, `Custom` painter                  | CanvasContext + Path2D/tessellation port                                                                                                  | phase 5                                                   |
+| 6     | `RangeSlider` (the last flying-pan-parity widget) | dual-handle `[low, high]` range: nearest-handle picking (low wins ties), no-cross clamping, activeHandle in the store so drags survive controlled rebuilds | ✅ (2026-11-03) |
 
 Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
 enums); `List` (virtualized — `listLayoutFlex` already ported) and a

@@ -41,6 +41,7 @@ import {
   ProgressBar,
   Radio,
   RadioGroup,
+  RangeSlider,
   SliderBar,
   TextInput,
   Toggle,
@@ -106,6 +107,8 @@ let wifi = true;
 let flavor = "mint";
 let volume = 65;
 let tone = 30;
+let priceLow = 20;
+let priceHigh = 80;
 let name = "";
 let dirty = true;
 
@@ -280,6 +283,31 @@ function buildTree(): ReconcilableWidget {
             size: 48,
             onChange: (next) => {
               tone = next;
+              dirty = true;
+            },
+          }),
+        ],
+      }),
+
+      // range slider — two handles, nearest-handle picking, no crossing
+      View({
+        style: {
+          flexDirection: FlexDirection.Column,
+          gap: 8,
+        },
+        children: [
+          Label({
+            text: `price range: ${priceLow.toFixed(2)}–${priceHigh.toFixed(2)}`,
+            style: { color: Palette.textMuted },
+          }),
+          RangeSlider({
+            value: [priceLow, priceHigh],
+            min: 0,
+            max: 100,
+            style: { width: 180, height: 24 },
+            onChange: ([low, high]) => {
+              priceLow = low;
+              priceHigh = high;
               dirty = true;
             },
           }),
