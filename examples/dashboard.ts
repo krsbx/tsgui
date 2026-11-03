@@ -444,9 +444,18 @@ const app = new App({
   },
 });
 
+// Devtools inspector — opt-in: VULCANIA_DEVTOOLS=1 bun run examples/dashboard.ts
+// then open http://127.0.0.1:6060 (tree, selection, frame graph).
+const devtools =
+  process.env.VULCANIA_DEVTOOLS === "1"
+    ? await import("@vulcania/devtools").then(({ inspect }) =>
+        inspect(app, { port: 6060 })
+      )
+    : null;
+
 let lastNodes = 0;
 
-app.run((a) => {
+await app.run((a) => {
   // The trees rebuild every frame; the reconciler short-circuits
   // identical references, so unchanged frames cost a diff walk only.
   a.root.widget = buildDashboard(a);
@@ -483,5 +492,9 @@ app.run((a) => {
     if (a.frames >= 240) a.quit();
   }
 });
+
+// The inspector's samplers are live intervals — close it so the process
+// exits promptly once the loop is done.
+await devtools?.close();
 
 console.log(`dashboard: ${app.frames} frames, ${lastNodes} nodes (root), ok`);

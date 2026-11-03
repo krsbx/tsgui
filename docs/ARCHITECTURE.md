@@ -44,7 +44,11 @@ docs/                                These documents.
 ```
 
 Planned packages (see ROADMAP.md): `@vulcania/platform` (window/input/audio
-lifecycle), `@vulcania/devtools` (inspector server, phase 5).
+lifecycle). `@vulcania/devtools` is the tooling umbrella apps install
+alongside the toolkit: the FFI dylib setup helpers (its `src/ffi` dlopens
+SDL on purpose — the only non-pure package besides bindings/app/gpu) and
+the live inspector (node:http + SSE over `App.onFrameEnd` /
+`AppWindow.paintOverlay` seams — dual-runtime, no Bun.serve).
 
 ## The layering rule
 

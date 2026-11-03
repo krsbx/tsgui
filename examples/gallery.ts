@@ -56,6 +56,15 @@ const app = new App({
 const gpu = app.root.renderer;
 const font = app.root.font;
 
+// Devtools inspector — opt-in: VULCANIA_DEVTOOLS=1 bun run examples/gallery.ts
+// then open http://127.0.0.1:6060 (tree, selection, frame graph).
+const devtools =
+  process.env.VULCANIA_DEVTOOLS === "1"
+    ? await import("@vulcania/devtools").then(({ inspect }) =>
+        inspect(app, { port: 6060 })
+      )
+    : null;
+
 // --- a real PNG, generated at runtime through SDL surfaces ----------------
 const PNG_PATH = "/tmp/vulcania-gallery.png";
 {
@@ -425,7 +434,7 @@ function buildTree(): ReconcilableWidget {
 // --- run through the app shell ---------------------------------------------
 let tree = buildTree();
 
-app.run((a) => {
+await app.run((a) => {
   if (dirty) {
     tree = buildTree(); // new descriptors — identity survives via reconcile
     dirty = false;
@@ -434,6 +443,10 @@ app.run((a) => {
 
   if (selftest && a.frames >= 240) a.quit();
 });
+
+// The inspector's samplers are live intervals — close it so the process
+// exits promptly once the loop is done.
+await devtools?.close();
 
 destroyTexture(photo);
 

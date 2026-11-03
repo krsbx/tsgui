@@ -242,9 +242,15 @@ complete, interactive at 60fps.
 
 ## Phase 5 — Devtools (the debuggability payoff)
 
-- [ ] `@vulcania/devtools`: Bun.serve inspector — live widget tree over
-      WebSocket, resolved styles, hover-highlight in-app, frame-time graph,
-      vertex/draw-call counters.
+- [x] `@vulcania/devtools`: the inspector (2026-11-03) — node:http + SSE
+      (NOT Bun.serve: dual-runtime), live widget tree at ≤4 Hz, click-to-select
+      with the in-app 2px accent outline (`AppWindow.paintOverlay` seam),
+      resolved styles + states via the paint walk's own
+      `effectiveStatesFor`, draw-call/vertex/frame graph from
+      `GpuRenderer.stats`. `App.run` now awaits its frame delay (flying-pan's
+      yielding loop) so an in-process server gets event-loop time. The
+      umbrella also absorbed tools/devtools' FFI setup. `examples/inspector.ts`
+      runs it always-on; dashboard/gallery opt in via `VULCANIA_DEVTOOLS=1`.
 - [ ] Canvas 2D `CanvasContext` port onto the encoder.
 - [ ] Path2D/tessellation port for arbitrary vector paths; TS SVG parser
       feeding it.
