@@ -208,6 +208,13 @@ jobs:
           set -euo pipefail
           archs=native
           [[ "$PLATFORM" == macos ]] && archs="arm64 x86_64"
+          # Resolve @rpath/libSDL3 from the directory the library sits in —
+          # without an RPATH, dlopen fails with "no LC_RPATH's found".
+          rpath_flags=""
+          case "$PLATFORM" in
+            macos) rpath_flags=-DCMAKE_INSTALL_RPATH=@loader_path ;;
+            linux) rpath_flags='-DCMAKE_INSTALL_RPATH=$ORIGIN' ;;
+          esac
           for arch in $archs; do
             arch_flags=""
             [[ "$arch" != native ]] && arch_flags="-DCMAKE_OSX_ARCHITECTURES=$arch"
@@ -216,7 +223,7 @@ jobs:
               -DBUILD_SHARED_LIBS=ON \
               -DSDLTTF_VENDORED=ON \
               -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
-              $arch_flags
+              $arch_flags $rpath_flags
           done
 
       - name: Build + install SDL3_ttf
@@ -286,6 +293,12 @@ jobs:
                 echo "::error::dylib links against Homebrew paths — vendored deps did not engage"
                 exit 1
               fi
+              for f in staging/*.dylib; do
+                if ! otool -l "$f" | grep 'path @loader_path' >/dev/null; then
+                  echo "::error::$(basename "$f") has no @loader_path RPATH — @rpath/libSDL3 will not resolve"
+                  exit 1
+                fi
+              done
               otool -L staging/*.dylib
               ;;
             linux)
