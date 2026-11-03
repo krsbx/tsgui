@@ -7,6 +7,14 @@ import { Library } from "./enums.ts";
 import { getAssetExtension, getLibraryAssetLink } from "./shared.ts";
 
 /**
+ * File stem of the shared library when it differs from the release tag
+ * prefix (`SDL_shadercross-<sha>` ships `libSDL3_shadercross.*`).
+ */
+const FILE_STEM: Partial<Record<Library, string>> = {
+  [Library.SDL3Shadercross]: "SDL3_shadercross",
+};
+
+/**
  * Matches an installed shared library for `library`, e.g. `libSDL3.0.dylib`,
  * `libSDL3.so.0` or `SDL3.dll` — but not `libSDL3_image...` nor a leftover
  * archive from an interrupted run.
@@ -38,7 +46,8 @@ export async function setupFfiCopy(
   const files = await readdir(dest);
 
   await Promise.all(
-    Object.entries(assets).map(async ([library, asset]) => {
+    Object.values(Library).map(async (library) => {
+      const asset = assets[library]!;
       if (!asset.found) {
         console.warn(
           `${library} has no release asset for this platform, skipping`
@@ -46,7 +55,7 @@ export async function setupFfiCopy(
         return;
       }
 
-      if (isInstalled(library, files)) {
+      if (isInstalled(FILE_STEM[library] ?? library, files)) {
         console.log(`${library} already exists in ${dest}, skipping`);
         return;
       }
