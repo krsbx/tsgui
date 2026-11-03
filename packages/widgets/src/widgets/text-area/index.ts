@@ -17,8 +17,8 @@ import {
   Metrics,
   Palette,
   type ReconcilableWidget,
-} from "@tsgui/core";
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import { type ViewStyle, WidgetType } from "@vulcania/layout";
 import { createWidget } from "../../create-widget.ts";
 import { CaretDirection } from "../text-input/core.ts";
 import { textInputClipboard } from "../text-input/state.ts";

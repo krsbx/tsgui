@@ -7,15 +7,15 @@
  * capture state must not leak across windows. The AnimationManager is
  * per-window only because transition keys are stableIds.
  */
-import { AnimationManager } from "@tsgui/animation";
-import { sdl } from "@tsgui/bindings";
+import { AnimationManager } from "@vulcania/animation";
+import { sdl } from "@vulcania/bindings";
 import {
   type ReconcilableWidget,
   type ReconciledNode,
   StateStore,
-} from "@tsgui/core";
-import { type FontManager, type WindowFonts } from "@tsgui/fonts";
-import { GpuRenderer, TtfFont, type WindowHandle } from "@tsgui/gpu";
+} from "@vulcania/core";
+import { type FontManager, type WindowFonts } from "@vulcania/fonts";
+import { GpuRenderer, TtfFont, type WindowHandle } from "@vulcania/gpu";
 import {
   FocusDispatcher,
   type KeyboardInputEvent,
@@ -23,10 +23,10 @@ import {
   type PointerInputEvent,
   ScrollDispatcher,
   type WheelInputEvent,
-} from "@tsgui/interactions";
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
-import { paintTree } from "@tsgui/paint";
-import { Reconciler, widgetPainters } from "@tsgui/widgets";
+} from "@vulcania/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
+import { paintTree } from "@vulcania/paint";
+import { Reconciler, widgetPainters } from "@vulcania/widgets";
 
 export interface RGBA {
   r: number;

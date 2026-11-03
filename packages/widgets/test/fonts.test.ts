@@ -4,7 +4,7 @@
  * measure the SAME font, or the wrapped lines disagree with what was
  * painted (the measureText-injection drift class).
  */
-import type { TextPainter } from "@tsgui/paint";
+import type { TextPainter } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import { Label, renderHeadless, View } from "../src/index.ts";
 

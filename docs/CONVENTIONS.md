@@ -9,7 +9,7 @@ unused vars, formatting); the rest is review discipline.
 
 - **Zero C, zero compiled artifacts.** Everything goes through dlopen FFI —
   `bun:ffi` on Bun, `node:ffi` (Node ≥ 26.9) on Node. No N-API addons, no
-  build step; `libtsgui` is permanently retired (see PLATFORM.md).
+  build step; `libvulcania` is permanently retired (see PLATFORM.md).
 - **Both runtimes, always.** A feature isn't done until its selftest passes
   on Bun _and_ Node. Node strips types only — no parameter properties
   (`constructor(private x)` is rejected at runtime), no TS `enum` values,

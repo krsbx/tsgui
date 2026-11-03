@@ -1,9 +1,9 @@
 /**
- * Branded handle types + shared option types for @tsgui/gpu.
+ * Branded handle types + shared option types for @vulcania/gpu.
  * Handles are derived from the generated symbols surface, so a window can
  * no longer be passed where a renderer or texture is expected.
  */
-import type { SdlSymbols } from "@tsgui/bindings";
+import type { SdlSymbols } from "@vulcania/bindings";
 
 export type WindowHandle = NonNullable<
   ReturnType<SdlSymbols["SDL_CreateWindow"]>

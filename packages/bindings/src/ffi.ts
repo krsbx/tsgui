@@ -20,6 +20,6 @@ export function resolveDylib(
   }
 
   throw new Error(
-    `tsgui: ${what} shared library not found — install it or set ${envVar}`
+    `vulcania: ${what} shared library not found — install it or set ${envVar}`
   );
 }

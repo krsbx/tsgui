@@ -1,7 +1,7 @@
 /** Toggle painter — the sliding knob sub-mark, ported from flying-pan. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import { paintBackground, paintBorder, type WidgetPainter } from "@tsgui/paint";
+import { Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
+import { paintBackground, paintBorder, type WidgetPainter } from "@vulcania/paint";
 import type { ToggleProps } from "../toggle.ts";
 
 const KNOB_INSET = 1;

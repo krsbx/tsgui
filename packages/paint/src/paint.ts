@@ -1,20 +1,20 @@
 /**
- * @tsgui/paint — the generic rendering engine. Walks a LayoutNode tree
+ * @vulcania/paint — the generic rendering engine. Walks a LayoutNode tree
  * and issues draw calls in flying-pan's proven order: shadow → border →
  * background → per-widget painter → children.
  *
  * The engine is widget-agnostic: per-widget painters are injected through
- * `PaintContext.painters` (assembled by @tsgui/widgets, which co-locates
+ * `PaintContext.painters` (assembled by @vulcania/widgets, which co-locates
  * each painter with its widget). The Painter surface is STRUCTURAL and
- * reuses @tsgui/gpu's option types, so GpuRenderer satisfies it while
+ * reuses @vulcania/gpu's option types, so GpuRenderer satisfies it while
  * headless tests mock it.
  */
-import type { AnimationManager } from "@tsgui/animation";
+import type { AnimationManager } from "@vulcania/animation";
 import {
   type InteractionStates,
   STATES_NONE,
   type StateStore,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import type {
   ArcOptions,
   Rect,
@@ -22,9 +22,9 @@ import type {
   RingOptions,
   TextDrawOptions,
   TextureDrawOptions,
-} from "@tsgui/gpu";
-import type { Size, ViewStyle } from "@tsgui/layout";
-import { type LayoutNode, Overflow, WidgetType } from "@tsgui/layout";
+} from "@vulcania/gpu";
+import type { Size, ViewStyle } from "@vulcania/layout";
+import { type LayoutNode, Overflow, WidgetType } from "@vulcania/layout";
 import { paintShadow } from "./primitives/shadow.ts";
 import { paintBackground, paintBorder } from "./primitives/shape.ts";
 import { resolveStyle } from "./style-resolve.ts";
@@ -60,7 +60,7 @@ export type WidgetPainter = (
   states: InteractionStates
 ) => void;
 
-/** Per-widget painter registry — assembled by @tsgui/widgets. */
+/** Per-widget painter registry — assembled by @vulcania/widgets. */
 export type WidgetPainters = ReadonlyMap<
   WidgetType | (string & {}),
   WidgetPainter

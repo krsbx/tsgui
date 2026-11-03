@@ -1,5 +1,5 @@
 /**
- * @tsgui/gpu — the batched renderer over SDL_Renderer's GPU backend.
+ * @vulcania/gpu — the batched renderer over SDL_Renderer's GPU backend.
  *
  * One frame = a handful of FFI calls, constant per texture batch rather
  * than per primitive: SetRenderDrawColor, RenderClear, RenderGeometry

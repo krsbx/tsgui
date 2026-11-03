@@ -1,18 +1,18 @@
 {
-  "name": "@tsgui/app",
+  "name": "@vulcania/app",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/animation": "workspace:*",
-    "@tsgui/fonts": "workspace:*",
-    "@tsgui/bindings": "workspace:*",
-    "@tsgui/core": "workspace:*",
-    "@tsgui/gpu": "workspace:*",
-    "@tsgui/interactions": "workspace:*",
-    "@tsgui/layout": "workspace:*",
-    "@tsgui/paint": "workspace:*",
-    "@tsgui/widgets": "workspace:*"
+    "@vulcania/animation": "workspace:*",
+    "@vulcania/fonts": "workspace:*",
+    "@vulcania/bindings": "workspace:*",
+    "@vulcania/core": "workspace:*",
+    "@vulcania/gpu": "workspace:*",
+    "@vulcania/interactions": "workspace:*",
+    "@vulcania/layout": "workspace:*",
+    "@vulcania/paint": "workspace:*",
+    "@vulcania/widgets": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

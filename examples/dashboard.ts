@@ -1,11 +1,11 @@
 /**
- * tsgui Dashboard — flying-pan's `examples/simple-dashboard.ts` rebuilt
- * on tsgui, multi-window restored. The main window is the scrollable
+ * vulcania Dashboard — flying-pan's `examples/simple-dashboard.ts` rebuilt
+ * on vulcania, multi-window restored. The main window is the scrollable
  * controls/visuals dashboard; the button opens a real second Details
  * window (live state readouts + window info) exactly like the original —
  * opened by the button, closed by its Close button or the window's ✕.
  *
- * The app shell (@tsgui/app) owns SDL, the window registry, event
+ * The app shell (@vulcania/app) owns SDL, the window registry, event
  * decode + routing, and the run loop; this file only builds widget
  * trees and mutates shared state — the phase 4 exit gate in its final
  * shape.
@@ -16,15 +16,15 @@
  * The selftest drives the window lifecycle: Details opens at frame 30,
  * closes at 120, reopens at 180, exits at 240.
  */
-import { App, type AppWindow } from "@tsgui/app";
-import { type ReconcilableWidget } from "@tsgui/core";
+import { App, type AppWindow } from "@vulcania/app";
+import { type ReconcilableWidget } from "@vulcania/core";
 import {
   FlexAlign,
   FlexDirection,
   Overflow,
   ProgressType,
   ProgressValueType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import {
   Button,
   Checkbox,
@@ -39,7 +39,7 @@ import {
   TextInput,
   Toggle,
   View,
-} from "@tsgui/widgets";
+} from "@vulcania/widgets";
 
 const selftest = process.argv.includes("--selftest");
 
@@ -59,7 +59,7 @@ const state = {
   checkboxChecked: false,
   toggleOn: false,
   textInputValue: "",
-  notes: "tsgui notes:\n- zero C\n- multi-window",
+  notes: "vulcania notes:\n- zero C\n- multi-window",
   flavor: "mint",
 };
 
@@ -102,7 +102,7 @@ function buildDashboard(app: App): ReconcilableWidget {
         },
         children: [
           Label({
-            text: "tsgui Dashboard",
+            text: "vulcania Dashboard",
             font: "display",
             style: { color: ACCENT, width: "100%" },
           }),
@@ -390,12 +390,12 @@ const displayFontPath =
     : "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
 
 const app = new App({
-  title: "tsgui — dashboard",
+  title: "vulcania — dashboard",
   width: 800,
   height: 600,
   backgroundColor: BACKDROP,
   fonts: {
-    // default: { path: process.env.TSGUI_FONT_PATH ?? displayFontPath, size: 18 },
+    // default: { path: process.env.VULCANIA_FONT_PATH ?? displayFontPath, size: 18 },
     display: { path: displayFontPath, size: 28 },
   },
 });

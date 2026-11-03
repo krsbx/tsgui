@@ -4,18 +4,18 @@
  * child's value; a child's own onClick fires first. Children carrying a
  * `label` render as a row with the text beside the dot.
  */
-import type { BaseWidgetProps } from "@tsgui/core";
+import type { BaseWidgetProps } from "@vulcania/core";
 import {
   type PointerPayload,
   propsOf,
   type ReconcilableWidget,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import {
   FlexAlign,
   FlexDirection,
   type ViewStyle,
   WidgetType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 import { Label } from "./label.ts";
 import type { RadioProps } from "./radio.ts";

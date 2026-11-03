@@ -1,5 +1,5 @@
 /** Reconcilable widget trees + interaction contract. */
-import type { LayoutNode, WidgetDescriptor } from "@tsgui/layout";
+import type { LayoutNode, WidgetDescriptor } from "@vulcania/layout";
 import type { KeyModifiers, MouseButton } from "./enums.ts";
 import type { StateStore } from "./state.ts";
 

@@ -1,14 +1,14 @@
 {
-  "name": "@tsgui/widgets",
+  "name": "@vulcania/widgets",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/core": "workspace:*",
-    "@tsgui/interactions": "workspace:*",
-    "@tsgui/layout": "workspace:*",
-    "@tsgui/paint": "workspace:*",
-    "@tsgui/gpu": "workspace:*"
+    "@vulcania/core": "workspace:*",
+    "@vulcania/interactions": "workspace:*",
+    "@vulcania/layout": "workspace:*",
+    "@vulcania/paint": "workspace:*",
+    "@vulcania/gpu": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -1,13 +1,13 @@
 /** Inline value labels — flying-pan's renderer/paint/text value branch. */
-import { Palette } from "@tsgui/core";
-import { ProgressValueType, type TextStyle } from "@tsgui/layout";
+import { Palette } from "@vulcania/core";
+import { ProgressValueType, type TextStyle } from "@vulcania/layout";
 import {
   type Painter,
   parseColor,
   type TextPainter,
   type WidgetPainter,
-} from "@tsgui/paint";
-import { resolveFont } from "@tsgui/paint";
+} from "@vulcania/paint";
+import { resolveFont } from "@vulcania/paint";
 
 /** Auto label from a value; `null` when there's nothing to show. */
 export function formatValueLabel(options: {

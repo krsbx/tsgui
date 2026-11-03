@@ -1,6 +1,6 @@
 /** Progress contracts — ported from flying-pan's widget/progress/types. */
-import type { ColorStop } from "@tsgui/core";
-import type { BaseWidgetProps } from "@tsgui/core";
+import type { ColorStop } from "@vulcania/core";
+import type { BaseWidgetProps } from "@vulcania/core";
 import type {
   CircularProgressDirection,
   ProgressBarOrientation,
@@ -9,7 +9,7 @@ import type {
   ProgressValueType,
   TextStyle,
   ViewStyle,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 
 export interface ProgressProps extends BaseWidgetProps {
   value?: number;

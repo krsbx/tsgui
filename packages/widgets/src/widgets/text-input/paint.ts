@@ -1,7 +1,7 @@
 /** TextInput painter — selection, text/placeholder, caret. */
-import { Metrics, Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import { parseColor, resolveFont, type WidgetPainter } from "@tsgui/paint";
+import { Metrics, Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
+import { parseColor, resolveFont, type WidgetPainter } from "@vulcania/paint";
 import type { TextInputProps } from "./index.ts";
 import { peekEditingState } from "./state.ts";
 

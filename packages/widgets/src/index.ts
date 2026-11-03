@@ -1,11 +1,11 @@
 /**
- * @tsgui/widgets — the widget library: factories, the reconciler, each
+ * @vulcania/widgets — the widget library: factories, the reconciler, each
  * widget's painter, and the headless harness. Contracts come from
- * @tsgui/core; input dispatchers live in @tsgui/interactions; the
- * generic rendering engine lives in @tsgui/paint (widgets contribute
+ * @vulcania/core; input dispatchers live in @vulcania/interactions; the
+ * generic rendering engine lives in @vulcania/paint (widgets contribute
  * their painters through PaintContext.painters).
  */
-export * from "@tsgui/core";
+export * from "@vulcania/core";
 export { createWidget, type CreateWidgetOptions } from "./create-widget.ts";
 export { Reconciler } from "./reconciler.ts";
 

@@ -1,10 +1,10 @@
 /**
- * The per-widget painter registry — what @tsgui/widgets contributes to
+ * The per-widget painter registry — what @vulcania/widgets contributes to
  * PaintContext.painters. Each painter is co-located with its widget
- * (<widget>/paint.ts); the engine (@tsgui/paint) stays widget-agnostic.
+ * (<widget>/paint.ts); the engine (@vulcania/paint) stays widget-agnostic.
  */
-import { WidgetType } from "@tsgui/layout";
-import type { WidgetPainters } from "@tsgui/paint";
+import { WidgetType } from "@vulcania/layout";
+import type { WidgetPainters } from "@vulcania/paint";
 import { paintCheckbox } from "./widgets/checkbox/paint.ts";
 import { paintImage } from "./widgets/image/paint.ts";
 import { paintLabel } from "./widgets/label/paint.ts";

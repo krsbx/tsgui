@@ -6,31 +6,31 @@ Bun workspaces (`packages/*`), one package per layer:
 
 ```
 packages/
-  bindings/     @tsgui/bindings      Native entry points (see FFI.md). The ONLY
+  bindings/     @vulcania/bindings      Native entry points (see FFI.md). The ONLY
                                      package allowed to dlopen native code.
-  gpu/          @tsgui/gpu           Batched renderer: geometry → SDL_Vertex
+  gpu/          @vulcania/gpu           Batched renderer: geometry → SDL_Vertex
                                      buffers → SDL_RenderGeometry (see RENDERING.md).
-  layout/       @tsgui/layout        Flexbox engine. Pure TS.
-  core/         @tsgui/core          Shared contracts: widget tree + interaction
+  layout/       @vulcania/layout        Flexbox engine. Pure TS.
+  core/         @vulcania/core          Shared contracts: widget tree + interaction
                                      payloads, StateStore, design tokens,
                                      InteractionStates. Pure TS.
-  interactions/ @tsgui/interactions  Event-fed dispatchers (pointer, focus,
+  interactions/ @vulcania/interactions  Event-fed dispatchers (pointer, focus,
                                      scroll) + hit-test. Pure TS.
-  animation/    @tsgui/animation     Style animation engine: AnimationManager
+  animation/    @vulcania/animation     Style animation engine: AnimationManager
                                      (transitions), easings, packed-color
                                      interpolation. Pure TS.
-  fonts/        @tsgui/fonts         Font registry: named font descriptors
+  fonts/        @vulcania/fonts         Font registry: named font descriptors
                                      (path + size) materialized per renderer
                                      as TtfFont instances.
-  paint/        @tsgui/paint         Generic rendering engine: paintTree walk,
+  paint/        @vulcania/paint         Generic rendering engine: paintTree walk,
                                      Painter/TextPainter surfaces, style
                                      resolution, fill/shape/shadow primitives.
                                      Pure TS.
-  widgets/      @tsgui/widgets       Widget factories (incl. net-new TextArea),
+  widgets/      @vulcania/widgets       Widget factories (incl. net-new TextArea),
                                      reconciler, per-widget painters (co-located
                                      with each widget), painter registry,
                                      headless harness. Pure TS.
-  app/          @tsgui/app           The application shell: multi-window App
+  app/          @vulcania/app           The application shell: multi-window App
                                      (SDL init, window registry, event decode
                                      + window routing, the run loop) and the
                                      per-window toolkit stack.
@@ -42,14 +42,14 @@ tools/codegen/                       Clang AST → FFI tables (bun:ffi / node:ff
 docs/                                These documents.
 ```
 
-Planned packages (see ROADMAP.md): `@tsgui/platform` (window/input/audio
-lifecycle), `@tsgui/devtools` (inspector server, phase 5).
+Planned packages (see ROADMAP.md): `@vulcania/platform` (window/input/audio
+lifecycle), `@vulcania/devtools` (inspector server, phase 5).
 
 ## The layering rule
 
 **`layout` is pure TypeScript** — no FFI, no native code, no window.
-**`widgets` never imports `@tsgui/bindings`** — its SDL-adjacent needs go
-through `@tsgui/gpu` or injectable seams (clipboard). `bindings` is the only
+**`widgets` never imports `@vulcania/bindings`** — its SDL-adjacent needs go
+through `@vulcania/gpu` or injectable seams (clipboard). `bindings` is the only
 package that dlopens native code.
 
 Concretely:
@@ -83,7 +83,7 @@ flying-pan lacks and it is the foundation of headless snapshot testing.
 ## Frame loop
 
 JS-driven; SDL3 requires the main thread for video/events. The shell
-lives in `@tsgui/app` — `App.run(frameBody)` polls + decodes events,
+lives in `@vulcania/app` — `App.run(frameBody)` polls + decodes events,
 routes them by `windowID`, runs the app body (which assigns each
 window's widget), then per window reconciles → lays out → dispatches →
 ticks the animation clock → paints. The gallery and dashboard run
@@ -99,7 +99,7 @@ while (running):
   root = layoutFlex(reconciled)        # pure TS → LayoutNode tree
   pointer.dispatch(events)             # hover/press/click + drag capture
   focus.dispatch(events)               # focus, key/char routing
-  animations.tick(t)                   # the transition clock (@tsgui/animation)
+  animations.tick(t)                   # the transition clock (@vulcania/animation)
   paintTree(ctx, root)                 # queues batches; overlay + phases
   gpu.present()
 ```
@@ -112,10 +112,10 @@ RENDERING.md) — it does not scale with widget count.
 Pointer (hover/press/click/drag), focus (click-to-focus, tab cycling,
 key/char routing) and scroll (wheel → nearest scrollable ancestor,
 clamped bounds, velocity coasting) are event-fed dispatchers in
-`@tsgui/interactions`: the app decodes SDL events into typed events
+`@vulcania/interactions`: the app decodes SDL events into typed events
 and feeds them per frame. Pure TypeScript — headless-testable, never touch
 SDL themselves; their contracts (payloads, key/mouse enums, StateStore,
-InteractionStates) come from `@tsgui/core`.
+InteractionStates) come from `@vulcania/core`.
 
 ### GC discipline
 

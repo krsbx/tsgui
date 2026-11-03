@@ -8,7 +8,7 @@
  * Runs against the software driver so readback is deterministic; skipped
  * when there is no display (headless CI).
  */
-import { PixelFormat, sdl, SdlDefines } from "@tsgui/bindings";
+import { PixelFormat, sdl, SdlDefines } from "@vulcania/bindings";
 import { afterAll, describe, expect, test } from "bun:test";
 import {
   createTextureFromPixels,
@@ -22,7 +22,7 @@ sdl.SDL_SetHint({ name: "SDL_VIDEO_ALLOW_SCREENSAVER", value: "0" });
 const initOk = sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO });
 const window = initOk
   ? sdl.SDL_CreateWindow({
-      title: "tsgui gpu readback",
+      title: "vulcania gpu readback",
       w: 64,
       h: 64,
       flags: SdlDefines.SDL_WINDOW_HIDDEN,

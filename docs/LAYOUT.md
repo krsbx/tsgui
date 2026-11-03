@@ -1,6 +1,6 @@
 # Layout Engine
 
-Package: `@tsgui/layout` — ported from flying-pan's layout subsystem
+Package: `@vulcania/layout` — ported from flying-pan's layout subsystem
 (~1,400 lines, 17 files) with one decisive change: **layout no longer
 depends on the renderer.**
 
@@ -10,7 +10,7 @@ flying-pan aliased `LayoutContext = PaintContext`, which dragged the
 renderer, font manager, and interaction managers into every layout call —
 the reason layout could not be tested without a window and a GPU.
 
-tsgui's `LayoutContext` is minimal and injected:
+vulcania's `LayoutContext` is minimal and injected:
 
 ```ts
 interface LayoutContext {
@@ -29,7 +29,7 @@ interface LayoutContext {
 
 Production wiring (ttf measurement, the scroll dispatcher) happens in the
 app layer; headless tests stub it in ten lines. The ESLint boundary rule
-forbids this package from importing `@tsgui/bindings` or `@tsgui/platform`.
+forbids this package from importing `@vulcania/bindings` or `@vulcania/platform`.
 
 ## Semantics (differences from naive expectations)
 

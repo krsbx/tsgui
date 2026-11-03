@@ -15,8 +15,8 @@ import {
   Scancode,
   sdl,
   SdlDefines,
-} from "@tsgui/bindings";
-import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@tsgui/gpu";
+} from "@vulcania/bindings";
+import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@vulcania/gpu";
 
 const selftest = process.argv.includes("--selftest");
 
@@ -25,7 +25,7 @@ if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
 }
 
 const window = sdl.SDL_CreateWindow({
-  title: "tsgui — phase 2 showcase",
+  title: "vulcania — phase 2 showcase",
   w: 1280,
   h: 800,
   flags: SdlDefines.SDL_WINDOW_RESIZABLE,
@@ -36,7 +36,7 @@ const gpu = new GpuRenderer(window);
 gpu.clearColor = { r: 24, g: 26, b: 34, a: 255 };
 
 const FONT_PATHS = [
-  process.env.TSGUI_FONT_PATH,
+  process.env.VULCANIA_FONT_PATH,
   "/System/Library/Fonts/Supplemental/Arial.ttf",
   "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
 ].filter((p): p is string => !!p);
@@ -45,7 +45,7 @@ const font = new TtfFont(gpu.renderer, FONT_PATHS[0]!, 24);
 const fontSmall = new TtfFont(gpu.renderer, FONT_PATHS[0]!, 16);
 
 // --- a real PNG, generated at runtime through SDL surfaces ---------------
-const PNG_PATH = "/tmp/tsgui-showcase.png";
+const PNG_PATH = "/tmp/vulcania-showcase.png";
 {
   const surface = sdl.SDL_CreateSurface({
     width: 256,
@@ -112,7 +112,7 @@ while (running) {
   font.draw(gpu, {
     x: 64,
     y: 52,
-    text: "tsgui — phase 2 showcase",
+    text: "vulcania — phase 2 showcase",
     tint: rgba({ r: 235, g: 238, b: 245 }),
   });
 

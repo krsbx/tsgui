@@ -5,8 +5,8 @@
  * dispatch harness; the module-level editing-state map is keyed by
  * stableId which restarts per reconciler, so tests reset in setup.
  */
-import { AnimationManager } from "@tsgui/animation";
-import { KeyModifiers, type ReconcilableWidget, StateStore } from "@tsgui/core";
+import { AnimationManager } from "@vulcania/animation";
+import { KeyModifiers, type ReconcilableWidget, StateStore } from "@vulcania/core";
 import {
   FocusDispatcher,
   type KeyboardInputEvent,
@@ -14,8 +14,8 @@ import {
   PointerDispatcher,
   type PointerInputEvent,
   PointerInputKind,
-} from "@tsgui/interactions";
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
+} from "@vulcania/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
 import { beforeEach, describe, expect, test } from "bun:test";
 import { renderHeadless } from "../src/index.ts";
 import {

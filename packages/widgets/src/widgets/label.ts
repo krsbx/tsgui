@@ -1,8 +1,8 @@
 /** Label — non-interactive text. */
-import { Palette } from "@tsgui/core";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
-import { PointerEvents, WidgetType } from "@tsgui/layout";
-import type { TextStyle } from "@tsgui/layout";
+import { Palette } from "@vulcania/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@vulcania/core";
+import { PointerEvents, WidgetType } from "@vulcania/layout";
+import type { TextStyle } from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 
 export interface LabelProps extends BaseWidgetProps {

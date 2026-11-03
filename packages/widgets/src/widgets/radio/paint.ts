@@ -1,7 +1,7 @@
 /** Radio painter — the dot sub-mark, ported from flying-pan. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import { paintBackground, paintBorder, type WidgetPainter } from "@tsgui/paint";
+import { Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
+import { paintBackground, paintBorder, type WidgetPainter } from "@vulcania/paint";
 import type { RadioProps } from "../radio.ts";
 
 const DOT_INSET = 0.5;

@@ -12,10 +12,10 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
-import type { BaseWidgetProps } from "@tsgui/core";
-import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@tsgui/core";
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import type { BaseWidgetProps } from "@vulcania/core";
+import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@vulcania/core";
+import { type ViewStyle, WidgetType } from "@vulcania/layout";
 import { createWidget } from "../../create-widget.ts";
 import {
   backspace,

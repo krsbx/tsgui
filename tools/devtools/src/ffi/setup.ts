@@ -22,7 +22,7 @@ function isInstalled(library: string, files: string[]) {
 export async function setupFfiCopy(
   dest: string,
   owner: string = "krsbx",
-  repo: string = "tsgui"
+  repo: string = "vulcania"
 ) {
   const releases = await getReleases(owner, repo);
 

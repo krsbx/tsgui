@@ -14,7 +14,7 @@ import {
   EasingName,
   type Transition,
   type ViewStyle,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { parseColor } from "./color.ts";
 import { easings } from "./easing.ts";
 import { interpolate } from "./interpolate.ts";

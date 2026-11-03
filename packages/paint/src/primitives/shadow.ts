@@ -3,9 +3,9 @@
  * falloff with the existing primitive (flying-pan's documented approach;
  * a Renderer-level blur lands with the SDF spike).
  */
-import { colorWithOpacity, parseColor } from "@tsgui/animation";
-import type { Rect } from "@tsgui/gpu";
-import type { ViewStyle } from "@tsgui/layout";
+import { colorWithOpacity, parseColor } from "@vulcania/animation";
+import type { Rect } from "@vulcania/gpu";
+import type { ViewStyle } from "@vulcania/layout";
 import type { Painter } from "../paint.ts";
 
 /**

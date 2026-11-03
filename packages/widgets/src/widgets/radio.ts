@@ -5,9 +5,9 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
-import { type TextStyle, type ViewStyle, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@vulcania/core";
+import { type TextStyle, type ViewStyle, WidgetType } from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 
 export interface RadioProps extends BaseWidgetProps {

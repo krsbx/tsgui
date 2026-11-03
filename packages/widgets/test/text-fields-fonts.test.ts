@@ -4,8 +4,8 @@
  * caret and selection land where the painted glyphs actually are (the
  * 8px-estimate drift bug, caught on Label first and extended here).
  */
-import { AnimationManager } from "@tsgui/animation";
-import type { TextPainter } from "@tsgui/paint";
+import { AnimationManager } from "@vulcania/animation";
+import type { TextPainter } from "@vulcania/paint";
 import { beforeEach, describe, expect, test } from "bun:test";
 import {
   renderHeadless,

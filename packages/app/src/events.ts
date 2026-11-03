@@ -6,19 +6,19 @@
  * scancode@24, text pointer@24, wheel scroll@24, motion x@28, button
  * u8@24 — the offsets the gallery proved against real events).
  */
-import { EventType, readCString, Scancode, SdlDefines } from "@tsgui/bindings";
+import { EventType, readCString, Scancode, SdlDefines } from "@vulcania/bindings";
 import {
   KeyModifiers,
   type KeyModifiers as KeyModifiersType,
-} from "@tsgui/core";
-import type { MouseButton } from "@tsgui/core";
+} from "@vulcania/core";
+import type { MouseButton } from "@vulcania/core";
 import {
   type KeyboardInputEvent,
   KeyboardInputKind,
   type PointerInputEvent,
   PointerInputKind,
   type WheelInputEvent,
-} from "@tsgui/interactions";
+} from "@vulcania/interactions";
 
 /** One SDL_EVENT_WINDOW_CLOSE_REQUESTED — route by windowId. */
 export interface CloseRequest {

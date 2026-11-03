@@ -14,10 +14,10 @@
  *   bun run examples/gallery.ts --selftest   # exit after 240 frames
  *   node examples/gallery.ts --selftest
  */
-import { App } from "@tsgui/app";
-import { image, PixelFormat, sdl } from "@tsgui/bindings";
-import { type ReconcilableWidget } from "@tsgui/core";
-import { destroyTexture, rgba } from "@tsgui/gpu";
+import { App } from "@vulcania/app";
+import { image, PixelFormat, sdl } from "@vulcania/bindings";
+import { type ReconcilableWidget } from "@vulcania/core";
+import { destroyTexture, rgba } from "@vulcania/gpu";
 import {
   EasingName,
   FlexAlign,
@@ -25,7 +25,7 @@ import {
   Overflow,
   ProgressType,
   ProgressValueType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import {
   Button,
   Checkbox,
@@ -42,13 +42,13 @@ import {
   TextInput,
   Toggle,
   View,
-} from "@tsgui/widgets";
+} from "@vulcania/widgets";
 
 const selftest = process.argv.includes("--selftest");
 
 // --- app shell (SDL init, root window, renderer, font, event routing) ----
 const app = new App({
-  title: "tsgui — widget gallery",
+  title: "vulcania — widget gallery",
   width: 1024,
   height: 640,
   backgroundColor: { r: 17, g: 24, b: 39, a: 255 }, // gray-900 backdrop
@@ -57,7 +57,7 @@ const gpu = app.root.renderer;
 const font = app.root.font;
 
 // --- a real PNG, generated at runtime through SDL surfaces ----------------
-const PNG_PATH = "/tmp/tsgui-gallery.png";
+const PNG_PATH = "/tmp/vulcania-gallery.png";
 {
   const surface = sdl.SDL_CreateSurface({
     width: 256,
@@ -125,7 +125,7 @@ function buildTree(): ReconcilableWidget {
         },
         children: [
           Label({
-            text: "tsgui widget gallery",
+            text: "vulcania widget gallery",
             style: { color: Palette.textOnAccent },
           }),
           Label({

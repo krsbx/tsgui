@@ -1,1 +1,1 @@
-export * from "@tsgui/bindings";
+export * from "@vulcania/bindings";

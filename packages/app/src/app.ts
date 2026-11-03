@@ -6,8 +6,8 @@
  * dispatches → paints (SDL has no GL context switch, so all windows
  * render every frame, unlike flying-pan's active-window-only pass).
  */
-import { sdl, SdlDefines } from "@tsgui/bindings";
-import { type FontDescriptor, FontManager } from "@tsgui/fonts";
+import { sdl, SdlDefines } from "@vulcania/bindings";
+import { type FontDescriptor, FontManager } from "@vulcania/fonts";
 import { type DecodedEvents, EventDecoder } from "./events.ts";
 import { AppWindow, type AppWindowOptions, type RGBA } from "./window.ts";
 

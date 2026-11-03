@@ -1,6 +1,6 @@
 /** Meter — HTML-`<meter>` zone semantics over the shared fill painter. */
-import { Palette } from "@tsgui/core";
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
+import { Palette } from "@vulcania/core";
+import type { BaseWidgetProps, ReconcilableWidget } from "@vulcania/core";
 import {
   PointerEvents,
   ProgressBarOrientation,
@@ -9,7 +9,7 @@ import {
   type TextStyle,
   type ViewStyle,
   WidgetType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 
 export interface MeterProps extends BaseWidgetProps {

@@ -1,6 +1,6 @@
 /**
- * tsgui codegen CLI — parses real C headers via clang's AST JSON dump and
- * generates FFI backend tables for @tsgui/bindings.
+ * vulcania codegen CLI — parses real C headers via clang's AST JSON dump and
+ * generates FFI backend tables for @vulcania/bindings.
  *
  * Usage:
  *   bun run tools/codegen/src/index.ts <target>|all [--check]

@@ -7,12 +7,12 @@
  * 4's dispatch feeds the real interaction flags; until then they default
  * to false and the base style passes through untouched.
  */
-import { colorWithOpacity, parseColor } from "@tsgui/animation";
-import type { InteractionStates } from "@tsgui/core";
-import type { ViewStyle } from "@tsgui/layout";
+import { colorWithOpacity, parseColor } from "@vulcania/animation";
+import type { InteractionStates } from "@vulcania/core";
+import type { ViewStyle } from "@vulcania/layout";
 
 export type { InteractionStates };
-// The packed-color codec lives in @tsgui/animation (interpolation needs
+// The packed-color codec lives in @vulcania/animation (interpolation needs
 // channel access); re-exported here so paint consumers import unchanged.
 export { colorWithOpacity, parseColor };
 

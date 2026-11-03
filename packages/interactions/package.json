@@ -1,11 +1,11 @@
 {
-  "name": "@tsgui/interactions",
+  "name": "@vulcania/interactions",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/core": "workspace:*",
-    "@tsgui/layout": "workspace:*"
+    "@vulcania/core": "workspace:*",
+    "@vulcania/layout": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

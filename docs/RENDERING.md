@@ -2,7 +2,7 @@
 
 ## Model: batched SDL_RenderGeometry — JS writes vertices, SDL draws
 
-The renderer (`GpuRenderer` in `@tsgui/gpu`) is a **geometry batcher** over
+The renderer (`GpuRenderer` in `@vulcania/gpu`) is a **geometry batcher** over
 SDL3's `SDL_Renderer` GPU backend. JS writes typed-array vertices; the GPU
 work is one `SDL_RenderGeometry` call per texture batch.
 
@@ -22,7 +22,7 @@ count (one per distinct texture); untextured geometry shares one batch.
 
 ## Backend
 
-`GpuRenderer` is constructed per window (`@tsgui/app` builds one per
+`GpuRenderer` is constructed per window (`@vulcania/app` builds one per
 AppWindow) — SDL textures are renderer-scoped, so fonts and image
 textures are per-window too; nothing shares them across windows.
 
@@ -78,7 +78,7 @@ the software-driver pixel tests exercise readback without needing them.
 
 ## Decoration layers
 
-The generic engine (`@tsgui/paint`) paints per widget in flying-pan's
+The generic engine (`@vulcania/paint`) paints per widget in flying-pan's
 order: **shadow → border → background → widget content → children**:
 
 - `primitives/shadow.ts` — stacked rounded-rect falloff layers (blur
@@ -88,7 +88,7 @@ order: **shadow → border → background → widget content → children**:
   borderWidth/2);
 - `primitives/fill.ts` + `color-stops.ts` — value fills, continuous and
   stepped (segments + gaps), with threshold color stops;
-- per-widget painters live in `@tsgui/widgets`, **co-located with their
+- per-widget painters live in `@vulcania/widgets`, **co-located with their
   widget** (`widgets/<name>/paint.ts` — `progress/paint/*`, `slider/*`,
   `meter`, `checkbox`, `toggle`, `radio`, `text-input`, `label`, `image`)
   and are injected through `PaintContext.painters` — one file per
@@ -105,7 +105,7 @@ The SDL3_ttf tier: white glyph runs rendered per unique string
 (`TTF_RenderText_Blended`, length 0 = NUL-terminated), uploaded as
 textures, tinted at draw, cached per string in the `TtfFont`. Fonts
 are NAMED: the app registers descriptors (path + size) through
-`@tsgui/fonts`, every window materializes its own TtfFont set (SDL
+`@vulcania/fonts`, every window materializes its own TtfFont set (SDL
 font textures are renderer-scoped), and `Label.font` resolves through
 `PaintContext.fonts` — layout measures the same font via
 `LayoutContext.measureText`'s fontName parameter, so wrap and paint
@@ -124,7 +124,7 @@ static caret. Focus comes from the focus dispatcher through
 
 ## Animation
 
-`@tsgui/animation` owns the clock: `AnimationManager.tick(t)` runs each
+`@vulcania/animation` owns the clock: `AnimationManager.tick(t)` runs each
 frame, and the paint walk applies its overlay to any style declaring
 `transition` — changed properties fade from the displayed value
 (easing curves: linear/ease/ease-in/ease-out/ease-in-out; colors

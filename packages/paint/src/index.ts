@@ -1,9 +1,9 @@
 /**
- * @tsgui/paint — the generic rendering engine: the paintTree walk
+ * @vulcania/paint — the generic rendering engine: the paintTree walk
  * (shadow → border → background → registered painter → children), the
  * structural Painter/TextPainter surfaces, style resolution, and the
  * generic fill/shape/shadow primitives. Per-widget painters live in
- * @tsgui/widgets, co-located with their widgets, injected through
+ * @vulcania/widgets, co-located with their widgets, injected through
  * PaintContext.painters.
  */
 export {

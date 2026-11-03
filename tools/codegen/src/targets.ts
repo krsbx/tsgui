@@ -17,11 +17,11 @@ export interface TargetSpec {
 
 /** Base include dir exposing SDL3/ plus the satellite header dirs. */
 export function includeDir(): string {
-  if (process.env.TSGUI_SDL3_INCLUDE) return process.env.TSGUI_SDL3_INCLUDE;
+  if (process.env.VULCANIA_SDL3_INCLUDE) return process.env.VULCANIA_SDL3_INCLUDE;
   if (process.platform === "darwin") return "/opt/homebrew/include";
   if (process.platform === "linux") return "/usr/include";
   throw new Error(
-    "codegen: set TSGUI_SDL3_INCLUDE to the base include directory (contains SDL3/, SDL3_image/, …)"
+    "codegen: set VULCANIA_SDL3_INCLUDE to the base include directory (contains SDL3/, SDL3_image/, …)"
   );
 }
 

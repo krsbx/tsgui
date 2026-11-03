@@ -3,10 +3,10 @@
  * dispatcher: track-press jumps, handle-press drags, hover never mutates,
  * step snapping, and the disabled no-op.
  */
-import { MouseButton, Palette, StateStore } from "@tsgui/core";
-import { PointerDispatcher, PointerInputKind } from "@tsgui/interactions";
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
-import { parseColor } from "@tsgui/paint";
+import { MouseButton, Palette, StateStore } from "@vulcania/core";
+import { PointerDispatcher, PointerInputKind } from "@vulcania/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
+import { parseColor } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   type PaintOp,

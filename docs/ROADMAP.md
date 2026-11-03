@@ -13,8 +13,8 @@ before anything else gets built on it.
       scanner (see FFI.md).
 - [x] Generate SDL3 tables: 1087 functions, 95 enums, 245 defines; 144
       FFI-unsafe exclusions reported (callbacks, variadics, struct-by-value).
-- [x] `@tsgui/bindings`: runtime detection, SDL3 dylib resolution
-      (`TSGUI_SDL3_PATH` → platform paths → soname), `sdl` hardcore tier.
+- [x] `@vulcania/bindings`: runtime detection, SDL3 dylib resolution
+      (`VULCANIA_SDL3_PATH` → platform paths → soname), `sdl` hardcore tier.
 - [x] `examples/hello.ts`: window + clear + event polling, zero compiled
       code.
 
@@ -25,11 +25,11 @@ headless smoke (`bun run smoke`).
 
 ## Phase 1 — Batched renderer in TypeScript (the thesis test, zero C) ✅ (2026-10-30)
 
-Revised: the `libtsgui` C core is retired — SDL_Renderer's GPU backend +
+Revised: the `libvulcania` C core is retired — SDL_Renderer's GPU backend +
 `SDL_RenderGeometryRaw` + `SDL_SetGPURenderState` cover it entirely through
 FFI (see PLATFORM.md).
 
-- [x] Renderer module in `@tsgui/gpu`: GPU-backend renderer per window
+- [x] Renderer module in `@vulcania/gpu`: GPU-backend renderer per window
       (`SDL_CreateRendererWithProperties`, "gpu" backend confirmed on
       macOS), batch accumulator into a reused vertex buffer, flush =
       `SDL_RenderGeometry` per texture batch. (Buffer since corrected to
@@ -64,7 +64,7 @@ Bun — measured **avg 0.35ms/frame (≈2,850 fps), p99 < 1ms, 6 calls/frame,
 
 Revised mid-phase: the zero-C decision routes decoration through the SDL
 tiers instead of porting stb_truetype / stb_image C sources, and the
-install-time source build disappeared along with libtsgui — nothing
+install-time source build disappeared along with libvulcania — nothing
 compiles at all.
 
 - [x] Scissor clipping — `SDL_SetRenderClipRect` push/pop around batch
@@ -73,8 +73,8 @@ compiles at all.
       tint; supersedes the stb_truetype atlas port. (2026-10-31)
 - [x] Image textures via the SDL3_image tier — `IMG_LoadTexture`, runtime
       PNG through surface + `SDL_SavePNG`; supersedes
-      `tsgui_image_decode`. (2026-10-31)
-- [x] Decoration layers in `@tsgui/widgets`' paint walk — shadow (stacked
+      `vulcania_image_decode`. (2026-10-31)
+- [x] Decoration layers in `@vulcania/widgets`' paint walk — shadow (stacked
       rounded-rect falloff), border (oversized shape), background
       (rounded when radius is set). (2026-10-31)
 - [x] ~~Install-time source build~~ — dropped with the zero-C decision:
@@ -89,7 +89,7 @@ pixel-readback guards for the geometry/vertex ABI and batch isolation.
 
 ## Phase 3.5 — Widget parity batch 1 (paint-only) (2026-10-31)
 
-tsgui shipped 4 widgets against flying-pan's ~14. The paint-only widgets
+vulcania shipped 4 widgets against flying-pan's ~14. The paint-only widgets
 port now; interaction widgets wait for the phase 4 dispatch.
 
 - [x] Shared fill painters — continuous + stepped fills (orientation/
@@ -123,12 +123,12 @@ in the paint path.
 
 ## Phase 3 — Layout + reconciler ✅ (2026-10-31)
 
-- [x] Port flying-pan's flexbox engine into `@tsgui/layout` (2026-10-31)
+- [x] Port flying-pan's flexbox engine into `@vulcania/layout` (2026-10-31)
       — GL coupling stripped, `LayoutContext` minimal + injected (was
       aliased to the renderer's PaintContext), single-object params kept,
       per-run text measurement via the `ttf` tier. 8 headless tests green
       on the full semantic surface; see docs/LAYOUT.md.
-- [x] Port reconciler + `stableId` + `StateStore` into `@tsgui/widgets`
+- [x] Port reconciler + `stableId` + `StateStore` into `@vulcania/widgets`
       (2026-10-31) — keyed children, identity short-circuit, mount/update/
       unmount hooks, state destroy-on-unmount.
 - [x] **Headless harness** (2026-10-31) — `renderHeadless()` runs tree →
@@ -142,13 +142,13 @@ runtimes.
 
 ## Phase 4 — Interactions + animation
 
-- [x] Package split (2026-11-01) — `@tsgui/widgets` was four concerns in
-      one package; now `@tsgui/core` (contracts: payloads, enums,
-      StateStore, design tokens, InteractionStates), `@tsgui/interactions`
-      (pointer/focus/scroll dispatchers + hit-test), and `@tsgui/paint`
+- [x] Package split (2026-11-01) — `@vulcania/widgets` was four concerns in
+      one package; now `@vulcania/core` (contracts: payloads, enums,
+      StateStore, design tokens, InteractionStates), `@vulcania/interactions`
+      (pointer/focus/scroll dispatchers + hit-test), and `@vulcania/paint`
       (generic walk + Painter surfaces + fill/shape/shadow primitives)
       are their own packages, with per-widget painters co-located in
-      `@tsgui/widgets` and injected through `PaintContext.painters`.
+      `@vulcania/widgets` and injected through `PaintContext.painters`.
       Dependencies point strictly downward; see ARCHITECTURE.md.
 - [x] Text wrapping (2026-11-01) — labels wrap to the available width
       like the web (default on; `textWrap: TextWrap.NoWrap` opts out).
@@ -181,18 +181,18 @@ Foundation work (each item unblocks a widget batch):
       keyed by stableId (radio groups by `name`), painted through
       `PaintContext.stateStore`; pseudo-states (`_hover`/`_focus`/
       `_pressed`/`_checked`/`_disabled`) ride the dispatchers' `statesOf`.
-- [x] AnimationManager port (2026-11-01) — `@tsgui/animation`: the
+- [x] AnimationManager port (2026-11-01) — `@vulcania/animation`: the
       transition engine (applyOverlay with mid-flight retargeting and
       parse-normalized color settling), easings, and the clock that
       drives indeterminate progress motion, the caret blink, and
       ViewStyle transitions. Injected through PaintContext.animationManager.
-- [x] Font manager (2026-11-02) — `@tsgui/fonts`: named font
+- [x] Font manager (2026-11-02) — `@vulcania/fonts`: named font
       descriptors (path + size) materialized per renderer as TtfFont
       instances; "default" is a registered identifier (apps load a
       specific font and alias it — never a hardcoded system font).
       Label.font resolves through PaintContext.fonts; layout measures
       the same font via measureText's fontName parameter.
-- [x] Multi-window (2026-11-01) — `@tsgui/app`, the application shell:
+- [x] Multi-window (2026-11-01) — `@vulcania/app`, the application shell:
       App with a window registry (create/destroy keyed by SDL windowID),
       event decode + routing, and a run loop that reconciles → lays out →
       dispatches → paints every window each frame. Per-window renderer +
@@ -217,22 +217,22 @@ Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
 enums); `List` (virtualized — `listLayoutFlex` already ported) and a
 `Flex` factory are candidate mini-batches after batch 3.
 
-**Exit:** the flying-pan example apps rebuilt on tsgui — batches 1–4
+**Exit:** the flying-pan example apps rebuilt on vulcania — batches 1–4
 complete, interactive at 60fps.
 
 - [x] `examples/dashboard.ts` (2026-11-01) — flying-pan's
-      `simple-dashboard.ts` rebuilt on tsgui: the same scrollable
+      `simple-dashboard.ts` rebuilt on vulcania: the same scrollable
       sections and palette, controlled widgets with live readouts, the
       animated indeterminate progress, slider-linked circular progress,
       and flying-pan's exact text-field focus transition. Selftested at
       240 frames on Bun and Node 26. Its multi-window
-      section is restored (real second window through @tsgui/app);
+      section is restored (real second window through @vulcania/app);
       Canvas 2D, tessellation, and virtual-list sections land with
       phase 5 (Canvas/Path2D/List factories).
 
 ## Phase 5 — Devtools (the debuggability payoff)
 
-- [ ] `@tsgui/devtools`: Bun.serve inspector — live widget tree over
+- [ ] `@vulcania/devtools`: Bun.serve inspector — live widget tree over
       WebSocket, resolved styles, hover-highlight in-app, frame-time graph,
       vertex/draw-call counters.
 - [ ] Canvas 2D `CanvasContext` port onto the encoder.
@@ -244,7 +244,7 @@ click a widget, see why.
 
 ## Phase 6 — Audio + packaging
 
-- [ ] SDL3 audio stream behind `tsgui_audio_*`.
+- [ ] SDL3 audio stream behind `vulcania_audio_*`.
 - [ ] Distribution: app-bundling story (app authors ship the compiled binary
       — their users compile nothing); optional prebuilt platform packages as
       opt-in convenience; codesigning + icons for macOS/Windows.
@@ -257,5 +257,5 @@ click a widget, see why.
 | IME / HarfBuzz shaping      | HarfBuzz is a dependency and a half; UTF-8 simple text covers v1 apps.                |
 | Vulkan/Metal/D3D12 backends | Come free via SDL_GPU from phase 1 — nothing deferred.                                |
 | wgpu / Dawn                 | Only if SDL_GPU ever hits a wall (see PLATFORM.md).                                   |
-| ~~Multi-window~~            | ✅ Landed 2026-11-01 (`@tsgui/app`) — struck from this list.                          |
+| ~~Multi-window~~            | ✅ Landed 2026-11-01 (`@vulcania/app`) — struck from this list.                          |
 | GPU-instanced text          | Only if the atlas-quads model misses 60fps targets.                                   |

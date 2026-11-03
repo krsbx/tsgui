@@ -1,10 +1,10 @@
 {
-  "name": "@tsgui/fonts",
+  "name": "@vulcania/fonts",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/gpu": "workspace:*"
+    "@vulcania/gpu": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

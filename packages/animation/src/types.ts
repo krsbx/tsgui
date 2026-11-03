@@ -1,5 +1,5 @@
 /** Transition contracts — ported from flying-pan's animation/types. */
-import type { AnimatableProperty, EasingName } from "@tsgui/layout";
+import type { AnimatableProperty, EasingName } from "@vulcania/layout";
 
 export interface TransitionConfig {
   /** Which property to animate. Default: 'all' */
@@ -18,4 +18,4 @@ export type ActiveTransition = {
   easing: EasingName;
 };
 
-export type { Transition } from "@tsgui/layout";
+export type { Transition } from "@vulcania/layout";

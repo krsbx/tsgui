@@ -8,14 +8,14 @@
  * Key and char events route to the focused widget; Enter / Space
  * synthesize a click on activable widgets (fresh press only).
  */
-import type { StateStore } from "@tsgui/core";
+import type { StateStore } from "@vulcania/core";
 import {
   KeyCode,
   type KeyModifiers,
   MouseButton,
   type ReconcilableWidget,
-} from "@tsgui/core";
-import { type LayoutNode, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import { type LayoutNode, WidgetType } from "@vulcania/layout";
 import { KeyboardInputKind, PointerInputKind } from "./enums.ts";
 import { hitTest } from "./hit-test.ts";
 import { type KeyboardInputEvent, type PointerInputEvent } from "./types.ts";

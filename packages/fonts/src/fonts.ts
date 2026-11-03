@@ -8,11 +8,11 @@
  * "default" is nothing but a registered identifier convention — apps
  * load a specific font and alias it, exactly like flying-pan's docs
  * entry. When no "default" is registered, the built-in platform
- * fallback (TSGUI_FONT_PATH → system font at the fallback size) keeps
+ * fallback (VULCANIA_FONT_PATH → system font at the fallback size) keeps
  * older apps working. Unknown names throw — fail-loud beats silent
  * fallback.
  */
-import { type RendererHandle, TtfFont } from "@tsgui/gpu";
+import { type RendererHandle, TtfFont } from "@vulcania/gpu";
 
 export interface FontDescriptor {
   path: string;
@@ -33,7 +33,7 @@ export const FALLBACK_FONT_SIZE = 18;
 
 /** Built-in fallback font — used only when no "default" is registered. */
 export function fallbackFontPath(): string {
-  const fromEnv = process.env.TSGUI_FONT_PATH;
+  const fromEnv = process.env.VULCANIA_FONT_PATH;
   if (fromEnv) return fromEnv;
   if (process.platform === "darwin") {
     return "/System/Library/Fonts/Supplemental/Arial.ttf";

@@ -3,10 +3,10 @@
  * real dispatcher: track-press jumps to the angle's value, handle-dot
  * press drags, hover never mutates.
  */
-import { MouseButton, StateStore } from "@tsgui/core";
-import { PointerDispatcher, PointerInputKind } from "@tsgui/interactions";
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
-import { parseColor } from "@tsgui/paint";
+import { MouseButton, StateStore } from "@vulcania/core";
+import { PointerDispatcher, PointerInputKind } from "@vulcania/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
+import { parseColor } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   CircularSlider,

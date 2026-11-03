@@ -5,8 +5,8 @@
  * span wrapped lines; the caret blinks on the animation clock;
  * placeholder shows when empty.
  */
-import { Metrics, Palette, propsOf } from "@tsgui/core";
-import { parseColor, resolveFont, type WidgetPainter } from "@tsgui/paint";
+import { Metrics, Palette, propsOf } from "@vulcania/core";
+import { parseColor, resolveFont, type WidgetPainter } from "@vulcania/paint";
 import { caretVisual, TEXT_LINE_ADVANCE } from "./core.ts";
 import type { TextAreaProps } from "./index.ts";
 import { ensureLayout, peekEditingState } from "./state.ts";

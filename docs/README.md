@@ -1,6 +1,6 @@
-# tsgui — Plan & Architecture Docs
+# vulcania — Plan & Architecture Docs
 
-tsgui is a from-the-ground-up retained-mode GUI toolkit for Node/Bun. It is a
+vulcania is a from-the-ground-up retained-mode GUI toolkit for Node/Bun. It is a
 rewrite of the ideas proven in [flying-pan](https://github.com/krsbx/flying-pan),
 restructured around three goals flying-pan lacked:
 

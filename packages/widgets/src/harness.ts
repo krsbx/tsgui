@@ -8,17 +8,17 @@
  * captured as a plain op object. That is what golden-snapshot tests diff,
  * and what phase 5's devtools can replay.
  */
-import type { AnimationManager } from "@tsgui/animation";
-import { StateStore } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
+import type { AnimationManager } from "@vulcania/animation";
+import { StateStore } from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
 import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   type Size,
-} from "@tsgui/layout";
-import type { InteractionStates, Painter, TextPainter } from "@tsgui/paint";
-import { paintTree } from "@tsgui/paint";
+} from "@vulcania/layout";
+import type { InteractionStates, Painter, TextPainter } from "@vulcania/paint";
+import { paintTree } from "@vulcania/paint";
 import { widgetPainters } from "./painters.ts";
 import { Reconciler } from "./reconciler.ts";
 

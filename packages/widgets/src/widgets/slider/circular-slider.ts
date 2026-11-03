@@ -1,17 +1,17 @@
 /** CircularSlider painter — track arc, filled arc, handle dot. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
+import { Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
 import {
   CircularProgressDirection,
   ProgressValueType,
   valueToRatio,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import {
   parseColor,
   resolveFillColorClamped,
   resolveFont,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
 import { paintInlineValueLabel } from "../label/paint.ts";
 import { HANDLE_SIZE } from "./geometry.ts";
 import { paintSliderHandle } from "./slider-handle.ts";

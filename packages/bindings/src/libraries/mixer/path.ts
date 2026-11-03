@@ -13,7 +13,7 @@ const CANDIDATES: Record<string, string[]> = {
 export function resolveLibrary(): string {
   return resolveDylib(
     "SDL3_mixer",
-    "TSGUI_SDL3_MIXER_PATH",
+    "VULCANIA_SDL3_MIXER_PATH",
     CANDIDATES[process.platform] ?? []
   );
 }

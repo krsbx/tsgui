@@ -2,7 +2,7 @@
 # SDL3_mixer and the SDL_shadercross CLI — by calling the per-library
 # workflows (build-sdl.yml, build-sdl-image.yml, build-sdl-ttf.yml,
 # build-sdl-mixer.yml, build-sdl-shadercross.yml). Each one still
-# publishes its own tsgui release (SDL3-<v>, SDL3_image-<v>, …); this just
+# publishes its own vulcania release (SDL3-<v>, SDL3_image-<v>, …); this just
 # resolves the tags up front and links every satellite against the same SDL3
 # tag that gets published.
 #

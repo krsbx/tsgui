@@ -1,7 +1,7 @@
 /** Image — texture-backed widget. */
-import type { BaseWidgetProps, ReconcilableWidget } from "@tsgui/core";
-import { WidgetType } from "@tsgui/layout";
-import type { ViewStyle } from "@tsgui/layout";
+import type { BaseWidgetProps, ReconcilableWidget } from "@vulcania/core";
+import { WidgetType } from "@vulcania/layout";
+import type { ViewStyle } from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 
 export interface ImageProps extends BaseWidgetProps {

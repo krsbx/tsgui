@@ -1,5 +1,5 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
-import { sdl, SdlDefines } from "@tsgui/bindings";
+import { sdl, SdlDefines } from "@vulcania/bindings";
 import type {
   ArcOptions,
   Rect,

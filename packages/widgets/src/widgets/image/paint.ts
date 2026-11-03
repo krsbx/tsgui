@@ -1,6 +1,6 @@
 /** Image painter — draws the descriptor's texture across the widget box. */
-import type { TextureDrawOptions } from "@tsgui/gpu";
-import { type PaintContext, type WidgetPainter } from "@tsgui/paint";
+import type { TextureDrawOptions } from "@vulcania/gpu";
+import { type PaintContext, type WidgetPainter } from "@vulcania/paint";
 
 export const paintImage: WidgetPainter = (ctx: PaintContext, node) => {
   // Descriptors carry the texture as an opaque prop; the painter trusts

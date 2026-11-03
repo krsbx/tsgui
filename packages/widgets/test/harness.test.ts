@@ -2,8 +2,8 @@
  * Golden snapshots over the headless pipeline — the phase 3 exit gate.
  * The .snap file is committed; CI compares instead of writing.
  */
-import { type ReconcilableWidget, StateStore } from "@tsgui/core";
-import { FlexAlign, FlexDirection } from "@tsgui/layout";
+import { type ReconcilableWidget, StateStore } from "@vulcania/core";
+import { FlexAlign, FlexDirection } from "@vulcania/layout";
 import { describe, expect, test } from "bun:test";
 import {
   Button,
@@ -34,7 +34,7 @@ const GALLERY: ReconcilableWidget = View({
         borderRadius: 12,
         backgroundColor: "#3b82f6",
       },
-      children: [Label({ text: "tsgui widget gallery" })],
+      children: [Label({ text: "vulcania widget gallery" })],
     }),
     Label({ text: "clicked 0 times", style: { color: "#6b7280" } }),
     Button({ children: [Label({ text: "Default" })] }),

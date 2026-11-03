@@ -67,8 +67,8 @@ export default [
           patterns: [
             {
               group: [
-                "@tsgui/bindings",
-                "@tsgui/platform",
+                "@vulcania/bindings",
+                "@vulcania/platform",
                 "bun:ffi",
                 "node:ffi",
               ],
@@ -89,10 +89,10 @@ export default [
           patterns: [
             {
               group: [
-                "@tsgui/gpu",
-                "@tsgui/layout",
-                "@tsgui/widgets",
-                "@tsgui/devtools",
+                "@vulcania/gpu",
+                "@vulcania/layout",
+                "@vulcania/widgets",
+                "@vulcania/devtools",
               ],
               message: "layering: platform sits below the toolkit layers",
             },
@@ -109,7 +109,7 @@ export default [
         {
           patterns: [
             {
-              group: ["@tsgui/*"],
+              group: ["@vulcania/*"],
               message: "layering: bindings must not import other repo packages",
             },
           ],

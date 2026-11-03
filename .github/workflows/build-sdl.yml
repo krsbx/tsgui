@@ -1,5 +1,5 @@
 # Build SDL3 from a libsdl-org release tag and publish the shared library as
-# a tsgui release asset — the "optional prebuilt platform packages" line of
+# a vulcania release asset — the "optional prebuilt platform packages" line of
 # ROADMAP.md phase 6 (see docs/PACKAGING.md work). The satellites have their
 # own workflows: build-sdl-image.yml, build-sdl-ttf.yml, build-sdl-mixer.yml.
 #
@@ -8,12 +8,12 @@
 #              (blank = newest stable release-3.x of repo)
 #   repo — source repository (default libsdl-org/SDL)
 #
-# One run publishes one tsgui release tagged SDL3-<version> with three assets:
+# One run publishes one vulcania release tagged SDL3-<version> with three assets:
 #
 #   SDL3_linux.tar.gz   x86_64 ELF soname + soname symlink
 #                       (built on ubuntu-24.04 → glibc ≥ 2.39 at runtime)
 #   SDL3_macos.tar.gz   universal2 dylib (arm64 + x86_64), keeping SDL's
-#                       default @rpath install name — tsgui pack rewrites
+#                       default @rpath install name — vulcania pack rewrites
 #                       it into the app bundle
 #   SDL3_windows.zip    x64 DLL
 #
@@ -267,7 +267,7 @@ jobs:
           ls -la
 
           notes=$(cat <<EOF
-          Prebuilt **$LIB $VERSION** shared library, built by tsgui CI from
+          Prebuilt **$LIB $VERSION** shared library, built by vulcania CI from
           [$REPO @ $SOURCE_TAG](https://github.com/$REPO/tree/$SOURCE_TAG).
 
           | Asset | Contents |
@@ -276,7 +276,7 @@ jobs:
           | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default \`@rpath\` install name |
           | ${LIB}_windows.zip | x64 DLL |
 
-          The macOS dylib keeps SDL's default \`@rpath\` install name; tsgui pack
+          The macOS dylib keeps SDL's default \`@rpath\` install name; vulcania pack
           rewrites it into the app bundle.
           EOF
           )

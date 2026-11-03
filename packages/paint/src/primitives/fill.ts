@@ -5,9 +5,9 @@
  * (border/background) live in shape.ts; color-stop math in
  * color-stops.ts.
  */
-import { type ColorStop, Palette } from "@tsgui/core";
-import type { ValidColor, ViewStyle } from "@tsgui/layout";
-import { valueToRatio } from "@tsgui/layout";
+import { type ColorStop, Palette } from "@vulcania/core";
+import type { ValidColor, ViewStyle } from "@vulcania/layout";
+import { valueToRatio } from "@vulcania/layout";
 import type { Painter } from "../paint.ts";
 import { resolveFillColorClamped } from "./color-stops.ts";
 import { paintBackground, paintBorder } from "./shape.ts";
@@ -161,4 +161,4 @@ export function fillRatio(props: {
 
 // Re-exports kept so existing importers of paint/fill keep one surface.
 export { resolveFillColor, resolveFillColorClamped } from "./color-stops.ts";
-export type { ColorStop } from "@tsgui/core";
+export type { ColorStop } from "@vulcania/core";

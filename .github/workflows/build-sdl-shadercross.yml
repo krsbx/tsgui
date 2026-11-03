@@ -1,11 +1,11 @@
 # Build SDL_shadercross (the HLSL → SPIR-V / MSL / DXIL offline translator)
-# and publish the CLI tool as tsgui release assets — the toolchain the phase
+# and publish the CLI tool as vulcania release assets — the toolchain the phase
 # 2.5 SDF spike needs (ROADMAP.md: shaders authored in HLSL, cross-compiled
 # offline, blobs checked in).
 #
 # Differences from the SDL-family workflows (build-sdl*.yml):
 # - Upstream has NO release tags — input is a git ref (default main) and the
-#   tsgui release is tagged SDL_shadercross-<short-sha> unless overridden.
+#   vulcania release is tagged SDL_shadercross-<short-sha> unless overridden.
 # - The artifact is an offline CLI tool plus its bundled libraries, not a
 #   runtime dylib. SDLSHADERCROSS_INSTALL_RUNTIME=ON installs dxcompiler,
 #   spirv-cross, vkd3d and SDL3 into lib/ and sets the CLI's RPATH to
@@ -51,7 +51,7 @@ on:
         default: "libsdl-org/SDL_shadercross"
         type: string
       release_tag:
-        description: tsgui release tag (blank = SDL_shadercross-<short sha>)
+        description: vulcania release tag (blank = SDL_shadercross-<short sha>)
         required: false
         default: ""
         type: string
@@ -79,7 +79,7 @@ on:
         default: "libsdl-org/SDL_shadercross"
         type: string
       release_tag:
-        description: tsgui release tag (blank = SDL_shadercross-<short sha>)
+        description: vulcania release tag (blank = SDL_shadercross-<short sha>)
         required: false
         default: ""
         type: string
@@ -580,17 +580,17 @@ jobs:
           ls -la
 
           if [[ "$MODE" == prebuilt ]]; then
-            provenance="Binaries repackaged from upstream CI run [#$UPSTREAM_RUN](https://github.com/$REPO/actions/runs/$UPSTREAM_RUN) and smoke-tested by tsgui CI (HLSL → SPIR-V → MSL)."
+            provenance="Binaries repackaged from upstream CI run [#$UPSTREAM_RUN](https://github.com/$REPO/actions/runs/$UPSTREAM_RUN) and smoke-tested by vulcania CI (HLSL → SPIR-V → MSL)."
             linux_desc="Steam Linux Runtime 3.0 (sniper) build, glibc >= 2.31"
           else
-            provenance="Built from source by tsgui CI and smoke-tested (HLSL → SPIR-V → MSL)."
+            provenance="Built from source by vulcania CI and smoke-tested (HLSL → SPIR-V → MSL)."
             linux_desc="ubuntu-24.04 build, glibc >= 2.39"
           fi
 
           notes=$(cat <<EOF
           Prebuilt **SDL_shadercross** CLI toolchain (source commit $VERSION,
           built from [$REPO @ $REF](https://github.com/$REPO/tree/$REF))
-          — the offline HLSL → SPIR-V / MSL / DXIL translator the tsgui phase
+          — the offline HLSL → SPIR-V / MSL / DXIL translator the vulcania phase
           2.5 SDF spike compiles its shaders with.
 
           $provenance

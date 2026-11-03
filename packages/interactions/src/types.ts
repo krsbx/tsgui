@@ -1,5 +1,5 @@
 /** Interaction contracts — ported from flying-pan's flying/interactions. */
-import type { KeyModifiers, MouseButton } from "@tsgui/core";
+import type { KeyModifiers, MouseButton } from "@vulcania/core";
 import type { KeyboardInputKind, PointerInputKind } from "./enums.ts";
 
 /** Decoded input-device pointer events, fed to the dispatcher per frame. */

@@ -1,5 +1,5 @@
 # Build SDL3_mixer from a libsdl-org release tag and publish the shared
-# library as a tsgui release asset — split out of build-sdl.yml so the mixer
+# library as a vulcania release asset — split out of build-sdl.yml so the mixer
 # satellite can carry its own vendoring setup.
 #
 # Trigger: Actions → "Build SDL Mixer" → Run workflow
@@ -10,13 +10,13 @@
 #              local prefix first). Blank = newest stable <repo owner>/SDL
 #              release.
 #
-# One run publishes one tsgui release tagged SDL3_mixer-<version> with three
+# One run publishes one vulcania release tagged SDL3_mixer-<version> with three
 # assets:
 #
 #   SDL3_mixer_linux.tar.gz   x86_64 ELF soname + soname symlink
 #                             (built on ubuntu-24.04 → glibc ≥ 2.39 at runtime)
 #   SDL3_mixer_macos.tar.gz   universal2 dylib (arm64 + x86_64), keeping the
-#                             default @rpath install name — tsgui pack
+#                             default @rpath install name — vulcania pack
 #                             rewrites it into the app bundle
 #   SDL3_mixer_windows.zip    x64 DLL
 #
@@ -357,7 +357,7 @@ jobs:
           ls -la
 
           notes=$(cat <<EOF
-          Prebuilt **$LIB $VERSION** shared library, built by tsgui CI from
+          Prebuilt **$LIB $VERSION** shared library, built by vulcania CI from
           [$REPO @ $SOURCE_TAG](https://github.com/$REPO/tree/$SOURCE_TAG),
           linked against SDL3 $SDL3_TAG.
 
@@ -369,7 +369,7 @@ jobs:
 
           Audio codecs are statically vendored — the library is a single
           self-contained file. The macOS dylib keeps the default \`@rpath\`
-          install name; tsgui pack rewrites it into the app bundle.
+          install name; vulcania pack rewrites it into the app bundle.
           EOF
           )
 

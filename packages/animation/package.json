@@ -1,10 +1,10 @@
 {
-  "name": "@tsgui/animation",
+  "name": "@vulcania/animation",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/layout": "workspace:*"
+    "@vulcania/layout": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

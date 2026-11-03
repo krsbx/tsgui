@@ -1,6 +1,6 @@
 /**
  * Minimal ambient types for node:ffi (stable in Node >= 26.9; the module is
- * experimental). Only the surface @tsgui/bindings uses is declared.
+ * experimental). Only the surface @vulcania/bindings uses is declared.
  */
 declare module "node:ffi" {
   export interface DlopenDef {

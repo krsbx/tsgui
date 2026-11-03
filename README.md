@@ -1,4 +1,4 @@
-# tsgui
+# vulcania
 
 A from-the-ground-up retained-mode GUI toolkit for Node and Bun, built
 directly on SDL3 through runtime FFI — no compiled addon, no build step.

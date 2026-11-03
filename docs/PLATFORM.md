@@ -17,7 +17,7 @@ SDL3 (stable since Jan 2025, zlib license) covers, in one C library:
 
 The earlier plan (GLFW + GL for v1, SDL3 later) rested on reusing
 flying-pan's GLFW bindings and GL familiarity. Both arguments dissolve in
-tsgui's architecture:
+vulcania's architecture:
 
 - **The GL renderer was getting thrown away regardless.** We were writing
   a new batched renderer either way; SDL3's GPU-backed SDL_Renderer means
@@ -55,8 +55,8 @@ stb_image**, and the "GLFW + miniaudio grab-bag" problem stops existing.
 
 Polled, never callbacks across the FFI boundary:
 
-1. `tsgui_poll_events()` pumps SDL's event queue (main thread).
-2. Native maps `SDL_Event` → packed `tsgui_event` (32 bytes:
+1. `vulcania_poll_events()` pumps SDL's event queue (main thread).
+2. Native maps `SDL_Event` → packed `vulcania_event` (32 bytes:
    `type, window, i32 ×4, f32 ×4, u64 timestamp`) into a preallocated ring.
 3. JS reads the ring as a typed-array view — one FFI call, zero allocation,
    zero per-event cost.
@@ -94,17 +94,17 @@ every library choice.
 - **`sdl` / `image` / `ttf` / `mixer` — the hardcore tiers.** The SDL3
   family bound directly through generated FFI tables: 1000+ functions, all
   enum/macro constants, everything reachable that is FFI-expressible. App
-  developers drop to these whenever tsgui has no wrapper for what they
+  developers drop to these whenever vulcania has no wrapper for what they
   need. This is flying-pan's model, kept.
-- **`tsgui` — the toolkit layer (pure TypeScript, later phases).** Widgets,
+- **`vulcania` — the toolkit layer (pure TypeScript, later phases).** Widgets,
   layout, the renderer module: all ordinary TS built on the tiers above.
   There is **no compiled toolkit artifact at all** — the earlier plan for a
-  `libtsgui.dylib` renderer core was retired when SDL_Renderer proved
+  `libvulcania.dylib` renderer core was retired when SDL_Renderer proved
   sufficient (below).
 
 What we give up vs the earlier curated-only design: SDL's API shape is
 visible to app code that chooses the hardcore tiers. What we keep: the
-_toolkit's_ own layers sit in `@tsgui/gpu` and `@tsgui/widgets` as plain
+_toolkit's_ own layers sit in `@vulcania/gpu` and `@vulcania/widgets` as plain
 TypeScript — a future platform swap is table regeneration plus one TS
 module.
 
@@ -117,7 +117,7 @@ yield, ~3–6 FFI calls per frame.
 
 ## Renderer architecture (Phase 1): SDL_Renderer, zero C
 
-The earlier plan — a `libtsgui.dylib` wrapping SDL_GPU — is retired. The
+The earlier plan — a `libvulcania.dylib` wrapping SDL_GPU — is retired. The
 per-frame call-count math made it unnecessary once rendering became
 batched: a frame is ~10 FFI calls (acquire, set state, `SDL_RenderGeometryRaw`
 per texture batch, `SDL_RenderPresent`), **constant** regardless of widget
@@ -138,7 +138,7 @@ The stack, all through FFI from TypeScript:
 
 If a future GPU API (wgpu/Dawn-class) ever becomes necessary, the swap is:
 regenerate tables against the new library + rewrite one TS module
-(`@tsgui/gpu`). The batch/encoder boundary stays fixed either way — that
+(`@vulcania/gpu`). The batch/encoder boundary stays fixed either way — that
 boundary, not a dylib, is what contains platform risk.
 
 Known risks: `SDL_SetGPURenderState` is new (3.4) — if it proves immature,

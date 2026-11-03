@@ -65,8 +65,8 @@ export async function generateTarget(
   ];
 
   // The toolkit-facing KeyCode table is pure data derived from the same
-  // SDL_keycode.h defines — emitted into @tsgui/core (a pure layer, so
-  // it cannot import @tsgui/bindings to read them).
+  // SDL_keycode.h defines — emitted into @vulcania/core (a pure layer, so
+  // it cannot import @vulcania/bindings to read them).
   if (spec.name === "sdl") {
     outputs.push([
       join(coreSrcDir, "generated/keycodes.ts"),

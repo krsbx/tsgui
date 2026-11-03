@@ -1,13 +1,13 @@
 /** Meter painter — HTML-`<meter>` low/high/optimum zones as palette colors. */
-import { MeterZone, Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import { ProgressBarOrientation, ProgressDirection } from "@tsgui/layout";
+import { MeterZone, Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
+import { ProgressBarOrientation, ProgressDirection } from "@vulcania/layout";
 import {
   fillRatio,
   paintContinuousFill,
   resolveFont,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
 import { paintInlineValueLabel } from "../label/paint.ts";
 import type { MeterProps } from "../meter.ts";
 

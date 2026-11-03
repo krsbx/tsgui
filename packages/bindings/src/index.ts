@@ -1,5 +1,5 @@
 /**
- * @tsgui/bindings — the ONLY package that talks to native code.
+ * @vulcania/bindings — the ONLY package that talks to native code.
  *
  * One folder per library under `libraries/<name>/` (loaders, path
  * resolution, generated tables). Adding a library = adding a folder +

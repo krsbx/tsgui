@@ -8,11 +8,11 @@
  * target), click = down+up on the same widget with the same button, and
  * double/triple-click counting inside the 500 ms window.
  */
-import type { StateStore } from "@tsgui/core";
-import type { InteractionStates } from "@tsgui/core";
-import type { PointerPayload, ReconcilableWidget } from "@tsgui/core";
-import { MouseButton } from "@tsgui/core";
-import type { LayoutNode } from "@tsgui/layout";
+import type { StateStore } from "@vulcania/core";
+import type { InteractionStates } from "@vulcania/core";
+import type { PointerPayload, ReconcilableWidget } from "@vulcania/core";
+import { MouseButton } from "@vulcania/core";
+import type { LayoutNode } from "@vulcania/layout";
 import { PointerInputKind } from "./enums.ts";
 import { hitTest } from "./hit-test.ts";
 import { type PointerInputEvent } from "./types.ts";
