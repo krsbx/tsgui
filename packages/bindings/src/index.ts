@@ -14,5 +14,5 @@ export { runtime, type Runtime } from "./runtime.ts";
 export * from "./libraries/image/index.ts";
 export * from "./libraries/mixer/index.ts";
 export * from "./libraries/sdl/index.ts";
-export * from "./libraries/shadercross/node.ts";
+export * from "./libraries/shadercross/index.ts";
 export * from "./libraries/ttf/index.ts";
