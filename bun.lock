@@ -17,6 +17,7 @@
         "@vulcania/app": "workspace:*",
         "@vulcania/bindings": "workspace:*",
         "@vulcania/core": "workspace:*",
+        "@vulcania/devtools": "workspace:*",
         "@vulcania/fonts": "workspace:*",
         "@vulcania/gpu": "workspace:*",
         "@vulcania/interactions": "workspace:*",
@@ -78,6 +79,20 @@
       "version": "0.0.1",
       "dependencies": {
         "@vulcania/layout": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "@types/node": "^26.6.6",
+      },
+    },
+    "packages/devtools": {
+      "name": "@vulcania/devtools",
+      "version": "0.0.1",
+      "dependencies": {
+        "@vulcania/app": "workspace:*",
+        "@vulcania/core": "workspace:*",
+        "@vulcania/layout": "workspace:*",
+        "@vulcania/paint": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -161,14 +176,6 @@
       "bin": {
         "vulcania-codegen": "./src/index.ts",
       },
-      "devDependencies": {
-        "@types/bun": "latest",
-        "@types/node": "^26.6.6",
-      },
-    },
-    "tools/devtools": {
-      "name": "@vulcania/devtools",
-      "version": "0.0.1",
       "devDependencies": {
         "@types/bun": "latest",
         "@types/node": "^26.6.6",
@@ -382,7 +389,7 @@
 
     "@vulcania/core": ["@vulcania/core@workspace:packages/core"],
 
-    "@vulcania/devtools": ["@vulcania/devtools@workspace:tools/devtools"],
+    "@vulcania/devtools": ["@vulcania/devtools@workspace:packages/devtools"],
 
     "@vulcania/fonts": ["@vulcania/fonts@workspace:packages/fonts"],
 
