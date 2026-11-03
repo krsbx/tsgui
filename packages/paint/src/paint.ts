@@ -102,7 +102,7 @@ const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([
 ]);
 
 function resolveChecked(
-  ctx: PaintContext,
+  ctx: Pick<PaintContext, "statesOf" | "stateStore">,
   node: LayoutNode,
   checkedKey: string | undefined
 ): boolean {
@@ -136,16 +136,26 @@ function resolveChecked(
   });
 }
 
-function paintNode(ctx: PaintContext, node: LayoutNode): void {
-  const base = node.widget.style ?? {};
+/**
+ * The pseudo-state a node paints under: the dispatcher states (hover/
+ * focus/press) with the control's checked flag folded in, so `_checked`
+ * style overrides apply. Single source for the paint walk AND the
+ * devtools detail view — a detail panel that folds differently from the
+ * paint would report states the user isn't seeing.
+ */
+export function effectiveStatesFor(
+  ctx: Pick<PaintContext, "statesOf" | "stateStore">,
+  node: LayoutNode
+): InteractionStates {
   const states = ctx.statesOf?.(node) ?? STATES_NONE;
-
-  // Controls resolve their checked flag: controlled props first, then
-  // the store-backed uncontrolled state. Folded into the pseudo-state
-  // so `_checked` style overrides apply.
   const checkedKey = CHECKED_PROP.get(node.widget.type);
   const checked = resolveChecked(ctx, node, checkedKey);
-  const effectiveStates = checkedKey ? { ...states, checked } : states;
+  return checkedKey ? { ...states, checked } : states;
+}
+
+function paintNode(ctx: PaintContext, node: LayoutNode): void {
+  const base = node.widget.style ?? {};
+  const effectiveStates = effectiveStatesFor(ctx, node);
 
   const resolved = resolveStyle(base, effectiveStates);
 

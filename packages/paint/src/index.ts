@@ -8,6 +8,7 @@
  */
 export {
   colorWithOpacity,
+  effectiveStatesFor,
   type InteractionStates,
   paintTree,
   parseColor,

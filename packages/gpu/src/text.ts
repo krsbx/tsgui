@@ -56,6 +56,11 @@ export class TtfFont {
     return { width: w[0]!, height: h[0]! };
   }
 
+  /** Cached text-run textures — the devtools inspector surfaces it. */
+  public get cacheSize(): number {
+    return this.cache.size;
+  }
+
   /**
    * Queue a text run. White glyphs are rendered once per unique string,
    * uploaded as a texture, and tinted per draw — UI strings repeat every
