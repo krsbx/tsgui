@@ -55,6 +55,8 @@ export default [
       "**/build/**",
       "**/generated/**",
       "**/*.d.ts",
+      // Pinned header submodules (codegen input only).
+      "vendor/**",
     ],
   },
   js.configs.recommended,
