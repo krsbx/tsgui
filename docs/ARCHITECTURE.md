@@ -26,7 +26,8 @@ packages/
                                      Painter/TextPainter surfaces, style
                                      resolution, fill/shape/shadow primitives.
                                      Pure TS.
-  widgets/      @vulcania/widgets       Widget factories (incl. net-new TextArea),
+  widgets/      @vulcania/widgets       Widget factories (incl. net-new TextArea,
+                                     the virtualized List, the Flex preset),
                                      reconciler, per-widget painters (co-located
                                      with each widget), painter registry,
                                      headless harness. Pure TS.

@@ -21,6 +21,7 @@ import { type ReconcilableWidget } from "@vulcania/core";
 import {
   FlexAlign,
   FlexDirection,
+  ListOrientation,
   Overflow,
   ProgressType,
   ProgressValueType,
@@ -30,6 +31,7 @@ import {
   Checkbox,
   CircularProgress,
   Label,
+  List,
   Meter,
   ProgressBar,
   Radio,
@@ -72,6 +74,22 @@ function divider(): ReconcilableWidget {
       height: 1,
       backgroundColor: DIVIDER,
       margin: 8,
+    },
+  });
+}
+
+/** One virtual-list row — flying-pan's item style, hover + fade included. */
+function listItem(i: number): ReconcilableWidget {
+  return Label({
+    text: `List item ${i + 1}`,
+    font: "default",
+    style: {
+      color: TEXT,
+      width: "100%",
+      height: 36,
+      padding: 8,
+      _hover: { backgroundColor: "#16213e" },
+      transition: { property: "backgroundColor", duration: 150 },
     },
   });
 }
@@ -239,6 +257,32 @@ function buildDashboard(app: App): ReconcilableWidget {
         optimum: 90,
         style: { width: "100%", height: 6 },
         showValue: ProgressValueType.Percent,
+      }),
+
+      // virtual lists -------------------------------------------------------
+      divider(),
+      sectionTitle("Virtual Lists"),
+
+      Label({
+        text: "Two 10,000-item lists — only the visible window exists per frame",
+        style: { color: MUTED, width: "100%" },
+      }),
+
+      List({
+        itemCount: 10_000,
+        itemSize: 36,
+        overscan: 5,
+        renderItem: listItem,
+        style: { width: "100%", height: 70 },
+      }),
+
+      List({
+        itemCount: 10_000,
+        itemSize: 250,
+        overscan: 5,
+        orientation: ListOrientation.Horizontal,
+        renderItem: listItem,
+        style: { width: "100%", height: 70 },
       }),
 
       // multi-window ------------------------------------------------------

@@ -51,7 +51,11 @@ These are flying-pan semantics, preserved faithfully and codified in
 - **List virtualization** generates visible items + overscan + spacers with
   negative synthetic stableIds (`-(listStableId * 100_001 + slot + 1)`),
   invisible to the reconciler. Spacers keep content-fit correct for scroll
-  bounds.
+  bounds. Apps build lists with the `List` factory in `@vulcania/widgets`
+  (fixed extents: `itemCount`/`itemSize`/`renderItem`/`overscan`/
+  `orientation`) — the descriptor carries no children; this pass injects
+  the window every frame. `Flex` in the same package is View with
+  direction/gap/justify/align lifted to first-class props.
 
 ## Engine map
 

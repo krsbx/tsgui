@@ -217,6 +217,15 @@ Batch 5's `WidgetType` slots exist (`Custom` is already in the layout
 enums); `List` (virtualized — `listLayoutFlex` already ported) and a
 `Flex` factory are candidate mini-batches after batch 3.
 
+**List + Flex factories ✅ (2026-11-03)** — `List` and `Flex` in
+`@vulcania/widgets`, flying-pan's exact API. `List({itemCount, itemSize,
+renderItem, overscan?, orientation?})` is a fixed-extent windowing list
+over the already-ported `listLayoutFlex` (visible window + spacers per
+frame, negative per-index stableIds so hover/state survives scrolling);
+`Flex({direction, gap?, justifyContent?, alignItems?})` lowers its
+shortcuts into the style and flows through the generic pass. Dashboard
+gained the virtual-list section (vertical + horizontal 10k items).
+
 **Exit:** the flying-pan example apps rebuilt on vulcania — batches 1–4
 complete, interactive at 60fps.
 
@@ -227,8 +236,9 @@ complete, interactive at 60fps.
       and flying-pan's exact text-field focus transition. Selftested at
       240 frames on Bun and Node 26. Its multi-window
       section is restored (real second window through @vulcania/app);
-      Canvas 2D, tessellation, and virtual-list sections land with
-      phase 5 (Canvas/Path2D/List factories).
+      its virtual-list section landed 2026-11-03 (two 10k `List`s);
+      Canvas 2D and tessellation land with the rest of phase 5
+      (Canvas/Path2D).
 
 ## Phase 5 — Devtools (the debuggability payoff)
 
