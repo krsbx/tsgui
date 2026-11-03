@@ -173,7 +173,18 @@ jobs:
           path: lib-src
           submodules: recursive
 
+      # Reuse the SDL3 prefix build-sdl.yml cached for this tag (the family
+      # run builds SDL3 first); only compile SDL3 here on a cache miss. Key
+      # must match build-sdl.yml's "Cache SDL3 prefix" step.
+      - name: Restore SDL3 prefix
+        id: sdl3-cache
+        uses: actions/cache@v4
+        with:
+          path: sdl3-prefix
+          key: sdl3-prefix-v1-${{ matrix.platform }}-${{ needs.prepare.outputs.sdl3_repo }}-${{ needs.prepare.outputs.sdl3_tag }}
+
       - name: Checkout SDL3 (link dependency)
+        if: steps.sdl3-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v4
         with:
           repository: ${{ needs.prepare.outputs.sdl3_repo }}
@@ -181,6 +192,7 @@ jobs:
           path: sdl3-src
 
       - name: Build + install SDL3 into a local prefix
+        if: steps.sdl3-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           # This SDL3 is only linked against, never shipped — skip SDL's

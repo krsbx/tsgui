@@ -123,8 +123,10 @@ jobs:
             echo "shadercross_ref=$shadercross"
           } >> "$GITHUB_OUTPUT"
 
-  # All run in parallel — each satellite builds its own SDL3 (pinned to
-  # the same tag) to link against, so none waits on the SDL3 job.
+  # image/ttf/mixer wait for SDL3: it caches its install prefix, which they
+  # restore to link against instead of each compiling SDL3 again. They are
+  # skipped if SDL3 fails, so no satellite ships against an unpublished SDL3.
+  # shadercross stays parallel: it bundles its own SDL3 (macOS 11.0 target).
   sdl3:
     name: SDL3
     needs: prepare
@@ -137,7 +139,7 @@ jobs:
 
   image:
     name: SDL3_image
-    needs: prepare
+    needs: [prepare, sdl3]
     permissions:
       contents: write
     uses: ./.github/workflows/build-sdl-image.yml
@@ -148,7 +150,7 @@ jobs:
 
   ttf:
     name: SDL3_ttf
-    needs: prepare
+    needs: [prepare, sdl3]
     permissions:
       contents: write
     uses: ./.github/workflows/build-sdl-ttf.yml
@@ -159,7 +161,7 @@ jobs:
 
   mixer:
     name: SDL3_mixer
-    needs: prepare
+    needs: [prepare, sdl3]
     permissions:
       contents: write
     uses: ./.github/workflows/build-sdl-mixer.yml

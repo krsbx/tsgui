@@ -170,7 +170,17 @@ jobs:
         run: |
           set -euo pipefail
           cmake --build build --config Release --parallel
-          cmake --install build --config Release --prefix "$PWD/dist"
+          cmake --install build --config Release --prefix "$PWD/sdl3-prefix"
+
+      # Satellite builds (image/ttf/mixer) restore this prefix to link against
+      # instead of compiling SDL3 again. Key must match their
+      # "Restore SDL3 prefix" step. A key that already exists is only a warning.
+      - name: Cache SDL3 prefix for satellite builds
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: sdl3-prefix
+          key: sdl3-prefix-v1-${{ matrix.platform }}-${{ inputs.repo }}-${{ needs.prepare.outputs.tag }}
 
       - name: Collect shared libraries
         env:
@@ -181,7 +191,7 @@ jobs:
           case "$PLATFORM" in
             linux)
               # Real soname files only (symlinks are re-created below).
-              find dist -name "*.so.*" -type f -exec cp {} staging/ \;
+              find sdl3-prefix -name "*.so.*" -type f -exec cp {} staging/ \;
               for f in staging/lib*.so.*; do
                 base=$(basename "$f")
                 soname=$(printf '%s' "$base" | sed -E 's/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/')
@@ -193,11 +203,11 @@ jobs:
             macos)
               # Real dylibs only — the plain libSDL3.dylib symlink is the
               # dev-link name; the versioned file matches the install name.
-              find dist -name "*.dylib" -type f -exec cp {} staging/ \;
+              find sdl3-prefix -name "*.dylib" -type f -exec cp {} staging/ \;
               lipo -info staging/*.dylib
               ;;
             windows)
-              find dist -name "*.dll" -type f -exec cp {} staging/ \;
+              find sdl3-prefix -name "*.dll" -type f -exec cp {} staging/ \;
               ;;
           esac
           ls -la staging/
