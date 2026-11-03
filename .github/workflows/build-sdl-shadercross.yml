@@ -356,14 +356,17 @@ jobs:
 
           # Libraries: flat is fine — INSTALL_RUNTIME gives every bundled
           # library a $ORIGIN / @loader_path RPATH. -a keeps soname symlinks.
+          # vkd3d is left out: shadercross only dlopens libvkd3d-utils by bare
+          # name for DXBC output (D3D11 bytecode, unused by SDL_GPU), and its
+          # dylibs carry absolute CI build paths.
           case "$TARGET_PLATFORM" in
             linux)
               find prefix/lib -maxdepth 1 -name "*.so*" ! -name "libSDL3.*" \
-                -exec cp -a {} staging-libs/ \;
+                ! -name "libvkd3d*" -exec cp -a {} staging-libs/ \;
               ;;
             macos)
               find prefix/lib -maxdepth 1 -name "*.dylib" ! -name "libSDL3.*" \
-                -exec cp -a {} staging-libs/ \;
+                ! -name "libvkd3d*" -exec cp -a {} staging-libs/ \;
               ;;
             windows)
               find prefix/bin prefix/lib -maxdepth 1 -name "*.dll" ! -name "SDL3.dll" \
@@ -439,6 +442,17 @@ jobs:
           done
           if [[ -n "$missing" ]]; then
             echo "::error::libraries archive is missing bundled deps:$missing"
+            exit 1
+          fi
+
+          # Nothing in the libraries archive may reference the CI machine.
+          case "$TARGET_PLATFORM" in
+            macos) refs=$(find staging-libs -type f -exec otool -L {} \; ) ;;
+            linux) refs=$(find staging-libs -type f -exec readelf -d {} \; ) ;;
+            *) refs="" ;;
+          esac
+          if grep -E '/Users/runner|/home/runner' <<<"$refs"; then
+            echo "::error::libraries archive references CI build paths"
             exit 1
           fi
 
