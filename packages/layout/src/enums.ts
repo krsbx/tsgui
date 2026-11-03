@@ -101,6 +101,7 @@ export const WidgetType = {
   Toggle: "Toggle",
   Radio: "Radio",
   SliderBar: "SliderBar",
+  RangeSlider: "RangeSlider",
   CircularSlider: "CircularSlider",
   ProgressBar: "ProgressBar",
   CircularProgress: "CircularProgress",

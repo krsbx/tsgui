@@ -12,8 +12,8 @@ export { Reconciler } from "./reconciler.ts";
 // Per-widget modules — factories + props
 export { Button, type ButtonProps } from "./widgets/button.ts";
 export { Checkbox, type CheckboxProps } from "./widgets/checkbox.ts";
-export { Flex, type FlexProps } from "./widgets/flex.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
+export { Flex, type FlexProps } from "./widgets/flex.ts";
 export { Image, type ImageProps } from "./widgets/image.ts";
 export { Label, type LabelProps } from "./widgets/label.ts";
 export { List, type ListProps } from "./widgets/list.ts";
@@ -27,6 +27,7 @@ export {
 } from "./widgets/progress/index.ts";
 export { RadioGroup, type RadioGroupProps } from "./widgets/radio-group.ts";
 export { Radio, type RadioProps } from "./widgets/radio.ts";
+export { RangeSlider, type RangeSliderProps } from "./widgets/range-slider.ts";
 export { SliderBar, type SliderBarProps } from "./widgets/slider-bar.ts";
 export {
   type CircularGeometry,
