@@ -13,9 +13,13 @@ export function generateTypes(
   const L = banner(`pointer brands + symbols type for ${pascalName}`);
 
   // Satellite libraries reference core handles (SDL_Window, …): import
-  // them from the sdl target's types instead of re-declaring.
+  // them from the sdl target's types instead of re-declaring. A handle the
+  // target's own prefixes cover is local even when it starts with SDL_
+  // (shadercross's SDL_ShaderCross_* structs).
+  const isOwn = (h: string) => namePrefixes.some((p) => h.startsWith(p));
+
   const imported = tables.handleTypes.filter(
-    (h) => h.startsWith("SDL_") && !namePrefixes.includes("SDL_")
+    (h) => h.startsWith("SDL_") && !isOwn(h)
   );
   L.push(`/**`);
   L.push(

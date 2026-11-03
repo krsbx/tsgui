@@ -63,6 +63,7 @@ const SATELLITES = [
   { name: "image", prefixes: ["IMG_"] },
   { name: "ttf", prefixes: ["TTF_"] },
   { name: "mixer", prefixes: ["MIX_"] },
+  { name: "shadercross", prefixes: ["SDL_ShaderCross_"] },
 ] as const;
 
 export const TARGETS: Record<string, TargetSpec> = {
