@@ -3,8 +3,17 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
+  "dependencies": {
+    "@vulcania/app": "workspace:*",
+    "@vulcania/core": "workspace:*",
+    "@vulcania/layout": "workspace:*",
+    "@vulcania/paint": "workspace:*"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^26.6.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
   }
 }

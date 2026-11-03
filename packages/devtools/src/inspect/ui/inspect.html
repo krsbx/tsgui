@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vulcania inspector</title>
+<style>
+  :root {
+    --bg: #0d1321; --surface: #16213e; --line: #26304d;
+    --text: #e8e8ea; --muted: #8a8fa3; --accent: #e94560;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--text); height: 100vh;
+         display: grid; grid-template-rows: auto 1fr auto; }
+  header { padding: 10px 14px; border-bottom: 1px solid var(--line);
+           display: flex; gap: 18px; align-items: baseline; }
+  header h1 { font-size: 14px; color: var(--accent); }
+  header .stat { font-size: 12px; color: var(--muted); }
+  header .stat b { color: var(--text); }
+  main { display: grid; grid-template-columns: 1fr 340px; min-height: 0; }
+  #tree { overflow: auto; padding: 8px 4px; }
+  #details { border-left: 1px solid var(--line); overflow: auto; padding: 12px; }
+  details.sub { margin-left: 14px; }
+  summary { cursor: pointer; list-style: none; white-space: nowrap;
+            padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+  summary:hover { background: var(--surface); }
+  summary.sel { background: var(--accent); color: #fff; }
+  summary .id { color: var(--muted); font-size: 11px; }
+  summary.sel .id { color: #ffd7de; }
+  .pane-title { font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+                color: var(--muted); margin-bottom: 8px; }
+  .kv { display: grid; grid-template-columns: 110px 1fr; gap: 2px 10px;
+        font-size: 12px; margin-bottom: 14px; }
+  .kv .k { color: var(--muted); } .kv .v { word-break: break-all; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { font-size: 11px; padding: 2px 8px; border-radius: 999px;
+          border: 1px solid var(--line); color: var(--muted); }
+  .chip.on { border-color: var(--accent); color: var(--accent); }
+  #graph { border-top: 1px solid var(--line); padding: 8px 14px; }
+  #frameCanvas { width: 100%; height: 72px; display: block; }
+  .empty { color: var(--muted); font-size: 12px; padding: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>vulcania inspector</h1>
+  <span class="stat">frame <b id="frame">–</b></span>
+  <span class="stat" id="windowStats">no windows</span>
+  <span class="stat">selected <b id="sel">–</b></span>
+</header>
+<main>
+  <div id="tree"><div class="empty">waiting for the first tree snapshot…</div></div>
+  <aside id="details"><div class="pane-title">Details</div>
+    <div class="empty">click a node in the tree</div></aside>
+</main>
+<footer id="graph">
+  <div class="pane-title">draw calls / frame (per window, first = root)</div>
+  <canvas id="frameCanvas"></canvas>
+</footer>
+<script>
+  const $ = (id) => document.getElementById(id);
+  let selected = null;           // {windowId, stableId}
+  const samples = [];            // [{windowId, drawCalls}] per frame tick
+  const MAX_SAMPLES = 240;
+
+  // ---- tree -------------------------------------------------------------
+  function renderTree(snapshot) {
+    const tree = $("tree");
+    tree.textContent = "";
+    if (!snapshot.windows.length) {
+      tree.innerHTML = '<div class="empty">no windows</div>';
+      return;
+    }
+    for (const win of snapshot.windows) {
+      const root = document.createElement("details");
+      root.className = "sub"; root.open = true;
+      root.innerHTML = `<summary>windows / ${win.title} <span class="id">#${win.windowId}</span></summary>`;
+      if (win.root) root.appendChild(renderNode(win.root, win.windowId));
+      else root.innerHTML += '<div class="empty">no layout yet</div>';
+      tree.appendChild(root);
+    }
+    if (selected) markSelected();
+  }
+
+  function renderNode(node, windowId) {
+    const details = document.createElement("details");
+    details.className = "sub"; details.open = true;
+    details.dataset.stableId = String(node.stableId);
+    const label = node.text !== undefined
+      ? `"${node.text.length > 24 ? node.text.slice(0, 24) + "…" : node.text}"`
+      : "";
+    const summary = document.createElement("summary");
+    summary.innerHTML =
+      `${node.type} <span class="id">#${node.stableId} ${label}</span>`;
+    summary.addEventListener("click", (event) => {
+      event.preventDefault();
+      select(windowId, node.stableId);
+    });
+    details.appendChild(summary);
+    for (const child of node.children) details.appendChild(renderNode(child, windowId));
+    return details;
+  }
+
+  function markSelected() {
+    document.querySelectorAll("summary.sel").forEach((el) => el.classList.remove("sel"));
+    if (!selected) return;
+    // The tree re-renders every snapshot; find the row by stableId.
+    const rows = document.querySelectorAll("details.sub[data-stable-id]");
+    for (const row of rows) {
+      if (row.dataset.stableId === String(selected.stableId)) {
+        const summary = row.querySelector(":scope > summary");
+        if (summary) {
+          summary.classList.add("sel");
+          summary.scrollIntoView({ block: "nearest" });
+        }
+        return;
+      }
+    }
+  }
+
+  async function select(windowId, stableId) {
+    selected = { windowId, stableId };
+    $("sel").textContent = `#${stableId}`;
+    markSelected();
+    await fetch("/select", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ windowId, stableId }),
+    });
+    await loadDetail();
+  }
+
+  // ---- details ----------------------------------------------------------
+  async function loadDetail() {
+    if (!selected) return;
+    const res = await fetch(`/api/node?windowId=${selected.windowId}&stableId=${selected.stableId}`);
+    const box = $("details");
+    if (!res.ok) {
+      box.innerHTML = '<div class="pane-title">Details</div><div class="empty">node is not laid out this frame</div>';
+      return;
+    }
+    const d = await res.json();
+    const chips = Object.entries(d.states)
+      .map(([k, v]) => `<span class="chip ${v ? "on" : ""}">${k}${v ? " ✓" : ""}</span>`).join("");
+    const styleRows = Object.entries(d.style)
+      .map(([k, v]) => `<span class="k">${k}</span><span class="v">${escapeHtml(JSON.stringify(v))}</span>`)
+      .join("");
+    box.innerHTML =
+      `<div class="pane-title">Details — #${d.stableId}</div>` +
+      `<div class="chips">${chips}</div>` +
+      `<div class="kv">` +
+      `<span class="k">type</span><span class="v">${escapeHtml(d.type)}</span>` +
+      (d.text !== undefined ? `<span class="k">text</span><span class="v">"${escapeHtml(d.text)}"</span>` : "") +
+      (d.font !== undefined ? `<span class="k">font</span><span class="v">${escapeHtml(d.font)}</span>` : "") +
+      `<span class="k">rect</span><span class="v">${d.rect.x}, ${d.rect.y} · ${d.rect.w}×${d.rect.h}</span>` +
+      `<span class="k">children</span><span class="v">${d.childCount}</span>` +
+      `</div>` +
+      `<div class="pane-title">Resolved style</div>` +
+      `<div class="kv">${styleRows}</div>`;
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // ---- frame graph ------------------------------------------------------
+  function onFrame(frame) {
+    $("frame").textContent = String(frame.frame);
+    if (frame.windows.length) {
+      $("windowStats").innerHTML = frame.windows
+        .map((w) => `${escapeHtml(w.title)}: <b>${w.drawCalls}</b> draws · <b>${w.nodes}</b> nodes · font <b>${w.fontCache}</b>`)
+        .join(" &nbsp; ");
+    }
+    samples.push(frame.windows.map((w) => ({ windowId: w.windowId, drawCalls: w.drawCalls })));
+    if (samples.length > MAX_SAMPLES) samples.shift();
+    drawGraph();
+  }
+
+  function drawGraph() {
+    const canvas = $("frameCanvas");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== w * dpr) { canvas.width = w * dpr; canvas.height = h * dpr; }
+    const ctx = canvas.getContext("2d");
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const max = Math.max(8, ...samples.flatMap((s) => s.map((p) => p.drawCalls)));
+    const windowIds = samples.length ? samples[samples.length - 1].map((p) => p.windowId) : [];
+    const colors = ["#e94560", "#4f8ef7", "#3ddc84", "#f7b32b"];
+    ctx.strokeStyle = "#26304d";
+    ctx.beginPath(); ctx.moveTo(0, h - 0.5); ctx.lineTo(w, h - 0.5); ctx.stroke();
+    windowIds.forEach((windowId, index) => {
+      ctx.strokeStyle = colors[index % colors.length];
+      ctx.beginPath();
+      samples.forEach((sample, i) => {
+        const point = sample.find((p) => p.windowId === windowId);
+        if (!point) return;
+        const x = (i / (MAX_SAMPLES - 1)) * w;
+        const y = h - (point.drawCalls / max) * (h - 4) - 1;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+  }
+
+  // ---- SSE --------------------------------------------------------------
+  const events = new EventSource("/events");
+  events.addEventListener("frame", (e) => onFrame(JSON.parse(e.data)));
+  events.addEventListener("tree", (e) => renderTree(JSON.parse(e.data)));
+</script>
+</body>
+</html>
