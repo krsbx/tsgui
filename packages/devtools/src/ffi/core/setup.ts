@@ -32,31 +32,33 @@ export async function setupFfiCopy(
   owner: string = "krsbx",
   repo: string = "vulcania"
 ) {
-  const releases = await getReleases(owner, repo);
-
-  const assets = Object.fromEntries(
-    Object.values(Library).map((library) => [
-      library,
-      getLibraryAssetLink(library, releases),
-    ])
-  );
-
   await mkdir(dest, { recursive: true });
 
   const files = await readdir(dest);
 
+  const missing = Object.values(Library).filter((library) => {
+    if (!isInstalled(FILE_STEM[library] ?? library, files)) return true;
+
+    console.log(`${library} already exists in ${dest}, skipping`);
+    return false;
+  });
+
+  // Everything is already installed, no need to hit the GitHub API
+  if (!missing.length) return {};
+
+  const releases = await getReleases(owner, repo);
+
+  const assets = Object.fromEntries(
+    missing.map((library) => [library, getLibraryAssetLink(library, releases)])
+  );
+
   await Promise.all(
-    Object.values(Library).map(async (library) => {
+    missing.map(async (library) => {
       const asset = assets[library]!;
       if (!asset.found) {
         console.warn(
           `${library} has no release asset for this platform, skipping`
         );
-        return;
-      }
-
-      if (isInstalled(FILE_STEM[library] ?? library, files)) {
-        console.log(`${library} already exists in ${dest}, skipping`);
         return;
       }
 

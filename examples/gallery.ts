@@ -14,6 +14,9 @@
  *   bun run examples/gallery.ts --selftest   # exit after 240 frames
  *   node examples/gallery.ts --selftest
  */
+// Must stay first: points the bindings at ./ffi before any of them load.
+import "./setup.ts";
+// Loaded after the proper setup
 import { App } from "@vulcania/app";
 import { image, PixelFormat, sdl } from "@vulcania/bindings";
 import { type ReconcilableWidget } from "@vulcania/core";

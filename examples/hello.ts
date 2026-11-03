@@ -5,6 +5,8 @@
  *   bun run examples/hello.ts              # run until the window closes
  *   bun run examples/hello.ts --selftest   # exit after ~120 frames (CI)
  */
+import "./setup.ts";
+// Loaded after the proper setup
 import { EventType, Scancode, sdl, SdlDefines } from "@vulcania/bindings";
 
 const selftest = process.argv.includes("--selftest");
