@@ -8,10 +8,11 @@
  * Libraries currently load eagerly at import; if one ever becomes
  * optional-heavy, give it a lazy `loadXxx()` instead of eager top-level await.
  */
-export { runtime, type Runtime } from "./runtime.ts";
 export { readCString } from "./read-cstring.ts";
+export { runtime, type Runtime } from "./runtime.ts";
 
-export * from "./libraries/sdl/index.ts";
 export * from "./libraries/image/index.ts";
-export * from "./libraries/ttf/index.ts";
 export * from "./libraries/mixer/index.ts";
+export * from "./libraries/sdl/index.ts";
+export * from "./libraries/shadercross/node.ts";
+export * from "./libraries/ttf/index.ts";
