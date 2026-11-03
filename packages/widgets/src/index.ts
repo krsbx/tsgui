@@ -15,6 +15,7 @@ export { Checkbox, type CheckboxProps } from "./widgets/checkbox.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
 export { Image, type ImageProps } from "./widgets/image.ts";
 export { Label, type LabelProps } from "./widgets/label.ts";
+export { List, type ListProps } from "./widgets/list.ts";
 export { Meter, type MeterProps } from "./widgets/meter.ts";
 export {
   CircularProgress,
