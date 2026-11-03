@@ -12,6 +12,7 @@ export { Reconciler } from "./reconciler.ts";
 // Per-widget modules — factories + props
 export { Button, type ButtonProps } from "./widgets/button.ts";
 export { Checkbox, type CheckboxProps } from "./widgets/checkbox.ts";
+export { Flex, type FlexProps } from "./widgets/flex.ts";
 export { CircularSlider } from "./widgets/circular-slider.ts";
 export { Image, type ImageProps } from "./widgets/image.ts";
 export { Label, type LabelProps } from "./widgets/label.ts";
