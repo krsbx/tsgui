@@ -341,34 +341,60 @@ jobs:
 
       # Not PLATFORM: the MSVC dev env exports Platform=x64, and Windows env
       # names are case-insensitive — bash would only ever see "Platform".
-      - name: Collect CLI + bundled libraries
+      # Two archives per platform:
+      #   staging-libs/ → SDL_shadercross_<platform>     shared libraries only,
+      #                   flat (what the FFI bindings load). No SDL3: it's the
+      #                   same pinned tag as the SDL3 release it sits beside.
+      #   staging-cli/  → SDL_shadercross_<platform>_cli the CLI + everything
+      #                   else (own bin/ + lib/ incl. SDL3, licenses).
+      - name: Collect libraries + CLI bundle
         env:
           TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          # Keep the installed bin/ + lib/ layout — the CLI's RPATH is
-          # $ORIGIN/../lib. -a preserves the soname symlinks.
-          mkdir -p staging/bin
-          cp -a prefix/bin/. staging/bin/
+          mkdir -p staging-libs staging-cli/bin
+
+          # Libraries: flat is fine — INSTALL_RUNTIME gives every bundled
+          # library a $ORIGIN / @loader_path RPATH. -a keeps soname symlinks.
           case "$TARGET_PLATFORM" in
             linux)
-              mkdir -p staging/lib
-              find prefix/lib -maxdepth 1 -name "*.so*" -exec cp -a {} staging/lib/ \;
+              find prefix/lib -maxdepth 1 -name "*.so*" ! -name "libSDL3.*" \
+                -exec cp -a {} staging-libs/ \;
               ;;
             macos)
-              mkdir -p staging/lib
-              find prefix/lib -maxdepth 1 -name "*.dylib" -exec cp -a {} staging/lib/ \;
+              find prefix/lib -maxdepth 1 -name "*.dylib" ! -name "libSDL3.*" \
+                -exec cp -a {} staging-libs/ \;
+              ;;
+            windows)
+              find prefix/bin prefix/lib -maxdepth 1 -name "*.dll" ! -name "SDL3.dll" \
+                -exec cp -n {} staging-libs/ \; 2>/dev/null || true
+              ;;
+          esac
+
+          # CLI bundle: keep the installed bin/ + lib/ layout — the CLI's
+          # RPATH is $ORIGIN/../lib.
+          cp -a prefix/bin/. staging-cli/bin/
+          case "$TARGET_PLATFORM" in
+            linux)
+              mkdir -p staging-cli/lib
+              find prefix/lib -maxdepth 1 -name "*.so*" -exec cp -a {} staging-cli/lib/ \;
+              ;;
+            macos)
+              mkdir -p staging-cli/lib
+              find prefix/lib -maxdepth 1 -name "*.dylib" -exec cp -a {} staging-cli/lib/ \;
               ;;
             windows)
               # DLLs install beside the exe; catch any that landed in lib/.
-              find prefix/lib -maxdepth 1 -name "*.dll" -exec cp -n {} staging/bin/ \; 2>/dev/null || true
+              find prefix/lib -maxdepth 1 -name "*.dll" -exec cp -n {} staging-cli/bin/ \; 2>/dev/null || true
               ;;
           esac
           if [[ -d prefix/share/licenses ]]; then
-            mkdir -p staging/share
-            cp -a prefix/share/licenses staging/share/
+            mkdir -p staging-cli/share
+            cp -a prefix/share/licenses staging-cli/share/
           fi
-          find staging | sort
+
+          echo "== libraries"; find staging-libs | sort
+          echo "== cli"; find staging-cli | sort
 
       - name: Audit dependencies (fail loud on leaked build-machine paths)
         env:
@@ -377,7 +403,7 @@ jobs:
           set -euo pipefail
           case "$TARGET_PLATFORM" in
             macos)
-              bins=$(find staging/bin staging/lib -type f)
+              bins=$(find staging-cli/bin staging-cli/lib -type f)
               if otool -L $bins | grep -E '/opt/homebrew|/usr/local/'; then
                 echo "::error::binary links against Homebrew paths — not self-contained"
                 exit 1
@@ -385,46 +411,75 @@ jobs:
               otool -L $bins
               ;;
             linux)
-              for f in $(find staging/bin staging/lib -type f); do
+              for f in $(find staging-cli/bin staging-cli/lib -type f); do
                 echo "== $f"
                 readelf -d "$f" | grep -E 'NEEDED|RUNPATH|RPATH' || true
               done
               ;;
           esac
 
+          # The libraries archive must be complete on its own (plus the SDL3
+          # release): every bundled dependency of a shipped library has to
+          # be in it.
+          bundled=$(ls prefix/lib prefix/bin 2>/dev/null | sort -u)
+          missing=""
+          for f in $(find staging-libs -type f); do
+            case "$TARGET_PLATFORM" in
+              # otool lists each arch of a universal2 binary — dedupe.
+              macos) deps=$(otool -L "$f" | sed -n 's|^[[:space:]]*@rpath/\([^ ]*\).*|\1|p' | sort -u) ;;
+              linux) deps=$(readelf -d "$f" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p') ;;
+              *) deps="" ;;
+            esac
+            for d in $deps; do
+              case "$d" in libSDL3.*) continue ;; esac
+              if grep -qx "$d" <<<"$bundled" && [[ ! -e "staging-libs/$d" ]]; then
+                missing="$missing $(basename "$f")→$d"
+              fi
+            done
+          done
+          if [[ -n "$missing" ]]; then
+            echo "::error::libraries archive is missing bundled deps:$missing"
+            exit 1
+          fi
+
       - name: Package (${{ matrix.platform }})
         env:
           TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
+          # The libraries archive keeps the <platform>.<ext> name the devtools
+          # downloader matches; the CLI bundle's _cli suffix keeps it out.
           name="SDL_shadercross_${TARGET_PLATFORM}"
           case "$TARGET_PLATFORM" in
             windows)
               powershell -NoProfile -Command \
-                "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
+                "Compress-Archive -Path 'staging-libs/*' -DestinationPath '${name}.zip' -Force"
+              powershell -NoProfile -Command \
+                "Compress-Archive -Path 'staging-cli/*' -DestinationPath '${name}_cli.zip' -Force"
               ;;
             *)
-              tar -czf "${name}.tar.gz" -C staging .
+              tar -czf "${name}.tar.gz" -C staging-libs .
+              tar -czf "${name}_cli.tar.gz" -C staging-cli .
               ;;
           esac
-          ls -la "${name}".*
+          ls -la "${name}".* "${name}"_cli.*
 
       - name: Smoke — compile a real HLSL shader with the packaged CLI
         env:
           TARGET_PLATFORM: ${{ matrix.platform }}
         run: |
           set -euo pipefail
-          # Runs the CLI from the extracted archive — exactly what ships —
+          # Runs the CLI from the extracted _cli archive — exactly what ships —
           # with no loader-path overrides, so RPATH / bundling bugs fail here.
           rm -rf smoke && mkdir smoke
           case "$TARGET_PLATFORM" in
             windows)
               powershell -NoProfile -Command \
-                "Expand-Archive -Path 'SDL_shadercross_windows.zip' -DestinationPath 'smoke'"
+                "Expand-Archive -Path 'SDL_shadercross_windows_cli.zip' -DestinationPath 'smoke'"
               cli="$PWD/smoke/bin/shadercross.exe"
               ;;
             *)
-              tar -xzf "SDL_shadercross_${TARGET_PLATFORM}.tar.gz" -C smoke
+              tar -xzf "SDL_shadercross_${TARGET_PLATFORM}_cli.tar.gz" -C smoke
               cli="$PWD/smoke/bin/shadercross"
               ;;
           esac
@@ -454,7 +509,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: asset-SDL_shadercross-${{ matrix.platform }}
-          path: SDL_shadercross_${{ matrix.platform }}.*
+          path: |
+            SDL_shadercross_${{ matrix.platform }}.*
+            SDL_shadercross_${{ matrix.platform }}_cli.*
           if-no-files-found: error
           retention-days: 7
 
@@ -494,15 +551,26 @@ jobs:
           Built from source by CI against SDL3 $SDL3_TAG and smoke-tested
           (HLSL → SPIR-V → MSL).
 
+          Shared libraries only (for FFI; place them beside the SDL3 release —
+          SDL3 itself is not included):
+
           | Asset | Contents |
           | ----- | -------- |
-          | SDL_shadercross_linux.tar.gz | x86_64 bin/shadercross + lib/ bundled .so libraries (ubuntu-24.04 build, glibc >= 2.39) |
-          | SDL_shadercross_macos.tar.gz | universal2 bin/shadercross (arm64 + x86_64) + lib/ bundled dylibs, DXC built from the SDL fork |
-          | SDL_shadercross_windows.zip | x64 bin/shadercross.exe + DLLs |
+          | SDL_shadercross_linux.tar.gz | x86_64 .so libraries + soname symlinks (ubuntu-24.04 build, glibc >= 2.39) |
+          | SDL_shadercross_macos.tar.gz | universal2 (arm64 + x86_64) dylibs, DXC built from the SDL fork |
+          | SDL_shadercross_windows.zip | x64 DLLs |
 
-          Each archive is self-contained: the CLI finds its bundled
-          dxcompiler / spirv-cross / SDL3 libraries in ../lib via RPATH, so
-          after extracting (keep the bin/ + lib/ layout) it runs directly:
+          CLI bundles (shadercross executable + its own libraries incl. SDL3 +
+          licenses):
+
+          | Asset | Contents |
+          | ----- | -------- |
+          | SDL_shadercross_linux_cli.tar.gz | bin/shadercross + lib/ + share/licenses/ |
+          | SDL_shadercross_macos_cli.tar.gz | bin/shadercross + lib/ + share/licenses/ |
+          | SDL_shadercross_windows_cli.zip | bin/shadercross.exe + DLLs + share/licenses/ |
+
+          The CLI finds its bundled libraries in ../lib via RPATH, so after
+          extracting a _cli archive (keep the bin/ + lib/ layout) it runs:
 
               ./bin/shadercross shader.hlsl -o shader.spv -t fragment
 
