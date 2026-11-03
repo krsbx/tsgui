@@ -2,7 +2,7 @@
  * Text via the SDL3_ttf tier — white glyph runs rendered to surfaces,
  * uploaded as textures, tinted at draw time, cached per string.
  */
-import { sdl, ttf, type TtfExtensionSymbols } from "@tsgui/bindings";
+import { sdl, ttf, type TtfExtensionSymbols } from "@vulcania/bindings";
 import type {
   RendererHandle,
   TextureDrawOptions,
@@ -54,6 +54,11 @@ export class TtfFont {
       throw new Error(`TTF_GetStringSize: ${sdl.SDL_GetError()}`);
     }
     return { width: w[0]!, height: h[0]! };
+  }
+
+  /** Cached text-run textures — the devtools inspector surfaces it. */
+  public get cacheSize(): number {
+    return this.cache.size;
   }
 
   /**

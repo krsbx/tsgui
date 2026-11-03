@@ -13,7 +13,7 @@ const CANDIDATES: Record<string, string[]> = {
 export function resolveLibrary(): string {
   return resolveDylib(
     "SDL3_image",
-    "TSGUI_SDL3_IMAGE_PATH",
+    "VULCANIA_SDL3_IMAGE_PATH",
     CANDIDATES[process.platform] ?? []
   );
 }

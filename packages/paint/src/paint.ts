@@ -1,20 +1,20 @@
 /**
- * @tsgui/paint — the generic rendering engine. Walks a LayoutNode tree
+ * @vulcania/paint — the generic rendering engine. Walks a LayoutNode tree
  * and issues draw calls in flying-pan's proven order: shadow → border →
  * background → per-widget painter → children.
  *
  * The engine is widget-agnostic: per-widget painters are injected through
- * `PaintContext.painters` (assembled by @tsgui/widgets, which co-locates
+ * `PaintContext.painters` (assembled by @vulcania/widgets, which co-locates
  * each painter with its widget). The Painter surface is STRUCTURAL and
- * reuses @tsgui/gpu's option types, so GpuRenderer satisfies it while
+ * reuses @vulcania/gpu's option types, so GpuRenderer satisfies it while
  * headless tests mock it.
  */
-import type { AnimationManager } from "@tsgui/animation";
+import type { AnimationManager } from "@vulcania/animation";
 import {
   type InteractionStates,
   STATES_NONE,
   type StateStore,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import type {
   ArcOptions,
   Rect,
@@ -22,9 +22,9 @@ import type {
   RingOptions,
   TextDrawOptions,
   TextureDrawOptions,
-} from "@tsgui/gpu";
-import type { Size, ViewStyle } from "@tsgui/layout";
-import { type LayoutNode, Overflow, WidgetType } from "@tsgui/layout";
+} from "@vulcania/gpu";
+import type { Size, ViewStyle } from "@vulcania/layout";
+import { type LayoutNode, Overflow, WidgetType } from "@vulcania/layout";
 import { paintShadow } from "./primitives/shadow.ts";
 import { paintBackground, paintBorder } from "./primitives/shape.ts";
 import { resolveStyle } from "./style-resolve.ts";
@@ -60,7 +60,7 @@ export type WidgetPainter = (
   states: InteractionStates
 ) => void;
 
-/** Per-widget painter registry — assembled by @tsgui/widgets. */
+/** Per-widget painter registry — assembled by @vulcania/widgets. */
 export type WidgetPainters = ReadonlyMap<
   WidgetType | (string & {}),
   WidgetPainter
@@ -71,6 +71,13 @@ export interface PaintContext {
   font: TextPainter;
   /** Per-node interaction flags — production wires the dispatchers. */
   statesOf?(node: LayoutNode): InteractionStates;
+  /**
+   * Named-font lookup — resolves a widget's `font` prop to its
+   * TextPainter. Implementations may throw on unknown names
+   * (fail-loud) or return undefined (fall back to `font`). Absent →
+   * every widget renders in `font`.
+   */
+  fonts?: (name: string) => TextPainter | undefined;
   /** The app's state store — uncontrolled widgets resolve values here. */
   stateStore?: StateStore;
   /** Per-widget painters — widget-specific content painting. */
@@ -95,7 +102,7 @@ const CHECKED_PROP = new Map<WidgetType | (string & {}), string>([
 ]);
 
 function resolveChecked(
-  ctx: PaintContext,
+  ctx: Pick<PaintContext, "statesOf" | "stateStore">,
   node: LayoutNode,
   checkedKey: string | undefined
 ): boolean {
@@ -129,16 +136,26 @@ function resolveChecked(
   });
 }
 
-function paintNode(ctx: PaintContext, node: LayoutNode): void {
-  const base = node.widget.style ?? {};
+/**
+ * The pseudo-state a node paints under: the dispatcher states (hover/
+ * focus/press) with the control's checked flag folded in, so `_checked`
+ * style overrides apply. Single source for the paint walk AND the
+ * devtools detail view — a detail panel that folds differently from the
+ * paint would report states the user isn't seeing.
+ */
+export function effectiveStatesFor(
+  ctx: Pick<PaintContext, "statesOf" | "stateStore">,
+  node: LayoutNode
+): InteractionStates {
   const states = ctx.statesOf?.(node) ?? STATES_NONE;
-
-  // Controls resolve their checked flag: controlled props first, then
-  // the store-backed uncontrolled state. Folded into the pseudo-state
-  // so `_checked` style overrides apply.
   const checkedKey = CHECKED_PROP.get(node.widget.type);
   const checked = resolveChecked(ctx, node, checkedKey);
-  const effectiveStates = checkedKey ? { ...states, checked } : states;
+  return checkedKey ? { ...states, checked } : states;
+}
+
+function paintNode(ctx: PaintContext, node: LayoutNode): void {
+  const base = node.widget.style ?? {};
+  const effectiveStates = effectiveStatesFor(ctx, node);
 
   const resolved = resolveStyle(base, effectiveStates);
 
@@ -184,6 +201,19 @@ function paintNode(ctx: PaintContext, node: LayoutNode): void {
   if (scrollable) {
     ctx.gpu.popClip?.();
   }
+}
+
+/**
+ * Resolve the font a widget renders in: a `font` prop naming a font
+ * from `PaintContext.fonts`, else the default font. One helper so
+ * every painter resolves identically — a named font that the lookup
+ * rejects propagates the error (fail-loud), and no lookup falls back
+ * to the default font (headless compat).
+ */
+export function resolveFont(ctx: PaintContext, node: LayoutNode): TextPainter {
+  const font = node.widget.props["font"];
+  if (typeof font !== "string") return ctx.font;
+  return ctx.fonts?.(font) ?? ctx.font;
 }
 
 /** Paint a laid-out tree in pre-order. */

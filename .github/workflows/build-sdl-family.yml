@@ -1,0 +1,185 @@
+# Build the whole SDL3 family in one run — SDL3, SDL3_image, SDL3_ttf,
+# SDL3_mixer and the SDL_shadercross CLI — by calling the per-library
+# workflows (build-sdl.yml, build-sdl-image.yml, build-sdl-ttf.yml,
+# build-sdl-mixer.yml, build-sdl-shadercross.yml). Each one still
+# publishes its own vulcania release (SDL3-<v>, SDL3_image-<v>, …); this just
+# resolves the tags up front and links every satellite against the same SDL3
+# tag that gets published.
+#
+# Trigger: Actions → "Build SDL family" → Run workflow
+#   owner     — GitHub owner the four repos live under (owner/SDL,
+#               owner/SDL_image, owner/SDL_ttf, owner/SDL_mixer)
+#   sdl3_tag  — SDL3 tag, e.g. release-3.4.14
+#   image_tag — SDL_image tag, e.g. release-3.2.4
+#   ttf_tag   — SDL_ttf tag, e.g. release-3.2.2
+#   mixer_tag — SDL_mixer tag, e.g. release-3.2.4
+#   shadercross_ref — SDL_shadercross commit/branch (upstream has no
+#               release tags)
+# Any blank tag/ref = the pin in version.lock (repo root).
+#   skip_shadercross — skip the shadercross build (its macOS job builds DXC
+#               from source and takes 30-40 min cold).
+
+name: Build SDL family
+
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        description: Repository owner for SDL, SDL_image, SDL_ttf, SDL_mixer
+        required: true
+        default: "libsdl-org"
+        type: string
+      sdl3_tag:
+        description: SDL3 tag (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      image_tag:
+        description: SDL_image tag (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      ttf_tag:
+        description: SDL_ttf tag (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      mixer_tag:
+        description: SDL_mixer tag (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      shadercross_ref:
+        description: SDL_shadercross commit/branch (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      skip_shadercross:
+        description: Skip the SDL_shadercross build (slow macOS DXC build)
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      sdl3_tag: ${{ steps.prep.outputs.sdl3_tag }}
+      image_tag: ${{ steps.prep.outputs.image_tag }}
+      ttf_tag: ${{ steps.prep.outputs.ttf_tag }}
+      mixer_tag: ${{ steps.prep.outputs.mixer_tag }}
+      shadercross_ref: ${{ steps.prep.outputs.shadercross_ref }}
+    steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
+      - id: prep
+        env:
+          OWNER: ${{ inputs.owner }}
+          SDL3_TAG: ${{ inputs.sdl3_tag }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          TTF_TAG: ${{ inputs.ttf_tag }}
+          MIXER_TAG: ${{ inputs.mixer_tag }}
+          SHADERCROSS_REF: ${{ inputs.shadercross_ref }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$OWNER" =~ ^[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::owner must be a GitHub user/org name, got: $OWNER"
+            exit 1
+          fi
+
+          # Explicit input wins; blank → the pin in version.lock.
+          resolve() {
+            local key=$1 value=$2
+            if [[ -z "$value" ]]; then
+              value=$(sed -n "s/^$key=//p" version.lock | head -n1)
+            fi
+            if [[ -z "$value" ]]; then
+              echo "::error::no $key input and no $key= entry in version.lock" >&2
+              exit 1
+            fi
+            echo "$key → $value" >&2
+            echo "$value"
+          }
+
+          # Plain assignments so a failed resolve trips set -e.
+          sdl3=$(resolve SDL3 "$SDL3_TAG")
+          image=$(resolve SDL_image "$IMAGE_TAG")
+          ttf=$(resolve SDL_ttf "$TTF_TAG")
+          mixer=$(resolve SDL_mixer "$MIXER_TAG")
+          shadercross=$(resolve SDL_shadercross "$SHADERCROSS_REF")
+          {
+            echo "sdl3_tag=$sdl3"
+            echo "image_tag=$image"
+            echo "ttf_tag=$ttf"
+            echo "mixer_tag=$mixer"
+            echo "shadercross_ref=$shadercross"
+          } >> "$GITHUB_OUTPUT"
+
+  # image/ttf/mixer wait for SDL3: it caches its install prefix, which they
+  # restore to link against instead of each compiling SDL3 again. They are
+  # skipped if SDL3 fails, so no satellite ships against an unpublished SDL3.
+  # shadercross stays parallel: it bundles its own SDL3 (macOS 11.0 target).
+  sdl3:
+    name: SDL3
+    needs: prepare
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-sdl.yml
+    with:
+      tag: ${{ needs.prepare.outputs.sdl3_tag }}
+      repo: ${{ inputs.owner }}/SDL
+
+  image:
+    name: SDL3_image
+    needs: [prepare, sdl3]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-sdl-image.yml
+    with:
+      tag: ${{ needs.prepare.outputs.image_tag }}
+      repo: ${{ inputs.owner }}/SDL_image
+      sdl3_tag: ${{ needs.prepare.outputs.sdl3_tag }}
+
+  ttf:
+    name: SDL3_ttf
+    needs: [prepare, sdl3]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-sdl-ttf.yml
+    with:
+      tag: ${{ needs.prepare.outputs.ttf_tag }}
+      repo: ${{ inputs.owner }}/SDL_ttf
+      sdl3_tag: ${{ needs.prepare.outputs.sdl3_tag }}
+
+  mixer:
+    name: SDL3_mixer
+    needs: [prepare, sdl3]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-sdl-mixer.yml
+    with:
+      tag: ${{ needs.prepare.outputs.mixer_tag }}
+      repo: ${{ inputs.owner }}/SDL_mixer
+      sdl3_tag: ${{ needs.prepare.outputs.sdl3_tag }}
+
+  shadercross:
+    name: SDL_shadercross
+    needs: prepare
+    if: ${{ !inputs.skip_shadercross }}
+    permissions:
+      contents: write
+    # inherit → optional SHADERCROSS_ARTIFACT_TOKEN for upstream prebuilt packages
+    secrets: inherit
+    uses: ./.github/workflows/build-sdl-shadercross.yml
+    with:
+      ref: ${{ needs.prepare.outputs.shadercross_ref }}
+      repo: ${{ inputs.owner }}/SDL_shadercross
+      sdl3_tag: ${{ needs.prepare.outputs.sdl3_tag }}

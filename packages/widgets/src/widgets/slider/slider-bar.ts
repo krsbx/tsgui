@@ -1,16 +1,17 @@
 /** SliderBar painter — track, fill, marks, handle; ported from flying-pan. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
+import { Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
 import {
   ProgressBarOrientation,
   ProgressValueType,
   valueToRatio,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import {
   paintBackground,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
 import { paintInlineValueLabel } from "../label/paint.ts";
 import { HANDLE_SIZE, TRACK_THICKNESS } from "./geometry.ts";
 import { paintSliderHandle } from "./slider-handle.ts";
@@ -100,7 +101,7 @@ export const paintSliderBar: WidgetPainter = (ctx, node) => {
   // Handle — a bordered disc centered on the value's position.
   paintSliderHandle(ctx, handleX, handleY, handleStyle as never);
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

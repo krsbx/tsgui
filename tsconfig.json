@@ -26,5 +26,7 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  // Pinned header submodules (codegen input only) — not our sources.
+  "exclude": ["node_modules", "vendor"]
 }

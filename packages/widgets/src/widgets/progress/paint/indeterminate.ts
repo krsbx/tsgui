@@ -4,16 +4,16 @@
  * from the AnimationManager clock through PaintContext (`time`); without
  * a manager they paint the static mid-cycle frame.
  */
-import { easings } from "@tsgui/animation";
-import { Palette, propsOf } from "@tsgui/core";
+import { easings } from "@vulcania/animation";
+import { Palette, propsOf } from "@vulcania/core";
 import {
   CircularProgressDirection,
   EasingName,
   type LayoutNode,
   ProgressBarOrientation,
   ProgressDirection,
-} from "@tsgui/layout";
-import { type PaintContext, parseColor } from "@tsgui/paint";
+} from "@vulcania/layout";
+import { type PaintContext, parseColor } from "@vulcania/paint";
 import type { CircularProgressProps, ProgressBarProps } from "../types.ts";
 
 const INDETERMINATE_BAR_DURATION = 1500;

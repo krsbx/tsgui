@@ -3,6 +3,17 @@
  * Adding a library is one entry here (plus a bindings folder); the
  * pipeline in generate.ts is generic.
  */
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+/**
+ * Pinned header sources — git submodules under vendor/, used only as clang
+ * input (`git submodule update --init`; no nested submodules needed).
+ */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const vendorRoot = resolve(__dirname, "../../..", "vendor");
 
 export interface TargetSpec {
   /** Library short name: file prefix, output folder, defs export name. */
@@ -13,16 +24,35 @@ export interface TargetSpec {
   prefixes: string[];
   /** Subdirectory of the include dir to scan for numeric #defines. */
   definesSubdir?: string;
+  /** Submodule under vendor/ whose include/ holds this target's headers. */
+  vendor: string;
 }
 
-/** Base include dir exposing SDL3/ plus the satellite header dirs. */
-export function includeDir(): string {
-  if (process.env.TSGUI_SDL3_INCLUDE) return process.env.TSGUI_SDL3_INCLUDE;
-  if (process.platform === "darwin") return "/opt/homebrew/include";
-  if (process.platform === "linux") return "/usr/include";
-  throw new Error(
-    "codegen: set TSGUI_SDL3_INCLUDE to the base include directory (contains SDL3/, SDL3_image/, …)"
+/**
+ * Include dir holding `spec`'s headers (`headerRel`, `definesSubdir`).
+ * VULCANIA_SDL3_INCLUDE overrides with one base dir exposing SDL3/,
+ * SDL3_image/, … (e.g. a system install).
+ */
+export function targetIncludeDir(spec: TargetSpec): string {
+  return (
+    process.env.VULCANIA_SDL3_INCLUDE ??
+    join(vendorRoot, spec.vendor, "include")
   );
+}
+
+/**
+ * Every `-I` dir for clang — all targets, since satellite headers include
+ * <SDL3/SDL.h>.
+ */
+export function includeDirs(): string[] {
+  const dirs = [...new Set(Object.values(TARGETS).map(targetIncludeDir))];
+  const missing = dirs.filter((dir) => !existsSync(dir));
+  if (missing.length > 0) {
+    throw new Error(
+      `codegen: missing headers in ${missing.join(", ")} — run \`git submodule update --init\` (or set VULCANIA_SDL3_INCLUDE)`
+    );
+  }
+  return dirs;
 }
 
 /**
@@ -33,6 +63,7 @@ const SATELLITES = [
   { name: "image", prefixes: ["IMG_"] },
   { name: "ttf", prefixes: ["TTF_"] },
   { name: "mixer", prefixes: ["MIX_"] },
+  { name: "shadercross", prefixes: ["SDL_ShaderCross_"] },
 ] as const;
 
 export const TARGETS: Record<string, TargetSpec> = {
@@ -44,6 +75,7 @@ export const TARGETS: Record<string, TargetSpec> = {
     // only exist as SDL_oldnames.h aliases, so they are deliberately omitted.
     prefixes: ["SDL_", "SDLK_"],
     definesSubdir: "SDL3",
+    vendor: "SDL",
   },
   ...Object.fromEntries(
     SATELLITES.map(({ name, prefixes }) => [
@@ -54,6 +86,7 @@ export const TARGETS: Record<string, TargetSpec> = {
         headerRel: `SDL3_${name}/SDL_${name}.h`,
         prefixes: [...prefixes, `SDL_${name.toUpperCase()}_`],
         definesSubdir: `SDL3_${name}`,
+        vendor: `SDL_${name}`,
       } satisfies TargetSpec,
     ])
   ),

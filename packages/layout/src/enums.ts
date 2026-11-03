@@ -101,11 +101,13 @@ export const WidgetType = {
   Toggle: "Toggle",
   Radio: "Radio",
   SliderBar: "SliderBar",
+  RangeSlider: "RangeSlider",
   CircularSlider: "CircularSlider",
   ProgressBar: "ProgressBar",
   CircularProgress: "CircularProgress",
   Meter: "Meter",
   TextInput: "TextInput",
+  TextArea: "TextArea",
   List: "List",
   Custom: "Custom",
 } as const;

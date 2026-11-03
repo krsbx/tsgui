@@ -1,0 +1,5 @@
+SDL3=release-3.4.18
+SDL_image=release-3.4.8
+SDL_ttf=release-3.2.2
+SDL_mixer=release-3.2.4
+SDL_shadercross=1ff05bec573988a98ef9e0260b4da44f512b8367

@@ -55,11 +55,24 @@ export function classifyFfiType(
 ): FfiType | null {
   // clang drops desugaredQualType on function types, so SDL typedef names
   // (Uint16, Sint32, …) survive into returnType — resolve through the
-  // header's own typedefs, with a cycle guard.
+  // header's own typedefs, with a cycle guard. A typedef only renames the
+  // pointee — the use site's `*`s add to the alias's own, so `const Uint8 *`
+  // stays a pointer instead of collapsing to a by-value uint8_t.
   let t = t0;
+  let pointerDepth = t0.pointerDepth;
+  let isFunctionPointer = t0.isFunctionPointer;
   for (let i = 0; aliases.has(t.name) && i < 8; i++) {
     t = aliases.get(t.name)!;
+    pointerDepth += t.pointerDepth;
+    isFunctionPointer ||= t.isFunctionPointer;
   }
+
+  t = {
+    ...t,
+    pointerDepth,
+    isFunctionPointer,
+    isConst: t0.isConst || t.isConst,
+  };
 
   // Enums by value are machine ints.
   if (t.pointerDepth === 0 && enumNames.has(t.name)) return "i32";

@@ -1,6 +1,6 @@
 /** Slider geometry — position↔value math and handle hit tests. */
-import { MouseButton } from "@tsgui/core";
-import { CircularProgressDirection } from "@tsgui/layout";
+import { MouseButton } from "@vulcania/core";
+import { CircularProgressDirection } from "@vulcania/layout";
 import { describe, expect, test } from "bun:test";
 import {
   isOnBarHandle,

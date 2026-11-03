@@ -5,8 +5,11 @@ import tseslint from "typescript-eslint";
 /**
  * Layering rules from docs/ARCHITECTURE.md, mechanically enforced:
  *
- *   layout | animation | core | interactions | paint | widgets | devtools
+ *   layout | fonts | animation | core | interactions | paint | widgets
  *                                      → pure TS, never import bindings/platform
+ *   devtools                           → tooling umbrella: the FFI setup
+ *                                        (src/ffi) may dlopen; the inspector
+ *                                        (src/inspect + tests) stays pure TS
  *   gpu                                → bindings only (renderer over SDL)
  *   platform                           → bindings only
  *   bindings                           → nothing from this repo
@@ -15,13 +18,34 @@ import tseslint from "typescript-eslint";
  */
 const PURE_LAYERS = [
   "packages/layout",
+  "packages/fonts",
   "packages/animation",
   "packages/core",
   "packages/interactions",
   "packages/paint",
   "packages/widgets",
-  "packages/devtools",
 ];
+
+/** The pure-TS import ban, shared by the pure layers and devtools' inspector. */
+const PURE_TS_IMPORTS = {
+  "no-restricted-imports": [
+    "error",
+    {
+      patterns: [
+        {
+          group: [
+            "@vulcania/bindings",
+            "@vulcania/platform",
+            "bun:ffi",
+            "node:ffi",
+          ],
+          message:
+            "layering: this package must stay pure TS — see docs/ARCHITECTURE.md",
+        },
+      ],
+    },
+  ],
+} as const;
 
 export default [
   {
@@ -31,6 +55,8 @@ export default [
       "**/build/**",
       "**/generated/**",
       "**/*.d.ts",
+      // Pinned header submodules (codegen input only).
+      "vendor/**",
     ],
   },
   js.configs.recommended,
@@ -59,26 +85,17 @@ export default [
   },
   ...PURE_LAYERS.map((layer) => ({
     files: [`${layer}/**/*.ts`],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          patterns: [
-            {
-              group: [
-                "@tsgui/bindings",
-                "@tsgui/platform",
-                "bun:ffi",
-                "node:ffi",
-              ],
-              message:
-                "layering: this package must stay pure TS — see docs/ARCHITECTURE.md",
-            },
-          ],
-        },
-      ],
-    },
+    rules: { ...PURE_TS_IMPORTS },
   })),
+  {
+    // The devtools umbrella is tooling: src/ffi dlopens SDL on purpose,
+    // but the inspector server and its tests stay pure TS.
+    files: [
+      "packages/devtools/src/inspect/**/*.ts",
+      "packages/devtools/test/**/*.ts",
+    ],
+    rules: { ...PURE_TS_IMPORTS },
+  },
   {
     files: ["packages/platform/**/*.ts"],
     rules: {
@@ -88,10 +105,10 @@ export default [
           patterns: [
             {
               group: [
-                "@tsgui/gpu",
-                "@tsgui/layout",
-                "@tsgui/widgets",
-                "@tsgui/devtools",
+                "@vulcania/gpu",
+                "@vulcania/layout",
+                "@vulcania/widgets",
+                "@vulcania/devtools",
               ],
               message: "layering: platform sits below the toolkit layers",
             },
@@ -108,7 +125,7 @@ export default [
         {
           patterns: [
             {
-              group: ["@tsgui/*"],
+              group: ["@vulcania/*"],
               message: "layering: bindings must not import other repo packages",
             },
           ],

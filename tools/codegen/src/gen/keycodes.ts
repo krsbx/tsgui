@@ -1,5 +1,5 @@
 /**
- * Generator for @tsgui/core's KeyCode — the toolkit-interpreted keys,
+ * Generator for @vulcania/core's KeyCode — the toolkit-interpreted keys,
  * with values straight from the scanned SDLK_ defines. Emitting them
  * keeps a hand-written copy from drifting when SDL moves a code: the
  * next `bun run codegen:sdl` picks up the new values.

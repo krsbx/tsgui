@@ -1,0 +1,187 @@
+/**
+ * App — the multi-window application shell, ported from flying-pan's
+ * App/WindowManager. Owns SDL init, the window registry, event decode
+ * + window routing, and the run loop: per frame the app body assigns
+ * each window's widget, then every window reconciles → lays out →
+ * dispatches → paints (SDL has no GL context switch, so all windows
+ * render every frame, unlike flying-pan's active-window-only pass).
+ */
+import { sdl, SdlDefines } from "@vulcania/bindings";
+import { type FontDescriptor, FontManager } from "@vulcania/fonts";
+import { type DecodedEvents, EventDecoder } from "./events.ts";
+import { AppWindow, type AppWindowOptions, type RGBA } from "./window.ts";
+
+const FRAME_MS = 16; // ~60fps frame limiter
+
+export interface AppOptions {
+  title: string;
+  width: number;
+  height: number;
+  /** Root window frame clear color. */
+  backgroundColor?: RGBA;
+  /**
+   * Named fonts for every window — "default" is the font widgets
+   * render in unless they name another. Unspecified → built-in
+   * fallback font.
+   */
+  fonts?: Record<string, FontDescriptor>;
+  /** Esc closes the app. Default true (the examples' behavior). */
+  quitOnEscape?: boolean;
+  /**
+   * Devtools seam — runs after every window painted and the teardown
+   * queue flushed, before the frame delay: the frame is complete and
+   * consistent for samplers (the inspector reads renderer stats here).
+   */
+  onFrameEnd?: (app: App) => void;
+}
+
+export class App {
+  /** The root window — closing it stops the app. */
+  public readonly root: AppWindow;
+
+  private readonly windows = new Map<number, AppWindow>();
+  private readonly fontManager: FontManager;
+  private readonly pendingDestroy: AppWindow[] = [];
+  private readonly decoder = new EventDecoder();
+  private readonly quitOnEscape: boolean;
+  private readonly onFrameEnd?: (app: App) => void;
+  private running = true;
+  private frames_ = 0;
+
+  public constructor(options: AppOptions) {
+    this.quitOnEscape = options.quitOnEscape ?? true;
+    this.onFrameEnd = options.onFrameEnd;
+    this.fontManager = new FontManager(options.fonts);
+
+    if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
+      throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
+    }
+
+    this.root = this.createWindow({
+      title: options.title,
+      width: options.width,
+      height: options.height,
+      resizable: true,
+      backgroundColor: options.backgroundColor,
+    });
+  }
+
+  public get frames(): number {
+    return this.frames_;
+  }
+
+  /** Every live window (registry order: root first). */
+  public get all(): AppWindow[] {
+    return [...this.windows.values()];
+  }
+
+  public createWindow(options: Omit<AppWindowOptions, "fonts">): AppWindow {
+    const handle = sdl.SDL_CreateWindow({
+      title: options.title,
+      w: options.width,
+      h: options.height,
+      flags: options.resizable ? SdlDefines.SDL_WINDOW_RESIZABLE : 0,
+    });
+    if (!handle) throw new Error(`SDL_CreateWindow: ${sdl.SDL_GetError()}`);
+
+    const window = new AppWindow(options, handle, this.fontManager);
+    this.windows.set(window.id, window);
+    return window;
+  }
+
+  /**
+   * Remove a window. The registry delete is immediate (future frames
+   * skip it) but the SDL teardown is DEFERRED to end-of-frame: handlers
+   * fire mid-dispatch, mid-iteration — destroying the renderer there
+   * would make the same frame's paint hit a dead renderer.
+   */
+  public destroyWindow(window: AppWindow): void {
+    if (!this.windows.has(window.id)) return;
+    this.windows.delete(window.id);
+    this.pendingDestroy.push(window);
+    if (window === this.root) this.running = false; // root gone → exit
+  }
+
+  /**
+   * Run until the root window closes. Per frame: poll + route events,
+   * then the app body assigns each window's widget, then every window
+   * reconciles → lays out → dispatches → paints.
+   *
+   * The frame delay awaits a timer instead of SDL_Delay: a native sleep
+   * never yields to the JS event loop, which would starve any in-process
+   * server (the devtools inspector) for the app's whole lifetime.
+   * flying-pan's loop yields the same way.
+   */
+  public async run(frameBody: (app: App) => void): Promise<void> {
+    while (this.running) {
+      const events = this.decoder.decode(() =>
+        sdl.SDL_PollEvent({ event: this.decoder.data })
+      );
+
+      this.route(events);
+      if (!this.running) break;
+
+      frameBody(this);
+
+      // Snapshot: handlers this frame may create windows (a live Map
+      // iterator would visit them half-initialized) or destroy them.
+      const windows = [...this.windows.values()];
+      for (const window of windows) {
+        window.reconcile();
+        window.layout();
+        window.dispatch(
+          events.pointerEvents.filter((e) => e.windowId === window.id),
+          events.keyboardEvents.filter((e) => e.windowId === window.id),
+          events.wheelEvents.filter((e) => e.windowId === window.id)
+        );
+        window.paint(performance.now());
+      }
+
+      this.frames_++;
+      this.flushDestroyQueue();
+      this.onFrameEnd?.(this);
+
+      await new Promise<void>((resolve) => setTimeout(resolve, FRAME_MS));
+    }
+
+    this.teardown();
+  }
+
+  /** Explicit stop — the run loop exits and tears down. */
+  public quit(): void {
+    this.running = false;
+  }
+
+  private route(events: DecodedEvents): void {
+    if (events.quit) this.running = false;
+
+    if (events.escape && this.quitOnEscape) this.running = false;
+
+    for (const request of events.closeRequests) {
+      if (request.windowId === this.root.id) {
+        this.running = false; // root close — flying-pan's exit semantics
+        continue;
+      }
+      const window = this.windows.get(request.windowId);
+      if (window) this.destroyWindow(window);
+    }
+  }
+
+  private flushDestroyQueue(): void {
+    while (this.pendingDestroy.length > 0) {
+      this.pendingDestroy.shift()!.destroy();
+    }
+  }
+
+  private teardown(): void {
+    this.flushDestroyQueue();
+    for (const window of this.windows.values()) {
+      window.destroy();
+    }
+    this.windows.clear();
+    sdl.SDL_Quit();
+  }
+}
+
+export { AppWindow, type AppWindowOptions };
+export { EventDecoder, type DecodedEvents } from "./events.ts";

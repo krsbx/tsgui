@@ -9,7 +9,7 @@ import {
   MouseButton,
   type ReconcilableWidget,
   StateStore,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import {
   FocusDispatcher,
   type KeyboardInputEvent,
@@ -17,13 +17,13 @@ import {
   PointerDispatcher,
   type PointerInputEvent,
   PointerInputKind,
-} from "@tsgui/interactions";
+} from "@vulcania/interactions";
 import {
   FlexDirection,
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { describe, expect, test } from "bun:test";
 import { Button, Checkbox, Label, Reconciler, View } from "../src/index.ts";
 

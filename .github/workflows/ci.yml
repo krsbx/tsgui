@@ -14,6 +14,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 26
+      # Pinned SDL-family headers codegen parses (vendor/ submodules,
+      # trimmed to include/ — see README "Pinned SDL headers").
+      - name: Fetch pinned SDL headers
+        run: node scripts/vendor-headers.ts
       - name: Install SDL3
         run: brew install sdl3 sdl3_image sdl3_ttf sdl3_mixer
       - name: Install dependencies

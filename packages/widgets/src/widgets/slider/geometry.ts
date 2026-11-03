@@ -2,7 +2,7 @@
  * Slider geometry — position↔value mapping and handle hit tests, ported
  * from flying-pan's widget/slider/{utility,constant}.
  */
-import { CircularProgressDirection, valueToRatio } from "@tsgui/layout";
+import { CircularProgressDirection, valueToRatio } from "@vulcania/layout";
 import type { CircularSliderProps } from "./types.ts";
 
 export const TRACK_THICKNESS = 4;

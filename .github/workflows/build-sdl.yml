@@ -1,0 +1,314 @@
+# Build SDL3 from a libsdl-org release tag and publish the shared library as
+# a vulcania release asset — the "optional prebuilt platform packages" line of
+# ROADMAP.md phase 6 (see docs/PACKAGING.md work). The satellites have their
+# own workflows: build-sdl-image.yml, build-sdl-ttf.yml, build-sdl-mixer.yml.
+#
+# Trigger: Actions → "Build SDL" → Run workflow
+#   tag  — source tag to build, e.g. release-3.4.18
+#              (blank = pin in version.lock)
+#   repo — source repository (default libsdl-org/SDL)
+#
+# One run publishes one vulcania release tagged SDL3-<version> with three assets:
+#
+#   SDL3_linux.tar.gz   x86_64 ELF soname + soname symlink
+#                       (built on ubuntu-24.04 → glibc ≥ 2.39 at runtime)
+#   SDL3_macos.tar.gz   universal2 dylib (arm64 + x86_64), keeping SDL's
+#                       default @rpath install name — vulcania pack rewrites
+#                       it into the app bundle
+#   SDL3_windows.zip    x64 DLL
+#
+# Option names verified against SDL 3.4.x — recheck the target tag's
+# CMakeLists when jumping majors.
+
+name: Build SDL
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.4.18 (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL
+        required: true
+        default: "libsdl-org/SDL"
+        type: string
+  # Same inputs, so build-sdl-family.yml can call this workflow.
+  workflow_call:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.4.18 (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL
+        required: true
+        default: "libsdl-org/SDL"
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  LIB: SDL3
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.prep.outputs.tag }}
+      version: ${{ steps.prep.outputs.version }}
+      release_tag: ${{ steps.prep.outputs.release_tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
+      - id: prep
+        env:
+          TAG: ${{ inputs.tag }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          set -euo pipefail
+
+          # Pinned value for a library from version.lock (KEY=value lines).
+          lock() {
+            local value
+            value=$(sed -n "s/^$1=//p" version.lock | head -n1)
+            if [[ -z "$value" ]]; then
+              echo "::error::version.lock has no $1= entry" >&2
+              exit 1
+            fi
+            echo "$value"
+          }
+
+          if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::repo must look like owner/name, got: $REPO"
+            exit 1
+          fi
+
+          # Blank tag → the pin in version.lock.
+          if [[ -z "$TAG" ]]; then
+            TAG=$(lock SDL3)
+            echo "Using version.lock: SDL3=$TAG"
+          fi
+
+          # SDL projects tag releases as release-X.Y.Z — fail fast on typos.
+          if [[ ! "$TAG" =~ ^release-[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::tag must look like release-3.4.18, got: $TAG"
+            exit 1
+          fi
+
+          version=${TAG#release-}
+          {
+            echo "tag=$TAG"
+            echo "version=$version"
+            echo "release_tag=$LIB-$version"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-24.04
+          - platform: macos
+            os: macos-15
+          - platform: windows
+            os: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      OSX_FLAGS: ${{ matrix.platform == 'macos' && '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64' || '' }}
+    steps:
+      - name: Install Linux build deps (decides which SDL backends get built in)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          # Mirrors SDL's own CI package list (.github/workflows/
+          # create-test-plan.py) — SDL 3.4 hard-fails on some missing X11 ones.
+          sudo apt-get install -y \
+            build-essential pkg-config \
+            libx11-dev libxext-dev libxcursor-dev libxfixes-dev libxi-dev \
+            libxrandr-dev libxss-dev libxtst-dev libxkbcommon-dev \
+            libwayland-dev wayland-protocols libdecor-0-dev \
+            libasound2-dev libpulse-dev libpipewire-0.3-dev \
+            libaudio-dev libjack-dev libsndio-dev \
+            libdbus-1-dev libudev-dev libusb-1.0-0-dev \
+            libdrm-dev libgbm-dev libegl1-mesa-dev libgl1-mesa-dev libgles2-mesa-dev \
+            libibus-1.0-dev
+
+      - name: Checkout SDL source
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ needs.prepare.outputs.tag }}
+          path: lib-src
+
+      - name: Configure SDL3
+        run: |
+          set -euo pipefail
+          cmake -S lib-src -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDL_SHARED=ON -DSDL_STATIC=OFF \
+            $OSX_FLAGS
+
+      - name: Build + install SDL3
+        run: |
+          set -euo pipefail
+          cmake --build build --config Release --parallel
+          cmake --install build --config Release --prefix "$PWD/sdl3-prefix"
+
+      # Satellite builds (image/ttf/mixer) restore this prefix to link against
+      # instead of compiling SDL3 again. Key must match their
+      # "Restore SDL3 prefix" step. A key that already exists is only a warning.
+      - name: Cache SDL3 prefix for satellite builds
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: sdl3-prefix
+          key: sdl3-prefix-v1-${{ matrix.platform }}-${{ inputs.repo }}-${{ needs.prepare.outputs.tag }}
+
+      - name: Collect shared libraries
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          case "$PLATFORM" in
+            linux)
+              # Real soname files only (symlinks are re-created below).
+              find sdl3-prefix -name "*.so.*" -type f -exec cp {} staging/ \;
+              for f in staging/lib*.so.*; do
+                base=$(basename "$f")
+                soname=$(printf '%s' "$base" | sed -E 's/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/')
+                if [[ "$soname" != "$base" ]]; then
+                  ln -sf "$base" "staging/$soname"
+                fi
+              done
+              ;;
+            macos)
+              # Real dylibs only — the plain libSDL3.dylib symlink is the
+              # dev-link name; the versioned file matches the install name.
+              find sdl3-prefix -name "*.dylib" -type f -exec cp {} staging/ \;
+              lipo -info staging/*.dylib
+              ;;
+            windows)
+              find sdl3-prefix -name "*.dll" -type f -exec cp {} staging/ \;
+              ;;
+          esac
+          ls -la staging/
+
+      - name: Audit dependencies (fail loud on leaked build-machine paths)
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          case "$PLATFORM" in
+            macos)
+              # System frameworks are expected; Homebrew prefixes mean the
+              # dylib is not portable.
+              if otool -L staging/*.dylib | grep -E '/opt/homebrew|/usr/local/'; then
+                echo "::error::dylib links against Homebrew paths"
+                exit 1
+              fi
+              otool -L staging/*.dylib
+              ;;
+            linux)
+              # ELF has no clean path-based leak signal (system and fallback
+              # deps both live under /usr/lib) — print NEEDED for review.
+              for f in staging/lib*.so.*; do
+                [[ -L "$f" ]] && continue
+                echo "== $(basename "$f")"
+                readelf -d "$f" | grep NEEDED || true
+              done
+              ;;
+          esac
+
+      - name: Package (${{ matrix.platform }})
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          name="${LIB}_${PLATFORM}"
+          case "$PLATFORM" in
+            windows)
+              powershell -NoProfile -Command \
+                "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
+              ;;
+            *)
+              tar -czf "${name}.tar.gz" -C staging .
+              ;;
+          esac
+          ls -la "${name}".*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Scoped by library: build-sdl-family.yml runs all four in one run.
+          name: asset-${{ env.LIB }}-${{ matrix.platform }}
+          path: ${{ env.LIB }}_${{ matrix.platform }}.*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asset-${{ env.LIB }}-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release ${{ needs.prepare.outputs.release_tag }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          REPO: ${{ inputs.repo }}
+          SOURCE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd dist
+          ls -la
+
+          notes=$(cat <<EOF
+          Prebuilt **$LIB $VERSION** shared library, built by vulcania CI from
+          [$REPO @ $SOURCE_TAG](https://github.com/$REPO/tree/$SOURCE_TAG).
+
+          | Asset | Contents |
+          | ----- | -------- |
+          | ${LIB}_linux.tar.gz | x86_64 shared library + soname symlink (ubuntu-24.04 build, glibc >= 2.39) |
+          | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default \`@rpath\` install name |
+          | ${LIB}_windows.zip | x64 DLL |
+
+          The macOS dylib keeps SDL's default \`@rpath\` install name; vulcania pack
+          rewrites it into the app bundle.
+          EOF
+          )
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG exists — replacing assets"
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber ./*
+          else
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --title "$LIB $VERSION" --notes "$notes" ./*
+          fi

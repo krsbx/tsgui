@@ -1,7 +1,7 @@
 /**
  * Packed-color codec — the style model's `ValidColor` strings to the
  * u32 encoding the gpu writes, and back. Lives with animation because
- * interpolation needs channel-level access; `@tsgui/paint` re-exports
+ * interpolation needs channel-level access; `@vulcania/paint` re-exports
  * the readers so the rest of the toolkit imports them unchanged.
  */
 

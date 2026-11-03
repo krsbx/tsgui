@@ -1,11 +1,11 @@
 /** CircularProgress — ring (thickness < 1) or pie (thickness ≥ 1). */
-import { Palette } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
+import { Palette } from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
 import {
   CircularProgressDirection,
   PointerEvents,
   WidgetType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { createWidget } from "../../create-widget.ts";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { CircularProgressProps } from "./types.ts";

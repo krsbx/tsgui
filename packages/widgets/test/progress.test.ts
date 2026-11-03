@@ -2,11 +2,11 @@
  * Progress + meter semantics through the headless harness — fill geometry,
  * direction, steps, color stops, zones, and the arc primitives' ops.
  */
-import { AnimationManager } from "@tsgui/animation";
-import { type ColorStop, MeterZone } from "@tsgui/core";
-import { valueToRatio } from "@tsgui/layout";
-import { ProgressType } from "@tsgui/layout";
-import { parseColor, resolveFillColorClamped } from "@tsgui/paint";
+import { AnimationManager } from "@vulcania/animation";
+import { type ColorStop, MeterZone } from "@vulcania/core";
+import { valueToRatio } from "@vulcania/layout";
+import { ProgressType } from "@vulcania/layout";
+import { parseColor, resolveFillColorClamped } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   CircularProgress,

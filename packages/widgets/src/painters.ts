@@ -1,10 +1,10 @@
 /**
- * The per-widget painter registry — what @tsgui/widgets contributes to
+ * The per-widget painter registry — what @vulcania/widgets contributes to
  * PaintContext.painters. Each painter is co-located with its widget
- * (<widget>/paint.ts); the engine (@tsgui/paint) stays widget-agnostic.
+ * (<widget>/paint.ts); the engine (@vulcania/paint) stays widget-agnostic.
  */
-import { WidgetType } from "@tsgui/layout";
-import type { WidgetPainters } from "@tsgui/paint";
+import { WidgetType } from "@vulcania/layout";
+import type { WidgetPainters } from "@vulcania/paint";
 import { paintCheckbox } from "./widgets/checkbox/paint.ts";
 import { paintImage } from "./widgets/image/paint.ts";
 import { paintLabel } from "./widgets/label/paint.ts";
@@ -15,7 +15,9 @@ import {
 } from "./widgets/progress/paint/index.ts";
 import { paintRadio } from "./widgets/radio/paint.ts";
 import { paintCircularSlider } from "./widgets/slider/circular-slider.ts";
+import { paintRangeSlider } from "./widgets/slider/range-slider.ts";
 import { paintSliderBar } from "./widgets/slider/slider-bar.ts";
+import { paintTextArea } from "./widgets/text-area/paint.ts";
 import { paintTextInput } from "./widgets/text-input/paint.ts";
 import { paintToggle } from "./widgets/toggle/paint.ts";
 
@@ -29,6 +31,8 @@ export const widgetPainters: WidgetPainters = new Map([
   [WidgetType.Toggle, paintToggle],
   [WidgetType.Radio, paintRadio],
   [WidgetType.SliderBar, paintSliderBar],
+  [WidgetType.RangeSlider, paintRangeSlider],
   [WidgetType.CircularSlider, paintCircularSlider],
   [WidgetType.TextInput, paintTextInput],
+  [WidgetType.TextArea, paintTextArea],
 ]);

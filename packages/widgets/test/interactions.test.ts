@@ -9,19 +9,19 @@ import {
   Palette,
   type ReconcilableWidget,
   StateStore,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import {
   PointerDispatcher,
   type PointerInputEvent,
   PointerInputKind,
-} from "@tsgui/interactions";
+} from "@vulcania/interactions";
 import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   WidgetType,
-} from "@tsgui/layout";
-import { paintTree, parseColor } from "@tsgui/paint";
+} from "@vulcania/layout";
+import { paintTree, parseColor } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   Checkbox,

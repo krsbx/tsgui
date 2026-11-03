@@ -1,7 +1,7 @@
 /** Slider handle — the bordered disc both slider painters share. */
-import { Metrics, Palette } from "@tsgui/core";
-import type { ViewStyle } from "@tsgui/layout";
-import { type PaintContext, parseColor } from "@tsgui/paint";
+import { Metrics, Palette } from "@vulcania/core";
+import type { ViewStyle } from "@vulcania/layout";
+import { type PaintContext, parseColor } from "@vulcania/paint";
 import { HANDLE_SIZE } from "./geometry.ts";
 
 /** Handle style hints a slider's `handleStyle` may carry. */

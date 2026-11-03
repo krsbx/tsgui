@@ -1,5 +1,5 @@
 /** Easing curves — ported from flying-pan's animation/easing. */
-import { EasingName } from "@tsgui/layout";
+import { EasingName } from "@vulcania/layout";
 
 export const easings: Record<EasingName, (t: number) => number> = {
   [EasingName.Linear]: (t) => t,

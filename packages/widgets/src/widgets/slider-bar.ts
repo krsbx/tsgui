@@ -10,14 +10,14 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
+} from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
 import {
   PointerEvents,
   ProgressBarOrientation,
   valueToRatio,
   WidgetType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {

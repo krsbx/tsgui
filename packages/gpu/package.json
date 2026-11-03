@@ -1,10 +1,10 @@
 {
-  "name": "@tsgui/gpu",
+  "name": "@vulcania/gpu",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/bindings": "workspace:*"
+    "@vulcania/bindings": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

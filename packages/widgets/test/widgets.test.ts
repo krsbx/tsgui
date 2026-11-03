@@ -1,17 +1,17 @@
-import { AnimationManager } from "@tsgui/animation";
-import { StateStore } from "@tsgui/core";
+import { AnimationManager } from "@vulcania/animation";
+import { StateStore } from "@vulcania/core";
 import type {
   ArcOptions,
   RectOptions,
   RingOptions,
   TextDrawOptions,
   TextureDrawOptions,
-} from "@tsgui/gpu";
-import { FlexDirection } from "@tsgui/layout";
-import { layoutFlex } from "@tsgui/layout";
-import type { LayoutContext, LayoutNode } from "@tsgui/layout";
-import { colorWithOpacity, parseColor } from "@tsgui/paint";
-import { paintTree } from "@tsgui/paint";
+} from "@vulcania/gpu";
+import { FlexDirection } from "@vulcania/layout";
+import { layoutFlex } from "@vulcania/layout";
+import type { LayoutContext, LayoutNode } from "@vulcania/layout";
+import { colorWithOpacity, parseColor } from "@vulcania/paint";
+import { paintTree } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   Label,

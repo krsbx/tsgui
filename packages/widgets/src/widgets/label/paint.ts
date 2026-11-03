@@ -1,12 +1,13 @@
 /** Inline value labels — flying-pan's renderer/paint/text value branch. */
-import { Palette } from "@tsgui/core";
-import { ProgressValueType, type TextStyle } from "@tsgui/layout";
+import { Palette } from "@vulcania/core";
+import { ProgressValueType, type TextStyle } from "@vulcania/layout";
 import {
   type Painter,
   parseColor,
   type TextPainter,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
+import { resolveFont } from "@vulcania/paint";
 
 /** Auto label from a value; `null` when there's nothing to show. */
 export function formatValueLabel(options: {
@@ -70,18 +71,23 @@ export function paintInlineValueLabel(
 /**
  * Label painter — the walk's text case, registered per widget type.
  * Wrapped labels (layout recorded node.textLayout) draw one run per
- * line at the line advance; unwrapped labels draw a single run.
+ * line at the line advance; unwrapped labels draw a single run. A
+ * `font` prop resolves through the context lookup — absent lookup
+ * falls back to the default font (headless compat); a present lookup
+ * with an unknown name fails loud (flying-pan semantics).
  */
 export const paintLabel: WidgetPainter = (ctx, node, style) => {
   const text = node.widget.props["text"];
   if (typeof text !== "string") return;
+
+  const font = resolveFont(ctx, node);
 
   const tint = parseColor((style as { color?: string }).color ?? Palette.text);
 
   if (node.textLayout) {
     const { lines, lineAdvance } = node.textLayout;
     for (const [i, line] of lines.entries()) {
-      ctx.font.draw(ctx.gpu, {
+      font.draw(ctx.gpu, {
         x: node.screenX,
         y: node.screenY + i * lineAdvance,
         text: line,
@@ -91,5 +97,5 @@ export const paintLabel: WidgetPainter = (ctx, node, style) => {
     return;
   }
 
-  ctx.font.draw(ctx.gpu, { x: node.screenX, y: node.screenY, text, tint });
+  font.draw(ctx.gpu, { x: node.screenX, y: node.screenY, text, tint });
 };

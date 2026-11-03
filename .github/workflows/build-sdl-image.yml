@@ -1,0 +1,416 @@
+# Build SDL3_image from a libsdl-org release tag and publish the shared
+# library as a vulcania release asset — split out of build-sdl.yml so the image
+# satellite can carry its own vendoring/codec setup.
+#
+# Trigger: Actions → "Build SDL Image" → Run workflow
+#   tag      — SDL_image source tag to build, e.g. release-3.4.8
+#              (blank = pin in version.lock)
+#   repo     — source repository (default libsdl-org/SDL_image)
+#   sdl3_tag — SDL3 tag to link against (each matrix job builds it into a
+#              local prefix first). Blank = SDL3 pin in version.lock.
+#
+# One run publishes one vulcania release tagged SDL3_image-<version> with three
+# assets:
+#
+#   SDL3_image_linux.tar.gz   x86_64 ELF soname + soname symlink
+#                             (built on ubuntu-24.04 → glibc ≥ 2.39 at runtime)
+#   SDL3_image_macos.tar.gz   universal2 dylib (arm64 + x86_64), keeping the
+#                             default @rpath install name — vulcania pack
+#                             rewrites it into the app bundle
+#   SDL3_image_windows.zip    x64 DLL
+#
+# Codecs come from SDL_image's external/ submodules and are statically linked
+# (SDLIMAGE_VENDORED=ON, SDLIMAGE_DEPS_SHARED=OFF) so the library is
+# self-contained. Option names verified against the 3.2.x line — recheck the
+# target tag's CMakeLists when jumping majors.
+
+name: Build SDL Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.4.8 (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_image
+        required: true
+        default: "libsdl-org/SDL_image"
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+  # Same inputs, so build-sdl-family.yml can call this workflow.
+  workflow_call:
+    inputs:
+      tag:
+        description: Source tag, e.g. release-3.4.8 (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+      repo:
+        description: Repository, e.g. libsdl-org/SDL_image
+        required: true
+        default: "libsdl-org/SDL_image"
+        type: string
+      sdl3_tag:
+        description: SDL3 tag to link against (blank = version.lock)
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  LIB: SDL3_image
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.prep.outputs.tag }}
+      version: ${{ steps.prep.outputs.version }}
+      release_tag: ${{ steps.prep.outputs.release_tag }}
+      sdl3_repo: ${{ steps.prep.outputs.sdl3_repo }}
+      sdl3_tag: ${{ steps.prep.outputs.sdl3_tag }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      # version.lock (repo root) pins every library; blank inputs use it.
+      - name: Read version.lock
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: version.lock
+          sparse-checkout-cone-mode: false
+      - id: prep
+        env:
+          TAG: ${{ inputs.tag }}
+          REPO: ${{ inputs.repo }}
+          SDL3_TAG_INPUT: ${{ inputs.sdl3_tag }}
+        run: |
+          set -euo pipefail
+
+          # Pinned value for a library from version.lock (KEY=value lines).
+          lock() {
+            local value
+            value=$(sed -n "s/^$1=//p" version.lock | head -n1)
+            if [[ -z "$value" ]]; then
+              echo "::error::version.lock has no $1= entry" >&2
+              exit 1
+            fi
+            echo "$value"
+          }
+
+          if [[ ! "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "::error::repo must look like owner/name, got: $REPO"
+            exit 1
+          fi
+
+          # Blank tag → the pin in version.lock.
+          if [[ -z "$TAG" ]]; then
+            TAG=$(lock SDL_image)
+            echo "Using version.lock: SDL_image=$TAG"
+          fi
+
+          # SDL projects tag releases as release-X.Y.Z — fail fast on typos.
+          if [[ ! "$TAG" =~ ^release-[0-9]+(\.[0-9]+)+$ ]]; then
+            echo "::error::tag must look like release-3.4.8, got: $TAG"
+            exit 1
+          fi
+
+          # SDL3 comes from the same owner as SDL_image, so a fork builds
+          # against its own SDL (owner/SDL_image → owner/SDL).
+          sdl3_repo="${REPO%%/*}/SDL"
+
+          if [[ -n "$SDL3_TAG_INPUT" ]]; then
+            sdl3_tag=$SDL3_TAG_INPUT
+          else
+            sdl3_tag=$(lock SDL3)
+          fi
+
+          version=${TAG#release-}
+          {
+            echo "tag=$TAG"
+            echo "version=$version"
+            echo "release_tag=$LIB-$version"
+            echo "sdl3_repo=$sdl3_repo"
+            echo "sdl3_tag=$sdl3_tag"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    name: ${{ matrix.platform }}
+    needs: prepare
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-24.04
+          - platform: macos
+            os: macos-15
+          - platform: windows
+            os: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      OSX_FLAGS: ${{ matrix.platform == 'macos' && '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64' || '' }}
+    steps:
+      # Only libSDL3_image ships, so SDL3 itself needs no video/audio backend
+      # headers — just a toolchain. nasm is for the vendored codecs' asm.
+      - name: Install nasm
+        uses: ilammy/setup-nasm@v1
+
+      - name: Checkout SDL_image source (with vendored codec submodules)
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repo }}
+          ref: ${{ needs.prepare.outputs.tag }}
+          path: lib-src
+          submodules: recursive
+
+      # Reuse the SDL3 prefix build-sdl.yml cached for this tag (the family
+      # run builds SDL3 first); only compile SDL3 here on a cache miss. Key
+      # must match build-sdl.yml's "Cache SDL3 prefix" step.
+      - name: Restore SDL3 prefix
+        id: sdl3-cache
+        uses: actions/cache@v4
+        with:
+          path: sdl3-prefix
+          key: sdl3-prefix-v1-${{ matrix.platform }}-${{ needs.prepare.outputs.sdl3_repo }}-${{ needs.prepare.outputs.sdl3_tag }}
+
+      - name: Checkout SDL3 (link dependency)
+        if: steps.sdl3-cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ needs.prepare.outputs.sdl3_repo }}
+          ref: ${{ needs.prepare.outputs.sdl3_tag }}
+          path: sdl3-src
+
+      - name: Build + install SDL3 into a local prefix
+        if: steps.sdl3-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          # This SDL3 is only linked against, never shipped — skip SDL's
+          # "no X11/Wayland" configure error on Linux instead of installing
+          # the display dev packages (build-sdl.yml builds the real one).
+          console_flags=""
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            console_flags=-DSDL_UNIX_CONSOLE_BUILD=ON
+          fi
+          cmake -S sdl3-src -B sdl3-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSDL_SHARED=ON -DSDL_STATIC=OFF \
+            $OSX_FLAGS $console_flags
+          cmake --build sdl3-build --config Release --parallel
+          cmake --install sdl3-build --config Release --prefix "$PWD/sdl3-prefix"
+          ls sdl3-prefix/lib
+
+      # macOS builds each arch separately and lipo-merges them: vendored
+      # deps (e.g. libwebp) probe SIMD once for the host arch, which breaks
+      # a single-pass CMAKE_OSX_ARCHITECTURES=arm64;x86_64 build.
+      - name: Configure SDL3_image
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          archs=native
+          [[ "$PLATFORM" == macos ]] && archs="arm64 x86_64"
+          # Resolve @rpath/libSDL3 from the directory the library sits in —
+          # without an RPATH, dlopen fails with "no LC_RPATH's found".
+          rpath_flags=""
+          case "$PLATFORM" in
+            macos) rpath_flags=-DCMAKE_INSTALL_RPATH=@loader_path ;;
+            linux) rpath_flags='-DCMAKE_INSTALL_RPATH=$ORIGIN' ;;
+          esac
+          for arch in $archs; do
+            arch_flags=""
+            [[ "$arch" != native ]] && arch_flags="-DCMAKE_OSX_ARCHITECTURES=$arch"
+            cmake -S lib-src -B "build-$arch" \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS=ON \
+              -DSDLIMAGE_VENDORED=ON \
+              -DSDLIMAGE_DEPS_SHARED=OFF \
+              -DCMAKE_PREFIX_PATH="$PWD/sdl3-prefix" \
+              $arch_flags $rpath_flags
+          done
+
+      - name: Build + install SDL3_image
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          archs=native
+          [[ "$PLATFORM" == macos ]] && archs="arm64 x86_64"
+          for arch in $archs; do
+            cmake --build "build-$arch" --config Release --parallel
+            cmake --install "build-$arch" --config Release --prefix "$PWD/dist-$arch"
+          done
+
+          if [[ "$PLATFORM" == macos ]]; then
+            # Merge each real dylib into a universal2 one under dist/lib.
+            mkdir -p dist/lib
+            find dist-arm64 -name "*.dylib" -type f | while read -r a; do
+              name=$(basename "$a")
+              x=$(find dist-x86_64 -name "$name" -type f | head -n1)
+              lipo -create "$a" "$x" -output "dist/lib/$name"
+            done
+          else
+            mv dist-native dist
+          fi
+
+      - name: Collect shared libraries
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          mkdir -p staging
+          case "$PLATFORM" in
+            linux)
+              # Real soname files only (symlinks are re-created below).
+              find dist -name "*.so.*" -type f -exec cp {} staging/ \;
+              for f in staging/lib*.so.*; do
+                base=$(basename "$f")
+                soname=$(printf '%s' "$base" | sed -E 's/(\.so\.[0-9]+)\.[0-9]+\.[0-9]+$/\1/')
+                if [[ "$soname" != "$base" ]]; then
+                  ln -sf "$base" "staging/$soname"
+                fi
+              done
+              ;;
+            macos)
+              # Real dylibs only — the plain .dylib symlink is the dev-link
+              # name; the versioned file matches the install name.
+              find dist -name "*.dylib" -type f -exec cp {} staging/ \;
+              lipo -info staging/*.dylib
+              ;;
+            windows)
+              find dist -name "*.dll" -type f -exec cp {} staging/ \;
+              ;;
+          esac
+          ls -la staging/
+
+      - name: Audit dependencies (fail loud on leaked build-machine paths)
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          # CMake silently ignores unknown -D options, so a stale vendored
+          # flag would quietly link the runner's own codecs. Verify instead.
+          case "$PLATFORM" in
+            macos)
+              if otool -L staging/*.dylib | grep -E '/opt/homebrew|/usr/local/'; then
+                echo "::error::dylib links against Homebrew paths — vendored deps did not engage"
+                exit 1
+              fi
+              for f in staging/*.dylib; do
+                if ! otool -l "$f" | grep 'path @loader_path' >/dev/null; then
+                  echo "::error::$(basename "$f") has no @loader_path RPATH — @rpath/libSDL3 will not resolve"
+                  exit 1
+                fi
+              done
+              otool -L staging/*.dylib
+              ;;
+            linux)
+              # Vendored codecs must not show up as NEEDED entries.
+              for f in staging/lib*.so.*; do
+                [[ -L "$f" ]] && continue
+                echo "== $(basename "$f")"
+                needed=$(readelf -d "$f" | grep NEEDED || true)
+                echo "$needed"
+                if grep -E 'lib(png|jpeg|tiff|webp|avif|jxl|dav1d|aom)' <<<"$needed"; then
+                  echo "::error::$(basename "$f") links a system codec — vendored deps did not engage"
+                  exit 1
+                fi
+              done
+              ;;
+            windows)
+              if ls staging/*.dll | grep -viE 'SDL3_image\.dll$'; then
+                echo "::warning::extra DLLs in staging — codecs may be shared, not static"
+              fi
+              ;;
+          esac
+
+      - name: Package (${{ matrix.platform }})
+        env:
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          name="${LIB}_${PLATFORM}"
+          case "$PLATFORM" in
+            windows)
+              powershell -NoProfile -Command \
+                "Compress-Archive -Path 'staging/*' -DestinationPath '${name}.zip' -Force"
+              ;;
+            *)
+              tar -czf "${name}.tar.gz" -C staging .
+              ;;
+          esac
+          ls -la "${name}".*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          # Scoped by library: build-sdl-family.yml runs all four in one run.
+          name: asset-${{ env.LIB }}-${{ matrix.platform }}
+          path: ${{ env.LIB }}_${{ matrix.platform }}.*
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: asset-${{ env.LIB }}-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish release ${{ needs.prepare.outputs.release_tag }}
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
+          SDL3_TAG: ${{ needs.prepare.outputs.sdl3_tag }}
+          REPO: ${{ inputs.repo }}
+          SOURCE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          cd dist
+          ls -la
+
+          notes=$(cat <<EOF
+          Prebuilt **$LIB $VERSION** shared library, built by vulcania CI from
+          [$REPO @ $SOURCE_TAG](https://github.com/$REPO/tree/$SOURCE_TAG),
+          linked against SDL3 $SDL3_TAG.
+
+          | Asset | Contents |
+          | ----- | -------- |
+          | ${LIB}_linux.tar.gz | x86_64 shared library + soname symlink (ubuntu-24.04 build, glibc >= 2.39) |
+          | ${LIB}_macos.tar.gz | universal2 dylib (arm64 + x86_64), default \`@rpath\` install name |
+          | ${LIB}_windows.zip | x64 DLL |
+
+          Image codecs are statically vendored — the library is a single
+          self-contained file. The macOS dylib keeps the default \`@rpath\`
+          install name; vulcania pack rewrites it into the app bundle.
+          EOF
+          )
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $RELEASE_TAG exists — replacing assets"
+            gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber ./*
+          else
+            gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --title "$LIB $VERSION" --notes "$notes" ./*
+          fi

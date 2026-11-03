@@ -8,17 +8,17 @@
  * captured as a plain op object. That is what golden-snapshot tests diff,
  * and what phase 5's devtools can replay.
  */
-import type { AnimationManager } from "@tsgui/animation";
-import { StateStore } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
+import type { AnimationManager } from "@vulcania/animation";
+import { StateStore } from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
 import {
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   type Size,
-} from "@tsgui/layout";
-import type { InteractionStates, Painter, TextPainter } from "@tsgui/paint";
-import { paintTree } from "@tsgui/paint";
+} from "@vulcania/layout";
+import type { InteractionStates, Painter, TextPainter } from "@vulcania/paint";
+import { paintTree } from "@vulcania/paint";
 import { widgetPainters } from "./painters.ts";
 import { Reconciler } from "./reconciler.ts";
 
@@ -77,12 +77,14 @@ export interface HeadlessOptions {
   width: number;
   height: number;
   /** Defaults to a deterministic 8×18px-per-glyph estimate. */
-  measureText?(text: string, style: unknown): Size;
+  measureText?(text: string, style: unknown, fontName?: string): Size;
   getImageSize?(src: string): Size | null;
   /** Per-node interaction flags; defaults to all-off. */
   statesOf?(node: LayoutNode): InteractionStates;
   /** The transition engine — phases for indeterminate/caret painting. */
   animationManager?: AnimationManager;
+  /** Named-font lookup for Label.font resolution (none → default font). */
+  fonts?: (name: string) => TextPainter | undefined;
 }
 
 export interface HeadlessFrame {
@@ -114,7 +116,16 @@ export function renderHeadless(
     focusableNodes: [],
     scrollOffsetOf: () => ({ x: 0, y: 0 }),
     getStableId: reconciler.getStableId,
-    measureText: options.measureText ?? DEFAULT_MEASURE,
+    // Font-aware: when fonts are injected, a fontName resolves through
+    // them (mirroring AppWindow's production wiring) so label layout
+    // and label paint measure the same font.
+    measureText: (text, style, fontName) => {
+      if (fontName && options.fonts) {
+        const named = options.fonts(fontName);
+        if (named?.measure) return named.measure(text);
+      }
+      return (options.measureText ?? DEFAULT_MEASURE)(text, style);
+    },
     getImageSize: options.getImageSize ?? (() => null),
   };
 
@@ -153,6 +164,19 @@ export function renderHeadless(
       stateStore: stateStore,
       painters: widgetPainters,
       animationManager: options.animationManager,
+      // Named-font DRAWS route through the harness's recording font so
+      // paint ops are captured; the named font contributes its measure.
+      fonts: options.fonts
+        ? (name) => {
+            const named = options.fonts!(name);
+            return named
+              ? {
+                  draw: (_gpu, o) => font.draw(_gpu, o),
+                  measure: named.measure,
+                }
+              : undefined;
+          }
+        : undefined,
     },
     root
   );

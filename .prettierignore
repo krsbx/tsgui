@@ -12,3 +12,6 @@ routeTree.gen.ts
 # generated code — the generators own the formatting
 packages/bindings/src/libraries/*/generated/
 packages/core/src/generated/
+
+# pinned header submodules (codegen input only)
+vendor/

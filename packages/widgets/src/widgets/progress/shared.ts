@@ -1,6 +1,6 @@
 /** Props plumbing shared by both progress factories. */
-import { Palette } from "@tsgui/core";
-import { ProgressType } from "@tsgui/layout";
+import { Palette } from "@vulcania/core";
+import { ProgressType } from "@vulcania/layout";
 import type { ProgressProps } from "./types.ts";
 
 /** The ProgressProps fields both factories carry into the descriptor. */

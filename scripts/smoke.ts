@@ -6,7 +6,7 @@
  *   bun run smoke        (bun:ffi backend)
  *   bun run smoke:node   (node:ffi backend, Node >= 26.9)
  */
-import { image, mixer, runtime, sdl, ttf } from "@tsgui/bindings";
+import { image, mixer, runtime, sdl, ttf } from "@vulcania/bindings";
 
 /** SDL3 encodes versions as major*1_000_000 + minor*1_000 + patch. */
 function decode(v: number): string {

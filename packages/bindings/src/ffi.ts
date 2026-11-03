@@ -20,6 +20,17 @@ export function resolveDylib(
   }
 
   throw new Error(
-    `tsgui: ${what} shared library not found — install it or set ${envVar}`
+    `vulcania: ${what} shared library not found — install it or set ${envVar}`
   );
+}
+
+export function lazyload<T extends object>(lib: () => T): T {
+  let loaded: T | null = null;
+
+  const ensure = (): T => (loaded ??= lib());
+
+  return new Proxy({} as T, {
+    get: (_target, prop) => ensure()[prop as keyof T],
+    has: (_target, prop) => loaded !== null && prop in loaded,
+  });
 }

@@ -1,17 +1,18 @@
 /** ProgressBar painter — buffer, main fill (continuous or stepped), label. */
-import { propsOf } from "@tsgui/core";
+import { propsOf } from "@vulcania/core";
 import {
   ProgressBarOrientation,
   ProgressDirection,
   ProgressType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import {
   fillRatio,
   paintContinuousFill,
   paintSteppedFill,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
 import type { ProgressBarProps } from "../types.ts";
 import { paintIndeterminateBar } from "./indeterminate.ts";
@@ -108,7 +109,7 @@ export const paintProgressBar: WidgetPainter = (ctx, node) => {
     });
   }
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

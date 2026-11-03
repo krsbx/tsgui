@@ -10,10 +10,10 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
-import { clamp } from "@tsgui/layout";
-import { PointerEvents, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
+import { clamp } from "@vulcania/layout";
+import { PointerEvents, WidgetType } from "@vulcania/layout";
 import { createWidget } from "../create-widget.ts";
 import { createDragValueHandler } from "./slider/drag.ts";
 import {

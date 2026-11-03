@@ -1,5 +1,5 @@
 /** Texture creation/destruction over the SDL3 properties API. */
-import { sdl, SdlDefines } from "@tsgui/bindings";
+import { sdl, SdlDefines } from "@vulcania/bindings";
 import type { TextureFromPixelsOptions, TextureHandle } from "./types.ts";
 
 // Prop names are string #defines — invisible to the codegen's numeric

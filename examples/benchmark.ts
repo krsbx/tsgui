@@ -10,19 +10,22 @@
  * (SetRenderDrawColor, RenderClear, RenderGeometry ×2, RenderPresent) —
  * asserted at the end so the number can't silently drift.
  */
+// Must stay first: points the bindings at ./ffi before any of them load.
+import "./setup.ts";
+// Loaded after the proper setup
 import {
   EventType,
   PixelFormat,
   Scancode,
   sdl,
   SdlDefines,
-} from "@tsgui/bindings";
+} from "@vulcania/bindings";
 import {
   createTextureFromPixels,
   destroyTexture,
   GpuRenderer,
   rgba,
-} from "@tsgui/gpu";
+} from "@vulcania/gpu";
 
 function checkerboardPixels(size: number): Uint8Array {
   const pixels = new Uint8Array(size * size * 4);
@@ -54,7 +57,7 @@ if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
 }
 
 const window = sdl.SDL_CreateWindow({
-  title: "tsgui — phase 1 benchmark",
+  title: "vulcania — phase 1 benchmark",
   w: 1280,
   h: 800,
   flags: SdlDefines.SDL_WINDOW_RESIZABLE,

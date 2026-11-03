@@ -3,15 +3,15 @@
  * content bounds, velocity EMA + friction coasting, offset exposure for
  * LayoutContext.scrollOffsetOf.
  */
-import { type ReconcilableWidget, StateStore } from "@tsgui/core";
-import { ScrollDispatcher } from "@tsgui/interactions";
+import { type ReconcilableWidget, StateStore } from "@vulcania/core";
+import { ScrollDispatcher } from "@vulcania/interactions";
 import {
   FlexDirection,
   type LayoutContext,
   layoutFlex,
   type LayoutNode,
   Overflow,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { describe, expect, test } from "bun:test";
 import { Reconciler, View } from "../src/index.ts";
 

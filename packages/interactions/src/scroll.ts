@@ -18,7 +18,7 @@ import {
   type Coordinate2D,
   type LayoutNode,
   Overflow,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { hitTest } from "./hit-test.ts";
 import type { WheelInputEvent } from "./types.ts";
 

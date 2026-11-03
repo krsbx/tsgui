@@ -119,7 +119,7 @@ export interface ViewStyle {
 
   boxShadow?: BoxShadow | BoxShadow[];
 
-  /** Animated style transitions — sampled by @tsgui/animation each frame. */
+  /** Animated style transitions — sampled by @vulcania/animation each frame. */
   transition?: Transition;
 }
 
@@ -161,7 +161,7 @@ export interface TextStyle extends ViewStyle {
 export type WidgetProps = Record<string, unknown>;
 
 /**
- * The descriptor contract @tsgui/layout consumes. Widget packages extend
+ * The descriptor contract @vulcania/layout consumes. Widget packages extend
  * it with typed props; layout only reads type/style/children.
  */
 export interface WidgetDescriptor {

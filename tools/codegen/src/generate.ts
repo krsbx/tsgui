@@ -19,7 +19,7 @@ import {
 } from "./gen/index.ts";
 import { generateCoreKeycodes } from "./gen/keycodes.ts";
 import { buildFfiTables, pascalCase } from "./model/index.ts";
-import { includeDir, type TargetSpec } from "./targets.ts";
+import { includeDirs, targetIncludeDir, type TargetSpec } from "./targets.ts";
 
 const bindingsSrcDir = join(
   import.meta.dir,
@@ -32,11 +32,11 @@ export async function generateTarget(
   spec: TargetSpec,
   check: boolean
 ): Promise<void> {
-  const base = includeDir();
+  const base = targetIncludeDir(spec);
   const headerPath = join(base, spec.headerRel);
   console.log(`codegen[${spec.name}]: dumping ${headerPath} …`);
 
-  const ast = dumpAst(headerPath, base);
+  const ast = dumpAst(headerPath, includeDirs());
   // No parser-level name filter: non-prefixed typedefs (Sint32, Uint16, …)
   // must reach the alias resolver; the model filters by prefix instead.
   const header = await new ClangNodeParser(ast).parse();
@@ -65,8 +65,8 @@ export async function generateTarget(
   ];
 
   // The toolkit-facing KeyCode table is pure data derived from the same
-  // SDL_keycode.h defines — emitted into @tsgui/core (a pure layer, so
-  // it cannot import @tsgui/bindings to read them).
+  // SDL_keycode.h defines — emitted into @vulcania/core (a pure layer, so
+  // it cannot import @vulcania/bindings to read them).
   if (spec.name === "sdl") {
     outputs.push([
       join(coreSrcDir, "generated/keycodes.ts"),

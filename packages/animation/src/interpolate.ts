@@ -1,6 +1,6 @@
 /**
  * Style-value interpolation — ported from flying-pan's
- * animation/interpolate, adapted to tsgui's packed-u32 colors: the
+ * animation/interpolate, adapted to vulcania's packed-u32 colors: the
  * result formats back to `#rrggbbaa`, the only color form painters
  * parse.
  */

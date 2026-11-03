@@ -15,7 +15,7 @@ all — no N-API addon, no `node_api.h`, no cmake for bindings. Both runtimes
 ```
 
 ```ts
-import { Define, EventType, sdl } from "@tsgui/bindings";
+import { Define, EventType, sdl } from "@vulcania/bindings";
 
 // backend-agnostic
 sdl.SDL_CreateWindow("hi", 1280, 800, Define.SDL_WINDOW_RESIZABLE);
@@ -42,7 +42,7 @@ JSON (`clang -Xclang -ast-dump=json`) and generates:
 | `defs-bun.ts` / `defs-node.ts` — declarative dlopen tables                                                                                                                                         | the loaders                            |
 | `types.ts` — `<Lib>Symbols`: typed positional surface                                                                                                                                              | loaders, hot paths                     |
 | `functions.ts` — `<Lib>Functions`: **single-object-param wrappers** with real param names from the headers (`SDL_CreateWindow({ title, w, h, flags })`), plus the `create<Lib>Functions()` factory | the primary export (`sdl`, `image`, …) |
-| `core/generated/keycodes.ts` — the SDL target also emits `@tsgui/core`'s `KeyCode` from the scanned `SDLK_*` defines (core is a pure layer and cannot read `SdlDefines` itself)                    | `@tsgui/core`                          |
+| `core/generated/keycodes.ts` — the SDL target also emits `@vulcania/core`'s `KeyCode` from the scanned `SDLK_*` defines (core is a pure layer and cannot read `SdlDefines` itself)                    | `@vulcania/core`                          |
 
 Two surfaces per library, both convention-compliant:
 
@@ -50,7 +50,7 @@ Two surfaces per library, both convention-compliant:
   convention. String params are `string \| null` (C `char*` reality —
   `SDL_CreateRenderer({ window, name: null })` is the default-backend call).
 - **`sdlRaw`** (positional, typed via `<Lib>Symbols`) — the documented
-  escape hatch for hot paths and toolkit internals; `@tsgui/gpu` uses it
+  escape hatch for hot paths and toolkit internals; `@vulcania/gpu` uses it
   so the render path carries zero wrapper overhead. Both surfaces behave
   identically on Bun and Node (node loaders convert `'string'` returns).
 - **`readCString(pointer)`** — runtime-split helper (bun:ffi `CString` /
@@ -69,7 +69,7 @@ hand-maintained `.macros` file; ours scans the headers directly).
 **The pipeline is library-agnostic.** `clang/`, `model`, and `gen` know
 nothing about SDL — binding another C library means adding one `Target`
 (header path, symbol prefix, output dir) to `tools/codegen/src/index.ts`
-and one folder: `@tsgui/bindings/src/libraries/<name>/` holds that
+and one folder: `@vulcania/bindings/src/libraries/<name>/` holds that
 library's loaders (`bun.ts`, `node.ts`), dylib resolution (`path.ts`), and
 generated tables (`generated/`), exposed through a single re-export line in
 the package root. SDL is just the first target.
@@ -118,9 +118,29 @@ shim, not redesigning.
 ## Build & distribution
 
 - **Nothing to build for bindings** — SDL3 comes from the system (brew on
-  macOS, distro packages on Linux, official binaries on Windows).
-  Resolution: `TSGUI_SDL3_PATH` env → platform-conventional paths → bare
-  soname (system loader search).
+  macOS, distro packages on Linux, official binaries on Windows), or from
+  the repo's own release assets.
+  Resolution per library: `<VULCANIA_SDL3[_SATELLITE]_PATH>` env →
+  platform-conventional paths → bare soname (system loader search).
+  shadercross has no Homebrew formula — env var, a source-build install
+  prefix, or the release asset.
+- **Release assets** — CI builds every pinned version from `version.lock`
+  (the CI-facing mirror of the `vendor/` submodule pins) and publishes
+  flat-dylib archives to this repo's releases: `SDL3-3.4.18`,
+  `SDL3_image-3.4.8`, `SDL3_ttf-3.2.2`, `SDL3_mixer-3.2.4`,
+  `SDL_shadercross-<sha>`. `setupFfiCopy(dest)` (@vulcania/devtools,
+  defaulting to `krsbx/vulcania`) downloads the matching asset per
+  platform and unpacks the dylibs flat into `dest` — that's what
+  `bun run examples/download.ts` does into `examples/ffi/`, where
+  `examples/setup.ts` (preloaded for tests via `bunfig.toml`) aims the
+  `VULCANIA_SDL3_*_PATH` env vars.
+- **Every library loads lazily.** Importing `@vulcania/bindings` dlopens
+  NOTHING — each library's surface (`sdl`, `image`, `ttf`, `mixer`,
+  `shadercross`, + their `*Raw` tables) is a lazyload proxy whose dlopen
+  fires on the first property access, through one synchronous
+  `createRequire` path on every runtime. Nothing to install before the
+  first touch — and optional libraries (shadercross has no Homebrew
+  formula) simply never load unless used.
 - **There is nothing to compile.** Not bindings (dlopen), not the renderer
   (SDL_Renderer through FFI). The toolkit is pure TypeScript end to end.
 - App distribution (phase 6): apps bundle the SDL dylibs; their users

@@ -1,5 +1,5 @@
 /** The GpuRenderer — frame lifecycle and geometry batching. */
-import { sdl, SdlDefines } from "@tsgui/bindings";
+import { sdl, SdlDefines } from "@vulcania/bindings";
 import type {
   ArcOptions,
   Rect,
@@ -37,6 +37,11 @@ export class GpuRenderer {
   private indexCount = 0;
   /** Texture of the open batch; null = untextured batch. */
   private batchTexture: TextureHandle | null = null;
+
+  // Frame totals for the devtools frame graph — drawCalls counts
+  // SDL_RenderGeometry calls, vertices accumulates every flushed vertex.
+  private drawCalls = 0;
+  private frameVertices = 0;
 
   /** Scissor stack; empty = no clip. Applied at batch flush boundaries. */
   private readonly clipStack: Array<Rect> = [];
@@ -91,6 +96,8 @@ export class GpuRenderer {
   public beginFrame(): void {
     this.vertexCount = 0;
     this.indexCount = 0;
+    this.drawCalls = 0;
+    this.frameVertices = 0;
     this.batchTexture = null;
     const c = this.clearColor;
     sdl.SDL_SetRenderDrawColor({
@@ -446,11 +453,18 @@ export class GpuRenderer {
     if (!ok) {
       throw new Error(`SDL_RenderGeometry: ${sdl.SDL_GetError()}`);
     }
+    this.drawCalls++;
+    this.frameVertices += this.vertexCount;
     // The batch is sent — restart accumulation, or the next flush re-renders
     // every earlier quad under the newer batch's texture.
     this.vertexCount = 0;
     this.indexCount = 0;
     this.batchTexture = null;
+  }
+
+  /** This frame's totals — the devtools frame graph reads it. */
+  public get stats(): { drawCalls: number; vertices: number } {
+    return { drawCalls: this.drawCalls, vertices: this.frameVertices };
   }
 
   /** Send all queued geometry to SDL without presenting. */

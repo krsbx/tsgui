@@ -2,7 +2,7 @@
  * Generator for the backend-neutral dlopen table (node:ffi dialect).
  *
  * One defs file per library — node consumes it natively; bun remaps type
- * names to FFIType at load time (see @tsgui/bindings bun-dialect.ts).
+ * names to FFIType at load time (see @vulcania/bindings bun-dialect.ts).
  */
 import type { ReturnType as FFIReturnType } from "node:ffi";
 import type { FfiTables } from "../model/index.ts";

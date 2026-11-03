@@ -1,18 +1,22 @@
 /** SDL3_mixer bindings. Pointer values are opaque and backend-specific. */
+import { createRequire } from "node:module";
+import { lazyload } from "../../ffi.ts";
 import { runtime } from "../../runtime.ts";
-import { asMixerSymbols, type MixerFunctions } from "./generated/functions.ts";
-import type { MixerSymbols } from "./generated/types.ts";
 
 export * from "./generated/constants.ts";
-export type { MixerSymbols } from "./generated/types.ts";
 export type { MixerFunctions } from "./generated/functions.ts";
+export type { MixerSymbols } from "./generated/types.ts";
 
-const backend = await (runtime === "bun"
-  ? import("./bun.ts")
-  : import("./node.ts"));
+type Backend = Awaited<typeof import("./node.ts")>;
+
+const backend = lazyload<Backend>(() => {
+  const esmRequire = createRequire(import.meta.url);
+
+  return runtime === "bun" ? esmRequire("./bun.ts") : esmRequire("./node.ts");
+});
 
 /** Raw positional symbols — the documented escape hatch (hot paths, internals). */
-export const mixerRaw: MixerSymbols = asMixerSymbols(backend.mixerRaw);
+export const mixerRaw = lazyload(() => backend.mixerRaw);
 
 /** Object-param surface — the toolkit convention (docs/ARCHITECTURE.md). */
-export const mixer: MixerFunctions = backend.mixer;
+export const mixer = lazyload(() => backend.mixer);

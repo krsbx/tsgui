@@ -1,12 +1,11 @@
 /** Slider contracts — ported from flying-pan's widget/slider/types. */
-import type { ColorStop } from "@tsgui/core";
-import type { BaseWidgetProps } from "@tsgui/core";
+import type { BaseWidgetProps, ColorStop } from "@vulcania/core";
 import type {
   ProgressBarOrientation,
   TextStyle,
   ViewStyle,
-} from "@tsgui/layout";
-import { CircularProgressDirection } from "@tsgui/layout";
+} from "@vulcania/layout";
+import { CircularProgressDirection } from "@vulcania/layout";
 
 export interface SliderMark {
   value: number;
@@ -41,6 +40,24 @@ export interface SliderProps extends BaseWidgetProps {
 export interface SliderBarProps extends SliderProps {
   orientation?: ProgressBarOrientation;
   /** Tick marks at values, with optional labels. Bar sliders only. */
+  marks?: SliderMark[];
+}
+
+/**
+ * RangeSlider — dual-handle range selection (flying-pan's
+ * RangeSliderBar). Controlled-only like SliderBar; deliberate
+ * divergences from flying-pan: no `defaultValue` (no uncontrolled
+ * mode), no `showValue` (flying-pan accepts it and never renders it).
+ */
+export interface RangeSliderProps extends Omit<
+  SliderProps,
+  "value" | "onChange" | "showValue"
+> {
+  /** Controlled [low, high] — handles can meet but never cross. */
+  value?: [number, number];
+  onChange?(value: [number, number]): void;
+  orientation?: ProgressBarOrientation;
+  /** Tick marks at values, with optional labels. */
   marks?: SliderMark[];
 }
 

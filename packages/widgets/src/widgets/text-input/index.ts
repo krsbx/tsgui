@@ -12,10 +12,10 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
-import type { BaseWidgetProps } from "@tsgui/core";
-import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@tsgui/core";
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import type { BaseWidgetProps } from "@vulcania/core";
+import { KeyCode, KeyModifiers, type ReconcilableWidget } from "@vulcania/core";
+import { type ViewStyle, WidgetType } from "@vulcania/layout";
 import { createWidget } from "../../create-widget.ts";
 import {
   backspace,
@@ -60,6 +60,8 @@ export interface TextInputStateStyle extends ViewStyle {
 export interface TextInputProps extends BaseWidgetProps {
   /** Controlled text — wins over defaultValue. */
   value?: string;
+  /** Named font registered with the app's font manager. */
+  font?: string;
   /** Uncontrolled initial text. */
   defaultValue?: string;
   onChange?(value: string): void;
@@ -85,6 +87,7 @@ export interface TextInputProps extends BaseWidgetProps {
 export function TextInput(props: TextInputProps): ReconcilableWidget {
   const {
     value,
+    font,
     onChange,
     placeholder,
     disabled,
@@ -136,6 +139,9 @@ export function TextInput(props: TextInputProps): ReconcilableWidget {
       value,
       placeholder,
       disabled,
+      // Painter parity with the handlers — see TextArea.
+      measureText,
+      font,
     },
     style: {
       padding: Metrics.defaultPadding,

@@ -5,7 +5,9 @@
  *   bun run examples/hello.ts              # run until the window closes
  *   bun run examples/hello.ts --selftest   # exit after ~120 frames (CI)
  */
-import { EventType, Scancode, sdl, SdlDefines } from "@tsgui/bindings";
+import "./setup.ts";
+// Loaded after the proper setup
+import { EventType, Scancode, sdl, SdlDefines } from "@vulcania/bindings";
 
 const selftest = process.argv.includes("--selftest");
 
@@ -14,7 +16,7 @@ if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
 }
 
 const window = sdl.SDL_CreateWindow({
-  title: "tsgui — phase 0",
+  title: "vulcania — phase 0",
   w: 1280,
   h: 800,
   flags: SdlDefines.SDL_WINDOW_RESIZABLE,

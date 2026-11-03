@@ -14,45 +14,21 @@
  *   bun run examples/gallery.ts --selftest   # exit after 240 frames
  *   node examples/gallery.ts --selftest
  */
-import { AnimationManager } from "@tsgui/animation";
-import {
-  EventType,
-  image,
-  PixelFormat,
-  readCString,
-  Scancode,
-  sdl,
-  SdlDefines,
-} from "@tsgui/bindings";
-import {
-  KeyModifiers,
-  type MouseButton,
-  type ReconcilableWidget,
-  StateStore,
-} from "@tsgui/core";
-import { destroyTexture, GpuRenderer, rgba, TtfFont } from "@tsgui/gpu";
-import {
-  FocusDispatcher,
-  type KeyboardInputEvent,
-  KeyboardInputKind,
-  PointerDispatcher,
-  type PointerInputEvent,
-  PointerInputKind,
-  ScrollDispatcher,
-  type WheelInputEvent,
-} from "@tsgui/interactions";
+// Must stay first: points the bindings at ./ffi before any of them load.
+import "./setup.ts";
+// Loaded after the proper setup
+import { App } from "@vulcania/app";
+import { image, PixelFormat, sdl } from "@vulcania/bindings";
+import { type ReconcilableWidget } from "@vulcania/core";
+import { destroyTexture, rgba } from "@vulcania/gpu";
 import {
   EasingName,
   FlexAlign,
   FlexDirection,
-  type LayoutContext,
-  layoutFlex,
-  type LayoutNode,
   Overflow,
   ProgressType,
   ProgressValueType,
-} from "@tsgui/layout";
-import { paintTree } from "@tsgui/paint";
+} from "@vulcania/layout";
 import {
   Button,
   Checkbox,
@@ -65,46 +41,36 @@ import {
   ProgressBar,
   Radio,
   RadioGroup,
-  Reconciler,
+  RangeSlider,
   SliderBar,
   TextInput,
   Toggle,
   View,
-  widgetPainters,
-} from "@tsgui/widgets";
+} from "@vulcania/widgets";
 
 const selftest = process.argv.includes("--selftest");
 
-// --- window + renderer ----------------------------------------------------
-if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
-  throw new Error(`SDL_Init failed: ${sdl.SDL_GetError()}`);
-}
-
-const window = sdl.SDL_CreateWindow({
-  title: "tsgui — widget gallery",
-  w: 1024,
-  h: 640,
-  flags: SdlDefines.SDL_WINDOW_RESIZABLE,
+// --- app shell (SDL init, root window, renderer, font, event routing) ----
+const app = new App({
+  title: "vulcania — widget gallery",
+  width: 1024,
+  height: 640,
+  backgroundColor: { r: 17, g: 24, b: 39, a: 255 }, // gray-900 backdrop
 });
-if (!window) throw new Error(`SDL_CreateWindow: ${sdl.SDL_GetError()}`);
+const gpu = app.root.renderer;
+const font = app.root.font;
 
-// SDL3 requires explicit opt-in before SDL_EVENT_TEXT_INPUT flows.
-if (!sdl.SDL_StartTextInput({ window })) {
-  throw new Error(`SDL_StartTextInput: ${sdl.SDL_GetError()}`);
-}
-
-const gpu = new GpuRenderer(window);
-gpu.clearColor = { r: 17, g: 24, b: 39, a: 255 }; // gray-900 backdrop
-
-const FONT_PATHS = [
-  process.env.TSGUI_FONT_PATH,
-  "/System/Library/Fonts/Supplemental/Arial.ttf",
-  "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-].filter((p): p is string => !!p);
-const font = new TtfFont(gpu.renderer, FONT_PATHS[0]!, 18);
+// Devtools inspector — opt-in: VULCANIA_DEVTOOLS=1 bun run examples/gallery.ts
+// then open http://127.0.0.1:6060 (tree, selection, frame graph).
+const devtools =
+  process.env.VULCANIA_DEVTOOLS === "1"
+    ? await import("@vulcania/devtools").then(({ inspect }) =>
+        inspect(app, { port: 6060 })
+      )
+    : null;
 
 // --- a real PNG, generated at runtime through SDL surfaces ----------------
-const PNG_PATH = "/tmp/tsgui-gallery.png";
+const PNG_PATH = "/tmp/vulcania-gallery.png";
 {
   const surface = sdl.SDL_CreateSurface({
     width: 256,
@@ -125,8 +91,11 @@ const PNG_PATH = "/tmp/tsgui-gallery.png";
   sdl.SDL_DestroySurface({ surface });
 }
 
-const photo = image.IMG_LoadTexture({ renderer: gpu.renderer, file: PNG_PATH });
-if (!photo) throw new Error(`IMG_LoadTexture: ${sdl.SDL_GetError()}`);
+const photo = image.IMG_LoadTexture({
+  renderer: gpu.renderer,
+  file: PNG_PATH,
+});
+if (!photo) throw new Error("IMG_LoadTexture failed");
 
 // --- widget tree ----------------------------------------------------------
 // Rebuilt ONLY when app state changes; the reconciler keeps identity
@@ -138,6 +107,8 @@ let wifi = true;
 let flavor = "mint";
 let volume = 65;
 let tone = 30;
+let priceLow = 20;
+let priceHigh = 80;
 let name = "";
 let dirty = true;
 
@@ -169,7 +140,7 @@ function buildTree(): ReconcilableWidget {
         },
         children: [
           Label({
-            text: "tsgui widget gallery",
+            text: "vulcania widget gallery",
             style: { color: Palette.textOnAccent },
           }),
           Label({
@@ -312,6 +283,31 @@ function buildTree(): ReconcilableWidget {
             size: 48,
             onChange: (next) => {
               tone = next;
+              dirty = true;
+            },
+          }),
+        ],
+      }),
+
+      // range slider — two handles, nearest-handle picking, no crossing
+      View({
+        style: {
+          flexDirection: FlexDirection.Column,
+          gap: 8,
+        },
+        children: [
+          Label({
+            text: `price range: ${priceLow.toFixed(2)}–${priceHigh.toFixed(2)}`,
+            style: { color: Palette.textMuted },
+          }),
+          RangeSlider({
+            value: [priceLow, priceHigh],
+            min: 0,
+            max: 100,
+            style: { width: 180, height: 24 },
+            onChange: ([low, high]) => {
+              priceLow = low;
+              priceHigh = high;
               dirty = true;
             },
           }),
@@ -466,186 +462,25 @@ function buildTree(): ReconcilableWidget {
   });
 }
 
-// --- reconciler + layout context -------------------------------------------
-const stateStore = new StateStore();
-const reconciler = new Reconciler(stateStore);
-const animationManager = new AnimationManager();
-
+// --- run through the app shell ---------------------------------------------
 let tree = buildTree();
 
-const layoutIndex = new Map<number, LayoutNode>();
-const layoutCtx: LayoutContext = {
-  layoutIndex,
-  focusableNodes: [],
-  scrollOffsetOf: (node) => scrollDispatcher.offset(node),
-  getStableId: reconciler.getStableId,
-  measureText: (text) => font.measure(text),
-  getImageSize: () => null, // gallery images carry explicit dimensions
-};
-
-// --- dispatchers (the phase 4 port) ----------------------------------------
-const pointer = new PointerDispatcher();
-const focusDispatcher = new FocusDispatcher();
-const scrollDispatcher = new ScrollDispatcher();
-const pointerEvents: PointerInputEvent[] = [];
-const keyboardEvents: KeyboardInputEvent[] = [];
-const wheelEvents: WheelInputEvent[] = [];
-
-// --- frame loop ------------------------------------------------------------
-const eventData = new Uint8Array(256);
-const eventView = new DataView(eventData.buffer);
-const sizeW = new Int32Array(1);
-const sizeH = new Int32Array(1);
-
-let running = true;
-let frames = 0;
-
-while (running) {
-  while (sdl.SDL_PollEvent({ event: eventData })) {
-    const type = eventView.getUint32(0, true);
-    if (type === EventType.SDL_EVENT_QUIT) running = false;
-    if (type === EventType.SDL_EVENT_WINDOW_CLOSE_REQUESTED) running = false;
-    if (
-      type === EventType.SDL_EVENT_KEY_DOWN &&
-      eventView.getUint32(24, true) === Scancode.SDL_SCANCODE_ESCAPE
-    ) {
-      running = false;
-    }
-    if (
-      type === EventType.SDL_EVENT_KEY_DOWN ||
-      type === EventType.SDL_EVENT_KEY_UP
-    ) {
-      // SDL_KeyboardEvent: scancode@24, keycode@28, mod@32, repeat@39.
-      const mod = eventView.getUint32(32, true);
-      keyboardEvents.push({
-        kind:
-          type === EventType.SDL_EVENT_KEY_DOWN
-            ? KeyboardInputKind.KeyDown
-            : KeyboardInputKind.KeyUp,
-        key: eventView.getUint32(28, true),
-        // SDL_KMOD shift/ctrl/gui variants collapse to the toolkit bits.
-        modifiers: (((mod &
-          (SdlDefines.SDL_KMOD_LSHIFT | SdlDefines.SDL_KMOD_RSHIFT)) !==
-        0
-          ? KeyModifiers.Shift
-          : 0) |
-          ((mod & (SdlDefines.SDL_KMOD_LCTRL | SdlDefines.SDL_KMOD_RCTRL)) !== 0
-            ? KeyModifiers.Control
-            : 0) |
-          ((mod & (SdlDefines.SDL_KMOD_LGUI | SdlDefines.SDL_KMOD_RGUI)) !== 0
-            ? KeyModifiers.Meta
-            : 0)) as KeyModifiers,
-        repeat: eventView.getUint8(39) !== 0,
-      });
-    }
-    if (type === EventType.SDL_EVENT_TEXT_INPUT) {
-      // SDL_TextInputEvent: const char *text @ 24 — NUL-terminated UTF-8.
-      const textPtr = eventView.getBigUint64(24, true);
-      const text = readCString(textPtr);
-      if (text) {
-        keyboardEvents.push({
-          kind: KeyboardInputKind.Char,
-          key: 0,
-          text,
-          modifiers: 0,
-        });
-      }
-    }
-    if (type === EventType.SDL_EVENT_MOUSE_WHEEL) {
-      wheelEvents.push({
-        scrollX: eventView.getFloat32(24, true),
-        scrollY: eventView.getFloat32(28, true),
-        mouseX: eventView.getFloat32(36, true),
-        mouseY: eventView.getFloat32(40, true),
-      });
-    }
-    if (type === EventType.SDL_EVENT_MOUSE_MOTION) {
-      pointerEvents.push({
-        kind: PointerInputKind.Move,
-        x: eventView.getFloat32(28, true),
-        y: eventView.getFloat32(32, true),
-      });
-    }
-    if (
-      (type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN ||
-        type === EventType.SDL_EVENT_MOUSE_BUTTON_UP) &&
-      eventView.getUint8(24) > 0
-    ) {
-      pointerEvents.push({
-        kind:
-          type === EventType.SDL_EVENT_MOUSE_BUTTON_DOWN
-            ? PointerInputKind.Down
-            : PointerInputKind.Up,
-        x: eventView.getFloat32(28, true),
-        y: eventView.getFloat32(32, true),
-        button: eventView.getUint8(24) as MouseButton,
-      });
-    }
-  }
-
+await app.run((a) => {
   if (dirty) {
     tree = buildTree(); // new descriptors — identity survives via reconcile
     dirty = false;
   }
-  const reconciled = reconciler.reconcile(tree);
+  a.root.widget = tree;
 
-  sdl.SDL_GetWindowSize({ window, w: sizeW, h: sizeH });
-  layoutIndex.clear();
-  const root = layoutFlex({
-    node: reconciled.widget,
-    x: 0,
-    y: 0,
-    availableWidth: sizeW[0]!,
-    availableHeight: sizeH[0]!,
-    ctx: layoutCtx,
-  });
+  if (selftest && a.frames >= 240) a.quit();
+});
 
-  pointer.dispatch({ events: pointerEvents, root, layoutIndex, stateStore });
-  focusDispatcher.dispatch({
-    pointerEvents,
-    keyboardEvents,
-    root,
-    layoutIndex,
-    focusableNodes: layoutCtx.focusableNodes,
-    stateStore,
-  });
-  scrollDispatcher.dispatch({
-    wheelEvents,
-    root,
-    layoutIndex,
-    time: performance.now(),
-  });
-  animationManager.tick(performance.now());
-  pointerEvents.length = 0;
-  keyboardEvents.length = 0;
-  wheelEvents.length = 0;
-
-  gpu.beginFrame();
-  paintTree(
-    {
-      gpu,
-      font,
-      statesOf: (node) => ({
-        ...pointer.statesOf(node),
-        ...focusDispatcher.statesOf(node),
-      }),
-      stateStore,
-      painters: widgetPainters,
-      animationManager,
-    },
-    root
-  );
-  gpu.present();
-
-  frames++;
-  if (selftest && frames >= 240) running = false;
-  sdl.SDL_Delay({ ms: 16 });
-}
+// The inspector's samplers are live intervals — close it so the process
+// exits promptly once the loop is done.
+await devtools?.close();
 
 destroyTexture(photo);
-font.destroy();
-gpu.destroy();
-sdl.SDL_DestroyWindow({ window });
-sdl.SDL_Quit();
 
-console.log(`gallery: ${frames} frames, ${layoutIndex.size} nodes, ok`);
+console.log(
+  `gallery: ${app.frames} frames, ${app.root.layoutIndex.size} nodes, ok`
+);

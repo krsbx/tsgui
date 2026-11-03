@@ -8,13 +8,13 @@ import {
   focusStyle,
   Metrics,
   Palette,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import type {
   BaseWidgetProps,
   PointerPayload,
   ReconcilableWidget,
-} from "@tsgui/core";
-import { type ViewStyle, WidgetType } from "@tsgui/layout";
+} from "@vulcania/core";
+import { type ViewStyle, WidgetType } from "@vulcania/layout";
 import { createCheckedClickHandler, createWidget } from "../create-widget.ts";
 
 export interface ToggleProps extends BaseWidgetProps {

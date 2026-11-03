@@ -5,7 +5,7 @@
  * continue from the displayed value, completion culs. The clock is
  * injected (`tick(now)`) so tests are deterministic.
  */
-import { EasingName } from "@tsgui/layout";
+import { EasingName } from "@vulcania/layout";
 import { describe, expect, test } from "bun:test";
 import {
   AnimationManager,

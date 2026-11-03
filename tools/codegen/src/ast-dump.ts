@@ -5,7 +5,10 @@ import { spawnSync } from "node:child_process";
  * Dump a header's full AST as JSON. Some clang versions write the dump to
  * stdout, others to stderr — accept whichever stream parses as JSON.
  */
-export function dumpAst(headerPath: string, includeDir?: string): unknown {
+export function dumpAst(
+  headerPath: string,
+  includeDirs: string[] = []
+): unknown {
   const args = [
     "-x",
     "c",
@@ -14,7 +17,7 @@ export function dumpAst(headerPath: string, includeDir?: string): unknown {
     "-ast-dump=json",
     "-fparse-all-comments",
   ];
-  if (includeDir) args.push(`-I${includeDir}`);
+  for (const dir of includeDirs) args.push(`-I${dir}`);
   args.push(headerPath);
 
   const res = spawnSync("clang", args, {

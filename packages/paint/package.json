@@ -1,13 +1,13 @@
 {
-  "name": "@tsgui/paint",
+  "name": "@vulcania/paint",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "dependencies": {
-    "@tsgui/animation": "workspace:*",
-    "@tsgui/core": "workspace:*",
-    "@tsgui/gpu": "workspace:*",
-    "@tsgui/layout": "workspace:*"
+    "@vulcania/animation": "workspace:*",
+    "@vulcania/core": "workspace:*",
+    "@vulcania/gpu": "workspace:*",
+    "@vulcania/layout": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -1,12 +1,12 @@
 /** ProgressBar — linear, horizontal/vertical, forward/backward, stepped. */
-import { Palette } from "@tsgui/core";
-import type { ReconcilableWidget } from "@tsgui/core";
+import { Palette } from "@vulcania/core";
+import type { ReconcilableWidget } from "@vulcania/core";
 import {
   PointerEvents,
   ProgressBarOrientation,
   ProgressDirection,
   WidgetType,
-} from "@tsgui/layout";
+} from "@vulcania/layout";
 import { createWidget } from "../../create-widget.ts";
 import { resolveProgressType, sharedProgressProps } from "./shared.ts";
 import type { ProgressBarProps } from "./types.ts";

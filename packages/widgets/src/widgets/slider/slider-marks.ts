@@ -1,7 +1,7 @@
 /** Slider tick marks — border ticks at values, optional labels under. */
-import { Palette } from "@tsgui/core";
-import { valueToRatio } from "@tsgui/layout";
-import { type PaintContext, parseColor } from "@tsgui/paint";
+import { Palette } from "@vulcania/core";
+import { valueToRatio } from "@vulcania/layout";
+import { type PaintContext, parseColor } from "@vulcania/paint";
 import {
   TICK_LABEL_FONT_SIZE,
   TICK_SIZE,

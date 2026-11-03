@@ -1,7 +1,7 @@
 /** TextInput painter — selection, text/placeholder, caret. */
-import { Metrics, Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import { parseColor, type WidgetPainter } from "@tsgui/paint";
+import { Metrics, Palette } from "@vulcania/core";
+import { propsOf } from "@vulcania/core";
+import { parseColor, resolveFont, type WidgetPainter } from "@vulcania/paint";
 import type { TextInputProps } from "./index.ts";
 import { peekEditingState } from "./state.ts";
 
@@ -24,9 +24,10 @@ export const paintTextInput: WidgetPainter = (ctx, node, style) => {
   if (!text) return;
 
   // The painter measures per character via the injected font.
+  const font = resolveFont(ctx, node);
   const measure = (sub: string): number =>
-    ctx.font.measure?.(sub)?.width ?? sub.length * 8;
-  const textHeight = ctx.font.measure?.("H")?.height ?? 18;
+    font.measure?.(sub)?.width ?? sub.length * 8;
+  const textHeight = font.measure?.("H")?.height ?? 18;
 
   const padLeft = Metrics.defaultPadding;
   const contentX = node.screenX + padLeft - state.scrollX;
@@ -58,7 +59,7 @@ export const paintTextInput: WidgetPainter = (ctx, node, style) => {
 
   // Text or placeholder.
   const styleColor = style as { color?: string; placeholderColor?: string };
-  ctx.font.draw(ctx.gpu, {
+  font.draw(ctx.gpu, {
     x: contentX,
     y: contentY,
     text,

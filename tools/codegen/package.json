@@ -1,10 +1,10 @@
 {
-  "name": "@tsgui/codegen",
+  "name": "@vulcania/codegen",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "bin": {
-    "tsgui-codegen": "./src/index.ts"
+    "vulcania-codegen": "./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

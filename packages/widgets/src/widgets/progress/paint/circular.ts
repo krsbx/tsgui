@@ -1,17 +1,14 @@
 /** CircularProgress painter — buffer arc, main arc (ring or pie), label. */
-import { Palette } from "@tsgui/core";
-import { propsOf } from "@tsgui/core";
-import {
-  CircularProgressDirection,
-  ProgressType,
-} from "@tsgui/layout";
+import { Palette, propsOf } from "@vulcania/core";
+import { CircularProgressDirection, ProgressType } from "@vulcania/layout";
 import {
   colorWithOpacity,
   fillRatio,
   parseColor,
   resolveFillColorClamped,
+  resolveFont,
   type WidgetPainter,
-} from "@tsgui/paint";
+} from "@vulcania/paint";
 import { paintInlineValueLabel } from "../../label/paint.ts";
 import type { CircularProgressProps } from "../types.ts";
 import { paintIndeterminateCircular } from "./indeterminate.ts";
@@ -95,7 +92,7 @@ export const paintCircularProgress: WidgetPainter = (ctx, node) => {
     packedWithOpacity(mainColor, fillStyle.opacity)
   );
 
-  paintInlineValueLabel(ctx.gpu, ctx.font, {
+  paintInlineValueLabel(ctx.gpu, resolveFont(ctx, node), {
     x: node.screenX,
     y: node.screenY,
     w: node.width,

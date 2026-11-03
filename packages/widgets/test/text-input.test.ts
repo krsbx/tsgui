@@ -4,14 +4,14 @@
  * and fires onChange, arrows/shift select, backspace/delete respect the
  * selection, clipboard seam, and the painter draws text/selection/caret.
  */
-import { AnimationManager } from "@tsgui/animation";
+import { AnimationManager } from "@vulcania/animation";
 import {
   KeyCode,
   KeyModifiers,
   MouseButton,
   type ReconcilableWidget,
   StateStore,
-} from "@tsgui/core";
+} from "@vulcania/core";
 import {
   FocusDispatcher,
   type KeyboardInputEvent,
@@ -19,9 +19,9 @@ import {
   PointerDispatcher,
   type PointerInputEvent,
   PointerInputKind,
-} from "@tsgui/interactions";
-import { type LayoutContext, layoutFlex, type LayoutNode } from "@tsgui/layout";
-import { parseColor } from "@tsgui/paint";
+} from "@vulcania/interactions";
+import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
+import { parseColor } from "@vulcania/paint";
 import { describe, expect, test } from "bun:test";
 import {
   editingStateOf,

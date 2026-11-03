@@ -1,0 +1,24 @@
+{
+  "name": "@vulcania/app",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@vulcania/animation": "workspace:*",
+    "@vulcania/fonts": "workspace:*",
+    "@vulcania/bindings": "workspace:*",
+    "@vulcania/core": "workspace:*",
+    "@vulcania/gpu": "workspace:*",
+    "@vulcania/interactions": "workspace:*",
+    "@vulcania/layout": "workspace:*",
+    "@vulcania/paint": "workspace:*",
+    "@vulcania/widgets": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^26.6.6"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

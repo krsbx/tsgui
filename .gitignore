@@ -30,8 +30,12 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # agent tooling state
 .zcode/
 
+# temporary npm name-reservation folder (published then deleted, never committed)
+/vulcania/
+
 # IntelliJ based IDEs
 .idea
 
 # Finder (MacOS) folder config
 .DS_Store
+examples/ffi

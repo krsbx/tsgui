@@ -8,8 +8,8 @@ import type {
   Key,
   PointerPayload,
   ReconcilableWidget,
-} from "@tsgui/core";
-import type { ViewStyle, WidgetDescriptor, WidgetProps } from "@tsgui/layout";
+} from "@vulcania/core";
+import type { ViewStyle, WidgetDescriptor, WidgetProps } from "@vulcania/layout";
 
 export interface CreateWidgetOptions {
   type: WidgetDescriptor["type"];
