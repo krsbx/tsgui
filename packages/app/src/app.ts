@@ -27,6 +27,12 @@ export interface AppOptions {
   fonts?: Record<string, FontDescriptor>;
   /** Esc closes the app. Default true (the examples' behavior). */
   quitOnEscape?: boolean;
+  /**
+   * Devtools seam — runs after every window painted and the teardown
+   * queue flushed, before the frame delay: the frame is complete and
+   * consistent for samplers (the inspector reads renderer stats here).
+   */
+  onFrameEnd?: (app: App) => void;
 }
 
 export class App {
@@ -38,11 +44,13 @@ export class App {
   private readonly pendingDestroy: AppWindow[] = [];
   private readonly decoder = new EventDecoder();
   private readonly quitOnEscape: boolean;
+  private readonly onFrameEnd?: (app: App) => void;
   private running = true;
   private frames_ = 0;
 
   public constructor(options: AppOptions) {
     this.quitOnEscape = options.quitOnEscape ?? true;
+    this.onFrameEnd = options.onFrameEnd;
     this.fontManager = new FontManager(options.fonts);
 
     if (!sdl.SDL_Init({ flags: SdlDefines.SDL_INIT_VIDEO })) {
@@ -98,8 +106,13 @@ export class App {
    * Run until the root window closes. Per frame: poll + route events,
    * then the app body assigns each window's widget, then every window
    * reconciles → lays out → dispatches → paints.
+   *
+   * The frame delay awaits a timer instead of SDL_Delay: a native sleep
+   * never yields to the JS event loop, which would starve any in-process
+   * server (the devtools inspector) for the app's whole lifetime.
+   * flying-pan's loop yields the same way.
    */
-  public run(frameBody: (app: App) => void): void {
+  public async run(frameBody: (app: App) => void): Promise<void> {
     while (this.running) {
       const events = this.decoder.decode(() =>
         sdl.SDL_PollEvent({ event: this.decoder.data })
@@ -126,7 +139,9 @@ export class App {
 
       this.frames_++;
       this.flushDestroyQueue();
-      sdl.SDL_Delay({ ms: FRAME_MS });
+      this.onFrameEnd?.(this);
+
+      await new Promise<void>((resolve) => setTimeout(resolve, FRAME_MS));
     }
 
     this.teardown();

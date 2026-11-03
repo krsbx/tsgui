@@ -25,7 +25,7 @@ import {
   type WheelInputEvent,
 } from "@vulcania/interactions";
 import { type LayoutContext, layoutFlex, type LayoutNode } from "@vulcania/layout";
-import { paintTree } from "@vulcania/paint";
+import { paintTree, type Painter } from "@vulcania/paint";
 import { Reconciler, widgetPainters } from "@vulcania/widgets";
 
 export interface RGBA {
@@ -71,6 +71,17 @@ export class AppWindow {
   public readonly animation = new AnimationManager();
   public readonly layoutIndex = new Map<number, LayoutNode>();
   public readonly layoutCtx: LayoutContext;
+
+  /**
+   * Devtools hook — runs after paintTree, before present(): draws on top
+   * of the finished frame (the inspector's selection outline). Null =
+   * nothing extra paints. `win` is the laid-out node index — everything
+   * an overlay needs to place itself.
+   */
+  public paintOverlay: ((
+    gpu: Painter,
+    win: { readonly layoutIndex: Map<number, LayoutNode> }
+  ) => void) | null = null;
 
   private readonly sizeW = new Int32Array(1);
   private readonly sizeH = new Int32Array(1);
@@ -203,6 +214,7 @@ export class AppWindow {
       },
       this.root
     );
+    this.paintOverlay?.(this.renderer, this);
     this.renderer.present();
   }
 
