@@ -1,3 +1,1 @@
-[test]
-# Register happy-dom globals before tests so React component tests can render.
 preload = ["./examples/download.ts", "./examples/setup.ts"]
