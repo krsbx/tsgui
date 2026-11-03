@@ -118,9 +118,29 @@ shim, not redesigning.
 ## Build & distribution
 
 - **Nothing to build for bindings** — SDL3 comes from the system (brew on
-  macOS, distro packages on Linux, official binaries on Windows).
-  Resolution: `VULCANIA_SDL3_PATH` env → platform-conventional paths → bare
-  soname (system loader search).
+  macOS, distro packages on Linux, official binaries on Windows), or from
+  the repo's own release assets.
+  Resolution per library: `<VULCANIA_SDL3[_SATELLITE]_PATH>` env →
+  platform-conventional paths → bare soname (system loader search).
+  shadercross has no Homebrew formula — env var, a source-build install
+  prefix, or the release asset.
+- **Release assets** — CI builds every pinned version from `version.lock`
+  (the CI-facing mirror of the `vendor/` submodule pins) and publishes
+  flat-dylib archives to this repo's releases: `SDL3-3.4.18`,
+  `SDL3_image-3.4.8`, `SDL3_ttf-3.2.2`, `SDL3_mixer-3.2.4`,
+  `SDL_shadercross-<sha>`. `setupFfiCopy(dest)` (@vulcania/devtools,
+  defaulting to `krsbx/vulcania`) downloads the matching asset per
+  platform and unpacks the dylibs flat into `dest` — that's what
+  `bun run examples/download.ts` does into `examples/ffi/`, where
+  `examples/setup.ts` (preloaded for tests via `bunfig.toml`) aims the
+  `VULCANIA_SDL3_*_PATH` env vars.
+- **Every library loads lazily.** Importing `@vulcania/bindings` dlopens
+  NOTHING — each library's surface (`sdl`, `image`, `ttf`, `mixer`,
+  `shadercross`, + their `*Raw` tables) is a lazyload proxy whose dlopen
+  fires on the first property access, through one synchronous
+  `createRequire` path on every runtime. Nothing to install before the
+  first touch — and optional libraries (shadercross has no Homebrew
+  formula) simply never load unless used.
 - **There is nothing to compile.** Not bindings (dlopen), not the renderer
   (SDL_Renderer through FFI). The toolkit is pure TypeScript end to end.
 - App distribution (phase 6): apps bundle the SDL dylibs; their users

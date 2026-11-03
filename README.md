@@ -58,9 +58,14 @@ Things to know:
 
 - **`VULCANIA_SDL3_INCLUDE`** overrides the submodules with one base
   include dir exposing `SDL3/`, `SDL3_image/`, … (e.g. a system install).
-- **`vendor/SDL_shadercross` is pinned but not a codegen target yet.**
+- **All five pins are codegen targets** — `SDL_shadercross` included
+  (its bindings load lazily; the dylib is only needed on first
+  `loadShaderCross()` call).
 - **The submodules are headers only.** The runtime libraries still come
-  from your system (`brew install …` above) or the tsgui releases.
+  from your system (`brew install …` above) or the repo releases —
+  `bun run examples/download.ts` fetches the release dylibs into
+  `examples/ffi/`, where `examples/setup.ts` (preloaded via
+  `bunfig.toml`) points the `VULCANIA_SDL3_*_PATH` env vars.
 
 ## How it works
 
