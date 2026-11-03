@@ -75,7 +75,7 @@ export interface TtfSymbols {
   TTF_GetGlyphKerning(font: TTF_Font | null, previous_ch: number, ch: number, kerning: ArrayBufferView | ArrayBuffer | null): boolean;
   TTF_GetStringSize(font: TTF_Font | null, text: string | null, length: number | bigint, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
   TTF_GetStringSizeWrapped(font: TTF_Font | null, text: string | null, length: number | bigint, wrap_width: number, w: ArrayBufferView | ArrayBuffer | null, h: ArrayBufferView | ArrayBuffer | null): boolean;
-  TTF_MeasureString(font: TTF_Font | null, text: string | null, length: number | bigint, max_width: number, measured_width: ArrayBufferView | ArrayBuffer | null, measured_length: number | bigint): boolean;
+  TTF_MeasureString(font: TTF_Font | null, text: string | null, length: number | bigint, max_width: number, measured_width: ArrayBufferView | ArrayBuffer | null, measured_length: ArrayBufferView | ArrayBuffer | null): boolean;
   TTF_CreateSurfaceTextEngine(): TTF_TextEngine | null;
   TTF_DrawSurfaceText(text: TTF_Text | null, x: number, y: number, surface: SDL_Surface | null): boolean;
   TTF_DestroySurfaceTextEngine(engine: TTF_TextEngine | null): void;
@@ -101,7 +101,7 @@ export interface TtfSymbols {
   TTF_GetTextScript(text: TTF_Text | null): number;
   TTF_SetTextColor(text: TTF_Text | null, r: number, g: number, b: number, a: number): boolean;
   TTF_SetTextColorFloat(text: TTF_Text | null, r: number, g: number, b: number, a: number): boolean;
-  TTF_GetTextColor(text: TTF_Text | null, r: number, g: number, b: number, a: number): boolean;
+  TTF_GetTextColor(text: TTF_Text | null, r: ArrayBufferView | ArrayBuffer | null, g: ArrayBufferView | ArrayBuffer | null, b: ArrayBufferView | ArrayBuffer | null, a: ArrayBufferView | ArrayBuffer | null): boolean;
   TTF_GetTextColorFloat(text: TTF_Text | null, r: ArrayBufferView | ArrayBuffer | null, g: ArrayBufferView | ArrayBuffer | null, b: ArrayBufferView | ArrayBuffer | null, a: ArrayBufferView | ArrayBuffer | null): boolean;
   TTF_SetTextPosition(text: TTF_Text | null, x: number, y: number): boolean;
   TTF_GetTextPosition(text: TTF_Text | null, x: ArrayBufferView | ArrayBuffer | null, y: ArrayBufferView | ArrayBuffer | null): boolean;
