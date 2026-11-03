@@ -102,7 +102,7 @@ export const imageDefs = {
   IMG_CreateAnimationDecoder_IO: { arguments: ["pointer", "bool", "string"], return: "pointer" },
   IMG_CreateAnimationDecoderWithProperties: { arguments: ["uint32"], return: "pointer" },
   IMG_GetAnimationDecoderProperties: { arguments: ["pointer"], return: "uint32" },
-  IMG_GetAnimationDecoderFrame: { arguments: ["pointer", "pointer", "uint64"], return: "bool" },
+  IMG_GetAnimationDecoderFrame: { arguments: ["pointer", "pointer", "pointer"], return: "bool" },
   IMG_GetAnimationDecoderStatus: { arguments: ["pointer"], return: "int32" },
   IMG_ResetAnimationDecoder: { arguments: ["pointer"], return: "bool" },
   IMG_CloseAnimationDecoder: { arguments: ["pointer"], return: "bool" },

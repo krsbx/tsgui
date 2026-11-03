@@ -106,7 +106,7 @@ export interface ImageFunctions {
   IMG_CreateAnimationDecoder_IO(opts: { src: SDL_IOStream | null; closeio: boolean; type: string | null }): IMG_AnimationDecoder | null;
   IMG_CreateAnimationDecoderWithProperties(opts: { props: number }): IMG_AnimationDecoder | null;
   IMG_GetAnimationDecoderProperties(opts: { decoder: IMG_AnimationDecoder | null }): number;
-  IMG_GetAnimationDecoderFrame(opts: { decoder: IMG_AnimationDecoder | null; frame: SDL_Surface | null; duration: number | bigint }): boolean;
+  IMG_GetAnimationDecoderFrame(opts: { decoder: IMG_AnimationDecoder | null; frame: SDL_Surface | null; duration: ArrayBufferView | ArrayBuffer | null }): boolean;
   IMG_GetAnimationDecoderStatus(opts: { decoder: IMG_AnimationDecoder | null }): number;
   IMG_ResetAnimationDecoder(opts: { decoder: IMG_AnimationDecoder | null }): boolean;
   IMG_CloseAnimationDecoder(opts: { decoder: IMG_AnimationDecoder | null }): boolean;
