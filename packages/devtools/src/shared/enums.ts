@@ -15,3 +15,12 @@ export const Platform = {
 } as const;
 
 export type Platform = (typeof Platform)[keyof typeof Platform];
+
+export const AssetExtension = {
+  Windows: ".zip",
+  Linux: ".tar.gz",
+  MacOS: ".tar.gz",
+} as const;
+
+export type AssetExtension =
+  (typeof AssetExtension)[keyof typeof AssetExtension];

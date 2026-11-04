@@ -1,32 +1,18 @@
+import { type Library } from "../../shared/enums.ts";
+import { getAssetExtension, getPlatform } from "../../shared/utils.ts";
 import type { ReleaseListResponse } from "../release/types.ts";
-import { type Library, Platform } from "./enums.ts";
 
 type LibraryAsset =
   | {
       found: false;
-      timestamp: string | null;
-      url: string | null;
+      timestamp: null;
+      url: null;
     }
   | {
       found: true;
       timestamp: string;
       url: string;
     };
-
-export function getPlatform(): Platform {
-  const platform =
-    process.platform === "win32"
-      ? Platform.Windows
-      : process.platform === "darwin"
-        ? Platform.MacOS
-        : Platform.Linux;
-
-  return platform;
-}
-
-export function getAssetExtension(): string {
-  return getPlatform() === Platform.Windows ? ".zip" : ".tar.gz";
-}
 
 export function getLibraryAssetLink(
   library: Library,

@@ -1,10 +1,11 @@
 import { mkdir, readdir, rm } from "node:fs/promises";
 import { join } from "node:path";
+import { Library } from "../../shared/enums.ts";
+import { getAssetExtension } from "../../shared/utils.ts";
 import { downloadFile } from "../downloader.ts";
 import { getReleases } from "../release/index.ts";
 import { unpack } from "../unpack.ts";
-import { Library } from "./enums.ts";
-import { getAssetExtension, getLibraryAssetLink } from "./shared.ts";
+import { getLibraryAssetLink } from "./shared.ts";
 
 /**
  * File stem of the shared library when it differs from the release tag
