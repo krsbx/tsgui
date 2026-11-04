@@ -1,23 +1,11 @@
-import { getPlatform, Platform } from "@vulcania/devtools";
+import { resolveLibraryExtension } from "@vulcania/devtools";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const platform = getPlatform();
-const extension =
-  platform === Platform.Windows
-    ? ".dll"
-    : platform === Platform.MacOS
-      ? ".dylib"
-      : platform === Platform.Linux
-        ? ".so"
-        : null;
-
-if (!extension) {
-  throw new Error(`Unsupported platform: ${platform}!`);
-}
+const extension = resolveLibraryExtension();
 
 process.env.VULCANIA_SDL3_IMAGE_PATH = resolve(
   __dirname,

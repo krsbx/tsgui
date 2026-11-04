@@ -26,5 +26,10 @@ export { downloadFile } from "./ffi/downloader.ts";
 export { getReleases } from "./ffi/release/index.ts";
 export { unpack } from "./ffi/unpack.ts";
 
+export { LibraryExtension, LibraryPathResolution } from "./pack/enums.ts";
+export {
+  resolveLibraryExtension,
+  resolveLibraryPath,
+} from "./pack/resolver.ts";
 export { Library, Platform } from "./shared/enums.ts";
-export { getAssetExtension, getPlatform } from "./shared/utils.ts";
+export { resolveAssetExtension, resolvePlatform } from "./shared/utils.ts";

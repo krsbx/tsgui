@@ -1,7 +1,7 @@
 import { mkdir, readdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { Library } from "../../shared/enums.ts";
-import { getAssetExtension } from "../../shared/utils.ts";
+import { resolveAssetExtension } from "../../shared/utils.ts";
 import { downloadFile } from "../downloader.ts";
 import { getReleases } from "../release/index.ts";
 import { unpack } from "../unpack.ts";
@@ -53,6 +53,8 @@ export async function setupFfiCopy(
     missing.map((library) => [library, getLibraryAssetLink(library, releases)])
   );
 
+  const extension = resolveAssetExtension();
+
   await Promise.all(
     missing.map(async (library) => {
       const asset = assets[library]!;
@@ -63,7 +65,7 @@ export async function setupFfiCopy(
         return;
       }
 
-      const archive = join(dest, `${library}${getAssetExtension()}`);
+      const archive = join(dest, `${library}${extension}`);
 
       try {
         await downloadFile(asset.url, archive);

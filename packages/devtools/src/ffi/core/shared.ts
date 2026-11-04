@@ -1,5 +1,5 @@
 import { type Library } from "../../shared/enums.ts";
-import { getAssetExtension, getPlatform } from "../../shared/utils.ts";
+import { resolveAssetExtension, resolvePlatform } from "../../shared/utils.ts";
 import type { ReleaseListResponse } from "../release/types.ts";
 
 type LibraryAsset =
@@ -23,8 +23,8 @@ export function getLibraryAssetLink(
   const release = releases.find((release) =>
     release.tag_name.startsWith(`${library}-`)
   );
-  const platform = getPlatform();
-  const extension = getAssetExtension();
+  const platform = resolvePlatform();
+  const extension = resolveAssetExtension();
 
   const result = {
     found: false,

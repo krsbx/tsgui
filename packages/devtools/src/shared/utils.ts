@@ -1,6 +1,6 @@
 import { AssetExtension, Platform } from "./enums.ts";
 
-export function getPlatform(): Platform {
+export function resolvePlatform(): Platform {
   switch (process.platform) {
     case "win32":
       return Platform.Windows;
@@ -16,8 +16,8 @@ export function getPlatform(): Platform {
   }
 }
 
-export function getAssetExtension(
-  platform: Platform = getPlatform()
+export function resolveAssetExtension(
+  platform: Platform = resolvePlatform()
 ): AssetExtension {
   switch (platform) {
     case Platform.Windows:
