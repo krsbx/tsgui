@@ -8,8 +8,6 @@
  *   bun run examples/showcase.ts --selftest   # exit after 240 frames
  *   node examples/showcase.ts --selftest
  */
-import "./setup.ts";
-// Loaded after the proper setup
 import {
   EventType,
   image,

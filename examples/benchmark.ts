@@ -10,9 +10,6 @@
  * (SetRenderDrawColor, RenderClear, RenderGeometry ×2, RenderPresent) —
  * asserted at the end so the number can't silently drift.
  */
-// Must stay first: points the bindings at ./ffi before any of them load.
-import "./setup.ts";
-// Loaded after the proper setup
 import {
   EventType,
   PixelFormat,

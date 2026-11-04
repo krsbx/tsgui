@@ -16,9 +16,6 @@
  * The selftest drives the window lifecycle: Details opens at frame 30,
  * closes at 120, reopens at 180, exits at 240.
  */
-// Must stay first: points the bindings at ./ffi before any of them load.
-import "./setup.ts";
-// Loaded after the proper setup
 import { App, type AppWindow } from "@vulcania/app";
 import { type ReconcilableWidget } from "@vulcania/core";
 import {

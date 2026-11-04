@@ -16,9 +16,6 @@
  * frame graph should tick steadily), a scroll box, and a 10k virtual
  * list — watch `nodes` stay near the window size, not the item count.
  */
-// Must stay first: points the bindings at ./ffi before any of them load.
-import "./setup.ts";
-// Loaded after the proper setup
 import { App } from "@vulcania/app";
 import type { ReconcilableWidget } from "@vulcania/core";
 import { inspect } from "@vulcania/devtools";
