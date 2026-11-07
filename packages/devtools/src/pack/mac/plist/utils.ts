@@ -24,7 +24,7 @@ function toPlist<T>(obj: T, indent: number = 0): string {
     let xml = "";
 
     for (const [key, value] of entries) {
-      if (value === null || value === undefined) {
+      if (value == null) {
         xml += `${" ".repeat(currIndent)}<key>${key}</key>\n`;
       } else if (
         typeof value === "string" ||
